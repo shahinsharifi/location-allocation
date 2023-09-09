@@ -1,0 +1,194 @@
+@use '@angular/material' as mat;
+
+:host,
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+}
+
+mat-sidenav {
+  width: 345px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+mat-nav-list {
+  overflow-y: auto;
+}
+
+mat-sidenav-container {
+  flex: 1;
+}
+
+.content {
+  height: 100%;
+}
+
+mat-form-field.search {
+  width: 100%;
+  margin-bottom: -1.25em;
+}
+
+a.active {
+  color: white;
+  background-color: mat.get-color-from-palette(
+      mat.define-palette(mat.$indigo-palette)
+  ) !important;
+}
+
+
+.example-container {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.example-is-mobile .example-toolbar {
+  position: fixed;
+  /* Make sure the toolbar will stay on top of the content as it scrolls past. */
+  z-index: 2;
+}
+
+h1.example-app-name {
+  margin-left: 8px;
+}
+
+.example-sidenav-container {
+  /* When the sidenav is not fixed, stretch the sidenav container to fill the available space. This
+     causes `<mat-sidenav-content>` to act as our scrolling element for desktop layouts. */
+  flex: 1;
+}
+
+.example-is-mobile .example-sidenav-container {
+  /* When the sidenav is fixed, don't constrain the height of the sidenav container. This allows the
+     `<body>` to be our scrolling element for mobile layouts. */
+  flex: 1 0 auto;
+}
+
+
+
+::ng-deep .custom-popup-class1 {
+  color: purple;
+  text-align: center;
+}
+
+::ng-deep .custom-popup-class2 {
+  width: 300px;
+}
+
+mat-form-field {
+  display: block;
+  margin: 20px 0;
+}
+
+.form-container {
+  padding: 20px;
+}
+
+.main-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.main-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  background-color: #FFFFFF;
+}
+
+.image-parent-container {
+
+}
+
+
+mat-sidenav-container, mat-sidenav-content, mat-sidenav {
+  height: 100%;
+}
+
+mat-sidenav {
+  width: 250px;
+}
+
+a {
+  text-decoration: none;
+  color: white;
+}
+
+a:hover,
+a:active {
+  color: lightgray;
+}
+
+.example-card {
+  margin-bottom: 50px;
+}
+
+
+.card-fix {
+  padding: 0;
+
+  .card-fix-container {
+    box-sizing: border-box;
+    height: 100%;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+
+    .mat-card-content {
+      flex: 1;
+    }
+
+    & > .mat-card-actions:last-child {
+      margin-bottom: -16px;
+      padding-bottom: 0;
+    }
+  }
+}
+
+.instruction-toolbar{
+  box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12) !important;
+  z-index: 99999999;
+  background-color: #3f51b5;
+}
+
+.instruction-title{
+  font-size: larger;
+}
+
+.instruction{
+  margin-left: 20px;
+  font-weight: 200;
+  font-size: large;
+}
+
+.instruction-button{
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.backdrop{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: 20;
+  background-color: rgba(0,0,0,0.9);
+}
+
+.flexExpand {
+  flex: 1 1 auto;
+}

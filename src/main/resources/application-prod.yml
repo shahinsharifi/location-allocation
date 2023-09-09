@@ -1,0 +1,44 @@
+app:
+    client-url: http://localhost:4200
+    mapping:
+        style: mapbox://styles/mapbox/streets-v12
+        token: YOUR_TOKEN_HERE
+        url: https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/256/{z}/{x}/{y}
+logging:
+    file:
+        name: location_allocation.log
+        path: ./log
+    level:
+        de:
+            wigeogis: DEBUG
+        root: INFO
+    pattern:
+        console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
+        file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+spring:
+    batch:
+        jdbc:
+            initialize-schema: always
+        job:
+            enabled: true
+    datasource:
+        driverClassName: org.postgresql.Driver
+        password: cuda1030
+        url: jdbc:postgresql://pccuda.wigeo.lan:5432/location_allocation
+        username: postgres
+    devtools:
+        add-properties: false
+    docker:
+        compose:
+            enabled: true
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        hibernate:
+            ddl-auto: update
+        open-in-view: true
+        properties:
+            hibernate:
+                format_sql: true
+                jdbc:
+                    batch_size: 100
+        show-sql: false

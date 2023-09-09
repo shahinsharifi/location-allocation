@@ -1,0 +1,20 @@
+<div class="main-content">
+  <div fxLayout="column" fxFill>
+    <div fxLayout fxFlex>
+      <div fxFlex="60" fxLayoutAlign="center center" class="mat-elevation-z4">
+        <app-map #mapComponent class="map-container" [sessionId]="sessionId"></app-map>
+      </div>
+      <div fxFlex="40" fxLayoutAlign="center center" class="mat-elevation-z6">
+        <div fxLayout="column" fxFill>
+          <div fxFlex="50" fxLayoutAlign="center center">
+            <app-input  class="input-container" (sessionEvent)="handleSessionId($event)"></app-input>
+          </div>
+          <mat-divider></mat-divider>
+          <div fxFlex="50" fxLayoutAlign="center center">
+            <app-result></app-result>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

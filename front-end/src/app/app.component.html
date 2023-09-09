@@ -1,0 +1,41 @@
+<div class="example-container" [class.example-is-mobile]="false">
+  <mat-toolbar color="primary" class="instruction-toolbar">
+    <button mat-icon-button (click)="sidenav.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <h1 class="example-app-name">Location Allocation</h1>
+  </mat-toolbar>
+
+  <mat-sidenav-container [hasBackdrop]="false">
+    <mat-sidenav
+      #sidenav
+      mode="over"
+      [opened]="sidenavIsOpen"
+      (openedChange)="onSidenavChange()"
+    >
+      <mat-form-field class="search">
+        <input
+          matInput
+          type="text"
+          placeholder="Search"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="search()"
+        />
+        <button mat-button>
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+      <mat-nav-list>
+        <ng-container *ngFor="let cat of [1,2,3]">
+          <h3 matSubheader>{{ cat }}</h3>
+          <mat-divider></mat-divider>
+        </ng-container>
+      </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+      <section class="content">
+        <app-main></app-main>
+      </section>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

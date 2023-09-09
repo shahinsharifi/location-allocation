@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  martin:
+    image: ghcr.io/maplibre/martin:v0.8.7
+    restart: unless-stopped
+    container_name: vector-tiles
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:demo123@postgis:5432/location_allocation
+      - DEFAULT_SRID=3857
+    volumes:
+      - ./config:/config
+    depends_on:
+      postgis:
+        condition: service_healthy
+
+  postgis:
+    build:
+      context: .
+      dockerfile: /database/Dockerfile
+    image: location-allocation/postgis15:1.0
+    container_name: postgis
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: demo123
+      POSTGRES_DB: location_allocation
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    command: [ "postgres", "-c", "listen_addresses=*", "-c", "shared_buffers=2GB", "-c",
+               "maintenance_work_mem=1024MB", "-c", "work_mem=500MB", "-c", "effective_cache_size=4GB",
+               "-c", "autovacuum_vacuum_scale_factor=0.05", "-c", "autovacuum_analyze_scale_factor=0.02" ]
+
+volumes:
+  postgis_data:
