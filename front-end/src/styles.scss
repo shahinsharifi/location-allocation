@@ -1,5 +1,14 @@
 
+/* Line added via automated migrations. */
 @use "igniteui-angular/theming" as *;
+/* You can add global styles to this file, and also import other style files */
+// Standard CSS normalize, comment out if not required or using a different module
+@import "minireset.css/minireset";
+
+/* See: https://www.infragistics.com/products/ignite-ui-angular/angular/components/themes.html */
+
+@import "app/themes/palettes";
+@import "app/themes/vars";
 // Uncomment the following lines if you want to add a custom palette:
 // $primary: #731963 !default;
 // $secondary: #ce5712 !default;

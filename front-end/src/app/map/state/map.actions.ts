@@ -1,9 +1,12 @@
-import {createActionGroup, props} from "@ngrx/store";
+import {createActionGroup, emptyProps, props} from "@ngrx/store";
 
 
 export const mapActions = createActionGroup({
   source: 'Map',
   events: {
-    'Select Bbox': props<{ bbox: Array<number>[4] }>(),
+    'Activate Polygon Drawing': emptyProps(),
+    'Deactivate Polygon Drawing': emptyProps(),
+    'Clear Selection': emptyProps(),
+    'Regions Selected': props<{ spatialQuery: string, numSelectedRegions: number }>(),
   },
 });

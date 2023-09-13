@@ -1,0 +1,11 @@
+$app-button-group-theme-dark: button-group-theme(
+  $schema: $dark-schema,
+  $item-background: color($app-dark-palette, 'primary'),
+  $item-selected-background: color($app-dark-palette, 'surface'),
+  $item-hover-background: color($app-dark-palette, 'surface'),
+  $item-selected-hover-background: color($app-dark-palette, 'surface'),
+  $item-selected-border-color: color($app-dark-palette, 'surface'),
+  $item-border-color: color($app-dark-palette, 'surface'),
+  $shadow: none,
+);
+@include button-group($app-button-group-theme-dark);

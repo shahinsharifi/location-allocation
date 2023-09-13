@@ -10,6 +10,7 @@ import de.wigeogis.pmedian.database.repository.AllocationRepository;
 import jakarta.persistence.Tuple;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -43,9 +44,9 @@ public class AllocationService {
   }
 
   @Async
-  public CompletableFuture<Void> insertAllAsync(List<AllocationDto> allocations) {
-    repository.saveAll(allocations.stream().map(this::dtoToEntity).collect(Collectors.toList()));
-    return CompletableFuture.completedFuture(null);
+  public CompletableFuture<Integer> insertAllAsync(List<AllocationDto> allocations) {
+    List<Allocation> savedAllocations = repository.saveAll(allocations.stream().map(this::dtoToEntity).collect(Collectors.toList()));
+    return CompletableFuture.completedFuture(savedAllocations.size());
   }
 
   public boolean existsAllocationsBySessionId(UUID sessionId) {
@@ -66,6 +67,13 @@ public class AllocationService {
         result.get("maxX", Double.class),
         result.get("maxY", Double.class));
   }
+
+
+  public List<AllocationDto> insertAndFetchRegionsByWKTPolygon(UUID sessionId, String wktPolygon) {
+    List<Allocation> allocations = repository.insertAndFetchRegionsByWKTPolygon(sessionId, wktPolygon);
+    return allocations.stream().map(m -> new AllocationDto()).collect(Collectors.toList());
+  }
+
 
   public AllocationDto entityToDto(Allocation allocation) {
     return new ModelMapper().map(allocation, AllocationDto.class);

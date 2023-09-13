@@ -1,18 +1,25 @@
-import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatCardModule} from "@angular/material/card";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
 import {MatListModule} from "@angular/material/list";
 import {MatButtonModule} from "@angular/material/button";
-import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MatInputModule} from "@angular/material/input";
-import {MatStepperModule} from "@angular/material/stepper";
+import {MatStepper, MatStepperModule} from "@angular/material/stepper";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatExpansionModule} from "@angular/material/expansion";
 import {Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
-import {launcherActions} from "./state/launcher.actions";
 import {Session} from "../session/session";
+import {MatIconModule} from "@angular/material/icon";
+import {FlexModule} from "@angular/flex-layout";
+import {MatTooltipModule} from "@angular/material/tooltip";
+import {mapActions} from "../map/state/map.actions";
+import {MatButtonToggleModule} from "@angular/material/button-toggle";
+import {Observable, Subscription} from "rxjs";
+import {launcherActions} from "./state/launcher.actions";
+
 
 
 @Component({
@@ -23,60 +30,80 @@ import {Session} from "../session/session";
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
-    MatInputModule, MatExpansionModule],
+    MatInputModule, MatExpansionModule, MatIconModule, FlexModule, MatTooltipModule, MatButtonToggleModule],
   templateUrl: './launcher.component.html',
   styleUrls: ['./launcher.component.scss']
 })
 export class LauncherComponent implements OnInit, OnDestroy {
+  @ViewChild('stepper') private myStepper: MatStepper;
+  firstFormGroup: FormGroup;
+  secondFormGroup: FormGroup;
+  sessionState$: Observable<Session>;
+  spatialQuery$: Observable<string>; // polygon
+  numSelectedRegions$: Observable<number>;
 
-  my_dummy_sessions: Session[] = [
-    {id: 'a06861b9-51db-4dcf-aab2-302764a51b52'},
-    {id: 'f3737e00-f6b1-4e8f-b3e7-7dd96fc66de4'},
-    {id: 'ee4a0379-b9c7-473b-bfe7-72f31dbb83bd'}
-  ];
-
-  my_flag: number = 0;
-
-  firstFormGroup = this._formBuilder.group({
-    facilityNumber: ['', [Validators.required, Validators.pattern("^[0-9]*$")]]
-  });
-
-  secondFormGroup = this._formBuilder.group({
-    secondCtrl: '',
-  });
-
-  isOptional = false;
-
-  sessionId: string | null = null;
-
-  @Output() sessionEvent = new EventEmitter<string>();
-
-  constructor(private store: Store<AppState>, private _formBuilder: FormBuilder) {
+  constructor(private _formBuilder: FormBuilder, private store: Store<AppState>) {
+    this.sessionState$ = this.store.select(state => state.session.activeSession);
+    this.spatialQuery$ = this.store.select(state => state.map.spatialQuery);
+    this.numSelectedRegions$ = this.store.select(state => state.map.numSelectedRegions);
   }
+
+  private subs: Subscription[] = [];  // to hold all active subscriptions
 
   ngOnInit() {
+    this.subs.push(
+        this.sessionState$.subscribe(session => {
+          if (!session) return;
+          this.firstFormGroup.setValue({spatialQuery: session.spatialQuery || []});
+          this.secondFormGroup.setValue({
+            numberOfFacilities: session.numberOfFacilities || '',
+            maxTravelTimeInMinutes: session.maxTravelTimeInMinutes || ''
+          });
+        })
+    );
 
+    this.firstFormGroup = this._formBuilder.group({
+      spatialQuery: [[], Validators.required]
+    });
+
+    this.secondFormGroup = this._formBuilder.group({
+      numberOfFacilities: ['65', Validators.required],
+      maxTravelTimeInMinutes: ['30', Validators.required]
+    });
+
+    this.subs.push(
+        this.spatialQuery$.subscribe(coordinates => {
+          this.firstFormGroup.controls['spatialQuery'].setValue(coordinates);
+        })
+    );
   }
 
-  start() {
-      const parameters: Session = {
-        numberOfFacilities: Number(this.firstFormGroup.controls['facilityNumber'].value),
-        maxTravelTimeInMinutes: 30
-      };
-    this.store.dispatch(launcherActions.run(parameters));
-  }
-
-  stop() {
-    if (this.my_flag == 0) {
-      this.store.dispatch(launcherActions.runSuccess({session: this.my_dummy_sessions[this.my_flag]}));
-      this.my_flag = 1;
+  startCalculation() {
+    if(!this.firstFormGroup.invalid && !this.secondFormGroup.invalid){
+      const session: Session = {...this.firstFormGroup.value, ...this.secondFormGroup.value};
+      this.store.dispatch(launcherActions.run(session));
     } else {
-      this.store.dispatch(launcherActions.runSuccess({session: this.my_dummy_sessions[this.my_flag]}));
-      this.my_flag = 0;
+      console.log('Form is not valid')
     }
   }
 
+  resetForm(){
+    this.myStepper.reset();
+    this.firstFormGroup.reset();
+    this.secondFormGroup.reset();
+   // this.store.dispatch(resetSession()); // Reset the state
+  }
+
+  activateSelectByPolygon(){
+    this.store.dispatch(mapActions.activatePolygonDrawing());
+  }
+
+  clearSelection(){
+    this.store.dispatch(mapActions.clearSelection());
+  }
+
   ngOnDestroy() {
+    this.subs.forEach(sub => sub.unsubscribe());
   }
 
 }

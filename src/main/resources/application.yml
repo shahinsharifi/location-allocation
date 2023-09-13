@@ -41,6 +41,9 @@ spring:
         format_sql: true
     show-sql: false
 
+#levelDB configuration
+leveldb:
+  root: C:\\Data\\ATP\\neo4j\\dmatrix\\
 
 logging:
   level:

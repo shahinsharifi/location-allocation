@@ -1,6 +1,28 @@
-.input-container {
+.launcher-container {
   width: 100%;
   height: 100%;
+
+  .custom-stepper .mat-step-label {
+    color: #808080;  // Change color of step labels
+    font-size: 14px; // Change font size of step labels
+  }
+
+  .custom-stepper .mat-horizontal-stepper-header {
+    border-bottom: 1px solid #808080;  // Add a border to the bottom of the stepper header
+  }
+
+  .custom-stepper .mat-horizontal-stepper-header-container {
+    background-color: #f0f0f0;  // Change background color of stepper header
+  }
+
+  .custom-stepper .mat-stepper-horizontal-line {
+    border-top-width: 2px;  // Increase horizontal line thickness
+  }
+
+  .feature-number {
+    font-size: 1.2em;  /* Adjust as necessary */
+    /* Other styles as necessary */
+  }
 
   .input-form {
     bottom: 0;
@@ -11,12 +33,6 @@
     margin-right: 10px;
   }
 
-
-  //mat-stepper {
-  //  width: 100%;
-  //  height: 100%;
-  //}
-
   .mat-stepper-horizontal {
     margin-top: 8px;
   }
@@ -25,4 +41,35 @@
     margin-top: 16px;
   }
 
+  ::ng-deep .stepper {
+    max-width: 600px;
+    width: 100%;
+  }
+
+  ::ng-deep .form-field {
+    margin-bottom: 1rem;
+  }
+
+  ::ng-deep button:not(:last-child) {
+    margin-right: 0.5rem;
+  }
+
+  .button-group {
+    margin-top: 1rem;
+  }
+
+  .w-full {
+    width: 100%;
+  }
+
+  .example-form-field {
+    margin: 16px 0;
+  }
+
+  .example-margin {
+    margin-right: 8px;
+  }
+
 }
+
+

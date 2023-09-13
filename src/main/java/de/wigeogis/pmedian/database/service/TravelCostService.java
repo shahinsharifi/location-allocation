@@ -31,9 +31,9 @@ public class TravelCostService {
   private void preloadTravelCostMatrices() {
     log.info("Please wait, the travel cost matrix is being loaded ...");
 
-    List<TravelCost> travelCosts =
-        this.getByStartAndEndRegExp(
-            "^DE-(8[0-9]{4}|9[0-8][0-9]{3})$", "^DE-(8[0-9]{4}|9[0-8][0-9]{3})$");
+    List<TravelCost> travelCosts = this.getAll();
+//        this.getByStartAndEndRegExp(
+//            "^DE-(8[0-9]{4}|9[0-8][0-9]{3})$", "^DE-(8[0-9]{4}|9[0-8][0-9]{3})$");
 
     costMatrix =
         travelCosts.stream()

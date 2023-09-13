@@ -22,17 +22,13 @@ import org.locationtech.jts.geom.MultiPolygon;
 @Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllocationDto implements Serializable {
-
   private Integer id;
   private UUID sessionId;
   private String regionId;
   private String facilityRegionId;
   private Double travelCost;
 
-
-  public static AllocationDto fromRegion(Region region) {
-    AllocationDto allocationDto = new AllocationDto();
-    allocationDto.setRegionId(region.getId());
-    return allocationDto;
+  public RegionDto toRegionDto() {
+    return new RegionDto().setId(regionId);
   }
 }

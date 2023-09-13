@@ -123,11 +123,11 @@ public class OptimizationJobBuilder extends QuartzJobBean {
 //    return writer;
 //  }
 
-  @Bean
-  public TaskExecutor taskExecutor() {
-    SimpleAsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
-    taskExecutor.setConcurrencyLimit(5);  // adjust as needed
-    return taskExecutor;
-  }
+//  @Bean
+//  public TaskExecutor taskExecutor() {
+//    SimpleAsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
+//    taskExecutor.setConcurrencyLimit(5);  // adjust as needed
+//    return taskExecutor;
+//  }
 
 }

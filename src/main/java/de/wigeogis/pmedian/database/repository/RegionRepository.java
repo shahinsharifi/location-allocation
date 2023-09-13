@@ -6,6 +6,7 @@ import jakarta.persistence.Tuple;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
@@ -17,11 +18,8 @@ public interface RegionRepository extends JpaRepository<Region, String> {
 
   <T> List<T> getRegionsByIdStartsWith(String idStartsWith);
 
-  @Query(
-      value = "select * from region where id ~ ?1",
-      nativeQuery = true)
+  @Query(value = "select * from region where id ~ ?1", nativeQuery = true)
   List<Region> getRegionsByRegionCodePattern(String regExp);
-
 
   @Query(
       value =
@@ -37,4 +35,9 @@ public interface RegionRepository extends JpaRepository<Region, String> {
       nativeQuery = true)
   Tuple findAllRegionBounds();
 
+  @Query(
+      value =
+          "SELECT * FROM region WHERE ST_Intersects(geom, ST_Transform(ST_GeomFromText(?1, 4326), 3857))",
+      nativeQuery = true)
+  List<Region> findRegionsByWKTPolygon(String wktPolygon);
 }

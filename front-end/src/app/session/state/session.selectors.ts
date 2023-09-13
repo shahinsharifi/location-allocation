@@ -4,7 +4,13 @@ import {SessionState} from "./session.state";
 
 export const selectSessionState = createFeatureSelector<SessionState>('session');
 
-export const selectCurrentSession = createSelector(
+export const selectActiveSession = createSelector(
   selectSessionState,
-  (state: SessionState) => state.currentSession
+  (state: SessionState) => state.activeSession
 );
+
+
+export const fromSession = {
+  selectSessionState,
+  selectActiveSession
+};

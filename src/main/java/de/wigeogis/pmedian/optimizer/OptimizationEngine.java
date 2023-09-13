@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableTable;
 import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.database.dto.SessionDto;
+import de.wigeogis.pmedian.database.entity.Allocation;
 import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.database.service.AllocationService;
 import de.wigeogis.pmedian.optimizer.evaluator.CoverageEvaluator;
@@ -17,10 +18,14 @@ import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import de.wigeogis.pmedian.optimizer.util.FileUtils;
 
+import de.wigeogis.pmedian.websocket.NotificationService;
+import java.security.SecureRandom;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.nd4j.common.primitives.Pair;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -46,21 +51,26 @@ import org.uncommons.watchmaker.framework.termination.UserAbort;
 @RequiredArgsConstructor
 public class OptimizationEngine {
 
-  private final AllocationService allocationService;
   private final ApplicationEventPublisher eventPublisher;
+  private final NotificationService notificationService;
 
   private final ConcurrentHashMap<UUID, UserAbort> locationAbortSignalMap =
       new ConcurrentHashMap<>();
+
   private final ConcurrentHashMap<UUID, UserAbort> allocationAbortSignalMap =
       new ConcurrentHashMap<>();
-  private final SelectionStrategy<Object> selection =
-      new TournamentSelection(new AdjustableNumberGenerator<>(new Probability(0.9d)));
+
   private final ElapsedTime elapsedTime = new ElapsedTime(30 * 60 * 1000);
 
   public List<AllocationDto> evolve(
       SessionDto session,
       List<RegionDto> regions,
       ImmutableTable<String, String, Double> distanceMatrix) {
+
+//    List<RegionDto> regions =
+//        allocationDtos.stream()
+//            .map(AllocationDto::toRegionDto)
+//            .collect(Collectors.toList());
 
     Random rng = new XORShiftRNG();
 
@@ -101,8 +111,9 @@ public class OptimizationEngine {
     GenerationalEvolutionEngine<List<BasicGenome>> locationEngine =
         new GenerationalEvolutionEngine<>(
             locationCandidateFactory, locationPipeline, coverageEvaluator, selection, rng);
-    locationEngine.addEvolutionObserver(new EvolutionLogger(session.getId(), eventPublisher));
-    locationEngine.setSingleThreaded(false);
+    locationEngine.addEvolutionObserver(
+        new EvolutionLogger(session.getId(), eventPublisher, notificationService));
+    locationEngine.setSingleThreaded(true);
 
     log.info("Running location engine...");
     long start = System.currentTimeMillis();
@@ -143,8 +154,9 @@ public class OptimizationEngine {
     GenerationalEvolutionEngine<List<BasicGenome>> allocationEngine =
         new GenerationalEvolutionEngine<>(
             allocationCandidateFactory, allocationPipeline, travelCostEvaluator, selection, rng);
-    allocationEngine.addEvolutionObserver(new EvolutionLogger(session.getId(), eventPublisher));
-    allocationEngine.setSingleThreaded(false);
+    allocationEngine.addEvolutionObserver(
+        new EvolutionLogger(session.getId(), eventPublisher, notificationService));
+    allocationEngine.setSingleThreaded(true);
 
     // Running allocation engine
     start = System.currentTimeMillis();
@@ -159,11 +171,7 @@ public class OptimizationEngine {
 
     List<BasicGenome> resultAllocation =
         allocationEngine.evolve(
-            12,
-            7,
-            allocationAbortSignal,
-            new Stagnation(2000, false),
-            elapsedTime);
+            12, 7, allocationAbortSignal, new Stagnation(2000, false), elapsedTime);
     end = System.currentTimeMillis();
 
     // Cleaning up database
@@ -172,26 +180,29 @@ public class OptimizationEngine {
     List<RegionDto> facilitiesCodes =
         resultAllocation.stream().map(BasicGenome::getRegionDto).toList();
 
-    Map<RegionDto, RegionDto> coveredDemands =
-        FacilityCandidateUtil.findNearestFacilities(regions, facilitiesCodes, distanceMatrix);
-    log.info(
-        resultAllocation.size()
-            + " demands points have been allocated by the "
-            + facilitiesCodes.size()
-            + " facilities ...");
+        Map<RegionDto, RegionDto> coveredDemands =
+            FacilityCandidateUtil.findNearestFacilities(regions, facilitiesCodes, distanceMatrix);
+        log.info(
+            resultAllocation.size()
+                + " demands points have been allocated by the "
+                + facilitiesCodes.size()
+                + " facilities ...");
 
-    List<AllocationDto> allocations =
-        coveredDemands.keySet().stream()
-            .map(
-                demandDto ->
-                    new AllocationDto()
-                        .setSessionId(session.getId())
-                        .setRegionId(demandDto.getId())
-                        .setFacilityRegionId(coveredDemands.get(demandDto).getId())
-                        .setTravelCost(distanceMatrix.get(demandDto.getId(), coveredDemands.get(demandDto).getId())))
-            .toList();
+        List<AllocationDto> allocations =
+            coveredDemands.keySet().stream()
+                .map(
+                    demandDto ->
+                        new AllocationDto()
+                            .setSessionId(session.getId())
+                            .setRegionId(demandDto.getId())
+                            .setFacilityRegionId(coveredDemands.get(demandDto).getId())
+                            .setTravelCost(distanceMatrix.get(demandDto.getId(),
+     coveredDemands.get(demandDto).getId())))
+                .toList();
 
-    //allocationService.insertAll(allocations);
+//    List<AllocationDto> optimizedAllocations =
+//        FacilityCandidateUtil.findNearestFacilitiesForDemands(
+//            allocationDtos, facilitiesCodes, distanceMatrix);
 
     log.info("Allocated demands are saved into the database ...");
 

@@ -69,13 +69,13 @@ public class VectorTileController {
     layer.setPaint(
         Map.of(
             "fill-color",
-            String.format("#%02x%02x%02x", 245, 247, 145),
+            String.format("#%02x%02x%02x", 163, 163, 163),
             "fill-opacity",
             0.5,
             "fill-antialias",
             true,
             "fill-outline-color",
-            "hsl(61, 33%, 67%)"));
+            "hsl(0, 0%, 47%)"));
 
     return layer;
   }

@@ -2,6 +2,7 @@ package de.wigeogis.pmedian.optimizer.util;
 
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
+import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.database.entity.Region;
 import java.util.AbstractMap;
@@ -120,5 +121,34 @@ public class FacilityCandidateUtil {
     }
 
     return nearestFacilities;
+  }
+
+  public static List<AllocationDto> findNearestFacilitiesForDemands(
+      List<AllocationDto> allocations,
+      List<RegionDto> facilities,
+      ImmutableTable<String, String, Double> distanceMatrix) {
+
+    for (AllocationDto demand : allocations) {
+      double minDistance = Double.MAX_VALUE;
+      RegionDto nearestFacility = null;
+
+      for (RegionDto facility : facilities) {
+        Double distance = distanceMatrix.get(demand.getRegionId(), facility.getId());
+        if (distance != null && distance < minDistance) {
+          minDistance = distance;
+          nearestFacility = facility;
+        }
+      }
+
+      if (nearestFacility != null) {
+        demand.setFacilityRegionId(nearestFacility.getId());
+        demand.setTravelCost(minDistance);
+      } else if (distanceMatrix.row(demand.getRegionId()).size() == 1
+          && distanceMatrix.contains(demand.getRegionId(), demand.getRegionId())) {
+        demand.setFacilityRegionId(demand.getRegionId());
+        demand.setTravelCost(0.0);
+      }
+    }
+    return allocations;
   }
 }

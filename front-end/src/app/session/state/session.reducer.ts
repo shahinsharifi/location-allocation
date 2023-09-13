@@ -4,9 +4,7 @@ import {SessionState} from "./session.state";
 
 
 const initialState: SessionState = {
-  error: undefined,
-  loaded: false,
-  selected: undefined,
+  activeSession: undefined,
   sessions: undefined,
 }
 
@@ -14,8 +12,13 @@ export const sessionFeature = createFeature({
   name: 'session',
   reducer: createReducer<SessionState>(
     initialState,
-    on(sessionActions.sessionSelected, (state, selected) => {
-      return {...state, selected: selected};
+    on(sessionActions.createSession, (state, newState) => {
+      let sessions = state.sessions;
+      if (sessions === undefined) {
+        sessions = [];
+        sessions.push(newState.activeSession);
+      }
+      return {...state, sessions: sessions, activeSession: newState.activeSession};
     }),
   ),
 });

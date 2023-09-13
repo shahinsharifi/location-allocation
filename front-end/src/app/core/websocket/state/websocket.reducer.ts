@@ -1,7 +1,6 @@
-import { createFeature, createReducer, on } from '@ngrx/store';
-import {Message, WebSocketMessageType, WebSocketState} from "./websocket.state";
+import {createFeature, createReducer, on} from '@ngrx/store';
 import {websocketActions} from "./websocket.actions";
-
+import {WebSocketState} from "./websocket.state";
 
 
 export const initialState: WebSocketState = {
@@ -31,28 +30,10 @@ export const webSocketFeature = createFeature({
       connected: false
     })),
 
-    on(websocketActions.sendMessage, (state, { topic, message}) => {
-      const sendMessage: Message = {
-        type: WebSocketMessageType.SEND,
-        topic: topic,
-        data: message
-      };
-      return {
-        ...state,
-        message: sendMessage
-      };
-    }),
-
     on(websocketActions.receiveMessage, (state, { message}) => {
-      const receiveMessage: Message = {
-        type: WebSocketMessageType.RECEIVE,
-        topic: message.topic,
-        action: message.action,
-        data: message.data
-      };
       return {
         ...state,
-        message: receiveMessage
+        message: message
       };
     }),
   )

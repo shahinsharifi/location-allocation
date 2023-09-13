@@ -100,3 +100,21 @@ a:active {
   flex: 1 1 auto;
 }
 
+.input-section, .result-section {
+  padding: 10px;
+}
+
+.input-section:hover, .result-section:hover {
+  background-color: #f2f2f2;
+}
+
+.map-container {
+  padding: 20px;
+  border-radius: 4px;
+  background-color: #ffffff;
+}
+
+.mat-elevation-z6, .mat-elevation-z4 {
+  margin: 5px;
+  border-radius: 4px;
+}

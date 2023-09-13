@@ -1,5 +1,5 @@
 import {createActionGroup, emptyProps, props} from "@ngrx/store";
-import {Message} from "./websocket.state";
+import {Message} from "../message";
 
 
 export enum WebSocketActionTypes {

@@ -1,0 +1,5 @@
+$app-progress-dark: progress-circular-theme(
+  $progress-circle-color: color($app-dark-palette, 'secondary'),
+);
+
+@include progress-circular($app-progress-dark);

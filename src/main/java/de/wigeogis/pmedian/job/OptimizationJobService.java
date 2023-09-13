@@ -5,6 +5,7 @@ import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.database.dto.SessionDto;
 import de.wigeogis.pmedian.database.entity.Session;
+import de.wigeogis.pmedian.database.entity.SessionStatus;
 import de.wigeogis.pmedian.database.service.AllocationService;
 import de.wigeogis.pmedian.database.service.RegionService;
 import de.wigeogis.pmedian.database.service.SessionService;
@@ -46,22 +47,22 @@ public class OptimizationJobService {
 
 
   public SessionDto run(SessionDto sessionDto) throws Exception {
-    List<RegionDto> regions = regionService.getRegionsByRegionCodePattern("^DE-(8[0-9]{4}|9[0-8][0-9]{3})$");
-    ImmutableTable<String, String, Double> distanceMatrix = costService.getCostMatrix();
-    Thread execution =
-        new Thread(
-            () -> {
-              try {
-
-                List<AllocationDto> allocations = optimizationEngine.evolve(sessionDto, regions, distanceMatrix);
-                allocationService.insertAll(allocations);
-                allocationService.insertAllAsync(allocations);
-              } catch (Exception e) {
-                e.printStackTrace();
-              }
-            });
-    execution.start();
-    sessionDto.setRunning(true);
+//    List<RegionDto> regions = regionService.getRegionsByRegionCodePattern("^DE-(8[0-9]{4}|9[0-8][0-9]{3})$");
+//    ImmutableTable<String, String, Double> distanceMatrix = costService.getCostMatrix();
+//    Thread execution =
+//        new Thread(
+//            () -> {
+//              try {
+//
+//                List<AllocationDto> allocations = optimizationEngine.evolve(sessionDto, regions, distanceMatrix);
+//                allocationService.insertAll(allocations);
+//                allocationService.insertAllAsync(allocations);
+//              } catch (Exception e) {
+//                e.printStackTrace();
+//              }
+//            });
+//    execution.start();
+//    sessionDto.setStatus(SessionStatus.RUNNING);
     return sessionDto;
   }
 }

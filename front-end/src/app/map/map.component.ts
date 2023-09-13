@@ -1,11 +1,11 @@
-import {Component, Input, OnDestroy, OnInit, ViewEncapsulation,} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewEncapsulation,} from '@angular/core';
 import {NgxMapLibreGLModule} from "@maplibre/ngx-maplibre-gl";
 import {
+  IControl,
   LayerSpecification,
   LngLatBoundsLike,
   Map,
-  PointLike,
-  Popup,
+  NavigationControl,
   StyleSpecification
 } from "maplibre-gl";
 import {Observable, Subscription} from "rxjs";
@@ -13,10 +13,13 @@ import {HttpClient} from "@angular/common/http";
 import {VectorTileLayer} from "./vector-tile-layer";
 import {MatDialogModule} from "@angular/material/dialog";
 import style from '../../assets/style-de-at.json';
-import {Session} from "../session/session";
-import {fromLauncher} from "../launcher/state/launcher.selectors";
-import {Store} from "@ngrx/store";
+import {Session, SessionStatus} from "../session/session";
+import {select, Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import booleanIntersects from "@turf/boolean-intersects";
+import {mapActions} from "./state/map.actions";
+import {MapUtils} from "./map-utils";
 
 
 @Component({
@@ -24,7 +27,7 @@ import {AppState} from "../core/state/app.state";
   providers: [],
   imports: [
     NgxMapLibreGLModule,
-    MatDialogModule
+    MatDialogModule,
   ],
   standalone: true,
   templateUrl: './map.component.html',
@@ -32,32 +35,41 @@ import {AppState} from "../core/state/app.state";
   encapsulation: ViewEncapsulation.None
 })
 export class MapComponent implements OnInit, OnDestroy {
-  @Input('sessionId') sessionId: string | null = null;
+  mapUtils = new MapUtils();
   private subscriptions: Subscription[] = [];
   style = style as StyleSpecification;
   map: Map;
-  popup = new Popup({closeButton: false});
-  canvas: HTMLElement;
   start: any;
-  current: any
-  box: any;
+  draw: MapboxDraw;
+  session: Session | null = null;
+  sessionState$: Observable<Session>
+  selectionActive$: Observable<boolean>;
+  spatialQuery$: Observable<string>;
+  numberOfSelectedRegions$: Observable<number>;
 
-  private sessionState$: Observable<Session> = this.store.select(fromLauncher.selectLauncherSession);
-
-  constructor(private httpClient: HttpClient,private store: Store<AppState>) {
-    this.sessionState$.subscribe(this.sessionStateChange.bind(this));
+  constructor(private httpClient: HttpClient, private store: Store<AppState>) {
+    this.sessionState$ = this.store.pipe(select(state => state.session.activeSession));
+    this.selectionActive$ = this.store.pipe(select(state => state.map.selectionActive));
+    this.spatialQuery$ = this.store.pipe(select(state => state.map.spatialQuery));
+    this.numberOfSelectedRegions$ = this.store.pipe(select(state => state.map.numSelectedRegions));
   }
 
   ngOnInit(): void {
-
+    this.sessionState$.subscribe(this.sessionStateChange.bind(this));
+    this.selectionActive$.subscribe(active => console.log("Selection active: " + active));
   }
 
   initializeMap(map: Map) {
     this.map = map;
-    if(this.sessionId == null) {
+    this.map.addControl(new NavigationControl());
+    if (this.session == null || this.session.id == null) {
       this.loadBasedLayer();
-    } else {
-      this.loadResultLayer(this.sessionId);
+    } else if (
+        this.session.status == SessionStatus.RUNNING ||
+        this.session.status == SessionStatus.COMPLETED ||
+        this.session.status == SessionStatus.INTERRUPTED
+    ) {
+      this.loadResultLayer(this.session.id);
     }
   }
 
@@ -67,21 +79,21 @@ export class MapComponent implements OnInit, OnDestroy {
     const sub = this.httpClient.get<VectorTileLayer>(`http://localhost:8080/api/v1/tiles/base`).subscribe((layer: VectorTileLayer) => {
       this.map.addLayer(layer as LayerSpecification);
       this.map.addLayer(
-        {
-          'id': 'region-highlighted',
-          'type': 'fill',
-          'source': layer.source,
-          'source-layer': layer['source-layer'],
-          'paint': {
-            'fill-outline-color': '#484896',
-            'fill-color': '#6e599f',
-            'fill-opacity': 0.75
-          },
-          'filter': ['in', 'region_code', '']
-        } as LayerSpecification
+          {
+            'id': 'region-highlighted',
+            'type': 'fill',
+            'source': layer.source,
+            'source-layer': layer['source-layer'],
+            'paint': {
+              'fill-outline-color': '#484896',
+              'fill-color': '#6e599f',
+              'fill-opacity': 0.75
+            },
+            'filter': ['in', 'region_code', '']
+          } as LayerSpecification
       );
       this.map.fitBounds(layer.bounds as LngLatBoundsLike, {padding: 20});
-      this.initBoundingBoxDrawing();
+      this.initDrawing();
     });
     this.subscriptions.push(sub);
   }
@@ -125,10 +137,10 @@ export class MapComponent implements OnInit, OnDestroy {
         if (layer instanceof Array) {
           this.map.addLayer(layer[0] as LayerSpecification);
           this.map.addLayer(layer[1] as LayerSpecification);
-          this.map.fitBounds(layer[0].bounds as LngLatBoundsLike, { padding: 20 });
+          this.map.fitBounds(layer[0].bounds as LngLatBoundsLike, {padding: 20});
         } else {
           this.map.addLayer(layer as LayerSpecification);
-          this.map.fitBounds(layer.bounds as LngLatBoundsLike, { padding: 20 });
+          this.map.fitBounds(layer.bounds as LngLatBoundsLike, {padding: 20});
         }
       });
 
@@ -138,105 +150,79 @@ export class MapComponent implements OnInit, OnDestroy {
     }
   }
 
+  sessionStateChange(session: Session) {
+    if (session == null) return;
+    console.log("The status is: " + SessionStatus[session.status]);
+    if (session.id != null && session.status == SessionStatus.RUNNING) {
+      this.loadResultLayer(session.id).then(() => console.log(" Loaded result layer"));
+    }
+  }
 
-  initBoundingBoxDrawing() {
-
-    this.canvas = this.map.getCanvasContainer();
-
-    this.canvas.addEventListener('mousedown', this.mouseDown.bind(this), true);
-
-    this.map.on('mousemove', (e) => {
-
-      const features = this.map.queryRenderedFeatures(e.point, {
-        layers: ['region-highlighted']
-      });
-
-      this.map.getCanvas().style.cursor = features.length ? 'pointer' : '';
-
-      if (!features.length) {
-        this.popup.remove();
-        return;
+  initDrawing() {
+    this.draw = new MapboxDraw({
+      displayControlsDefault: false,
+      controls: {
+        polygon: false,
+        trash: false
       }
+    });
+    this.map.addControl(this.draw as unknown as IControl);
+    this.map.on('draw.create', this.selectFeatures.bind(this));
+    this.map.on('draw.delete', this.clearSelection.bind(this));
+    this.map.on('draw.update', this.selectFeatures.bind(this));
 
-      this.popup
-      .setLngLat(e.lngLat)
-      .setText(features[0].properties['region_code'])
-      .addTo(this.map);
+    this.selectionActive$.subscribe(active => {
+
+      if (!this.map) return;
+      const mapContainer = this.map.getCanvasContainer(); //get the map container
+
+      if (active) {
+        console.log("Selection active");
+        this.draw.changeMode(MapboxDraw.constants.modes.DRAW_POLYGON);
+        mapContainer.style.cursor = 'crosshair'; // set cursor to crosshair
+      } else {
+        console.log("Selection inactive");
+        this.clearSelection();
+        mapContainer.style.cursor = ''; // reset cursor
+      }
     });
   }
 
-  sessionStateChange(session: Session) {
-    this.loadResultLayer(session.id);
-  }
+  selectFeatures() {
+    let polygon = this.draw.getAll(); // Get all drawn polygons
 
-  mousePos(e: { shiftKey?: any; button?: number; clientX?: any; clientY?: any; }) {
-    const rect = this.canvas.getBoundingClientRect();
-    return [
-      e.clientX - rect.left - this.canvas.clientLeft,
-      e.clientY - rect.top - this.canvas.clientTop
-    ] as PointLike;
-  }
+    if (polygon.features.length > 0) {
+      let drawnPolygon = polygon.features[0];
+      let features = this.map.queryRenderedFeatures({layers: ['region']});
+      let intersectedFeatures = [];
 
-  mouseDown(e: { shiftKey: any; button: number; }) {
-    if (!(e.shiftKey && e.button === 0)) return;
-    this.map.dragPan.disable();
-    document.addEventListener('mousemove', this.onMouseMove.bind(this));
-    document.addEventListener('mouseup', this.onMouseUp.bind(this));
-    document.addEventListener('keydown', this.onKeyDown.bind(this));
-    this.start = this.mousePos(e);
-  }
-
-  onMouseMove(e: { shiftKey?: any; button?: number; clientX?: any; clientY?: any; }) {
-    this.current = this.mousePos(e);
-    if (!this.box) {
-      this.box = document.createElement('div');
-      this.box.style.cssText = 'background: rgba(56, 135, 190, 0.1); border: 2px solid #3887be; position: absolute; top: 0; left: 0; width: 0; height: 0; z-index:10000;';
-      this.canvas.appendChild(this.box);
-    }
-
-    const minX = Math.min(this.start.x, this.current.x),
-      maxX = Math.max(this.start.x, this.current.x),
-      minY = Math.min(this.start.y, this.current.y),
-      maxY = Math.max(this.start.y, this.current.y);
-
-    this.box.style.transform = `translate(${minX}px, ${minY}px)`;
-    this.box.style.width = maxX - minX + 'px';
-    this.box.style.height = maxY - minY + 'px';
-  }
-
-  onMouseUp(e: { shiftKey?: any; button?: number; clientX?: any; clientY?: any; }) {
-    this.finish([this.start, this.mousePos(e)]);
-  }
-
-  onKeyDown(e: { keyCode: number; }) {
-    if (e.keyCode === 27) this.finish();
-  }
-
-  finish(bbox?: any) {
-    document.removeEventListener('mousemove', this.onMouseMove);
-    document.removeEventListener('keydown', this.onKeyDown);
-    document.removeEventListener('mouseup', this.onMouseUp);
-
-    if (this.box) {
-      this.box.parentNode.removeChild(this.box);
-      this.box = null;
-    }
-
-    if (bbox) {
-      const features = this.map.queryRenderedFeatures(bbox, {
-        layers: ['region']
+      features.forEach(feature => {
+        if (booleanIntersects(drawnPolygon, feature)) {
+          intersectedFeatures.push(feature);
+        }
       });
 
-      if (features.length >= 1000) {
-        return window.alert('Select a smaller number of features');
-      }
+      let region_codes = intersectedFeatures.map((feature) => feature.properties['region_code']);
+      const spatialQuery = <Array<number[]>>drawnPolygon.geometry['coordinates'][0];
+      this.store.dispatch(mapActions.regionsSelected({
+        spatialQuery: this.mapUtils.toWKTPolygon(spatialQuery),
+        numSelectedRegions: region_codes.length
+      }));
 
-      const fips = features.map((feature) => feature.properties['region_code']);
-      this.map.setFilter('region-highlighted', ['in', 'region_code', ...fips]);
+      this.map.setFilter('region-highlighted', ['in', 'region_code', ...region_codes]);
+      this.draw.deleteAll(); // The drawn polygon should disappear
+    } else {
+      this.map.setFilter('region-highlighted', ['in', 'region_code', '']);
+      this.clearSelection();
     }
-
-    this.map.dragPan.enable();
   }
+
+  clearSelection() {
+    this.draw.deleteAll();
+    this.map.setFilter('region-highlighted', ['in', 'region_code', '']);
+    this.store.dispatch(mapActions.clearSelection());
+  }
+
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());

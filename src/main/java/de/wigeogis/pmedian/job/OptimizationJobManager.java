@@ -3,6 +3,7 @@ package de.wigeogis.pmedian.job;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.wigeogis.pmedian.database.dto.SessionDto;
 import de.wigeogis.pmedian.database.entity.Session;
+import de.wigeogis.pmedian.database.entity.SessionStatus;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.quartz.JobBuilder;
@@ -47,19 +48,19 @@ public class OptimizationJobManager {
     scheduler.scheduleJob(jobDetail, trigger);
     scheduler.triggerJob(jobDetail.getKey());
 
-    session.setRunning(true);
+    session.setStatus(SessionStatus.RUNNING);
     return session;
   }
 
   public SessionDto stop(SessionDto session) throws Exception {
     scheduler.pauseJob(JobKey.jobKey("JOB_" + session.getId().toString()));
-    session.setRunning(false);
+    session.setStatus(SessionStatus.INTERRUPTED);
     return session;
   }
 
   public SessionDto resume(SessionDto session) throws Exception {
     scheduler.pauseJob(JobKey.jobKey("JOB_" + session.getId().toString()));
-    session.setRunning(true);
+    session.setStatus(SessionStatus.RUNNING);
     return session;
   }
 }

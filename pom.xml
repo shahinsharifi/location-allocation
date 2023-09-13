@@ -144,6 +144,18 @@
       <version>2.3.9</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.iq80.leveldb</groupId>
+      <artifactId>leveldb</artifactId>
+      <version>0.12</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>guava</artifactId>
+          <groupId>com.google.guava</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <!-- JTS -->
     <dependency>
       <groupId>com.google.guava</groupId>

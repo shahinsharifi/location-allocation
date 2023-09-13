@@ -1,25 +1,13 @@
 package de.wigeogis.pmedian.websocket;
 
-public class Message {
+import java.util.Map;
+import java.util.UUID;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-    private String transactionId;
-
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-    }
-
-    private String sessionId;
-}
-
+public record Message(
+    UUID sessionId,
+    MessageType type,
+    MessageSubject subject,
+    String message,
+    Map<String, Object> data) {}

@@ -53,5 +53,11 @@ public class RegionService {
     );
   }
 
+
+  public List<RegionDto> findRegionsByWKTPolygon(String wktPolygon) {
+    List<Region> regions = repository.findRegionsByWKTPolygon(wktPolygon);
+    return regions.stream().map(this::entityToDto).collect(Collectors.toList());
+  }
+
 }
 

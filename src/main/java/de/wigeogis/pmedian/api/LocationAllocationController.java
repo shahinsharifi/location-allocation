@@ -1,21 +1,23 @@
 package de.wigeogis.pmedian.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableTable;
 import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.database.dto.SessionDto;
-import de.wigeogis.pmedian.database.entity.Session;
+import de.wigeogis.pmedian.database.entity.SessionStatus;
 import de.wigeogis.pmedian.database.service.AllocationService;
 import de.wigeogis.pmedian.database.service.RegionService;
 import de.wigeogis.pmedian.database.service.SessionService;
 import de.wigeogis.pmedian.database.service.TravelCostService;
-import de.wigeogis.pmedian.job.OptimizationJobService;
 import de.wigeogis.pmedian.optimizer.OptimizationEngine;
+import de.wigeogis.pmedian.utils.LevelDbHelper;
+import de.wigeogis.pmedian.websocket.MessageSubject;
+import de.wigeogis.pmedian.websocket.NotificationService;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -28,7 +30,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.core.functions.CheckedRunnable;
 import io.github.resilience4j.decorators.Decorators;
 
 @Log4j2
@@ -44,10 +45,11 @@ public class LocationAllocationController {
   private final ApplicationEventPublisher publisher;
   private final OptimizationEngine optimizationEngine;
 
+
   // Inject the resilience4j components
   private final CircuitBreaker optimizationEngineCircuitBreaker;
   private final ThreadPoolBulkhead optimizationEngineBulkhead;
-  private final OptimizationJobService optimizationJobService;
+  private final NotificationService notificationService;
 
   @RequestMapping(value = "/start", method = RequestMethod.POST)
   @ResponseBody
@@ -58,16 +60,52 @@ public class LocationAllocationController {
 
     Supplier<SessionDto> supplier =
         () -> {
-          List<RegionDto> regions =
-              regionService.getRegionsByRegionCodePattern("^DE-(8[0-9]{4}|9[0-8][0-9]{3})$");
+          List<RegionDto> regions = regionService.findRegionsByWKTPolygon(session.getSpatialQuery());
+              //regionService.getRegionsByRegionCodePattern("^DE-(8[0-9]{4}|9[0-8][0-9]{3})$");
+
+          final LevelDbHelper dMatrix = LevelDbHelper.getInstance();
+
+
+
+          List<AllocationDto> allocations =
+              regions.stream()
+                  .map(
+                      regionDto ->
+                          new AllocationDto()
+                              .setSessionId(session.getId())
+                              .setRegionId(regionDto.getId())
+                              .setFacilityRegionId(null)
+                              .setTravelCost(-1d))
+                  .toList();
+          CompletableFuture<Integer> completableFuture = allocationService.insertAllAsync(allocations);
+
+          completableFuture.whenComplete(
+              (result, throwable) -> {
+                if (throwable != null) {
+                  log.error("Optimization failed: ", throwable);
+                } else {
+                  session.setStatus(SessionStatus.RUNNING);
+                  notificationService.publishData(
+                      session.getId(),
+                      MessageSubject.SESSION_STATUS,
+                      "Session status changed to " + session.getStatus(),
+                      Map.of("status", session.getStatus()));
+                }
+              });
 
           ImmutableTable<String, String, Double> distanceMatrix = costService.getCostMatrix();
 
           log.info("New session with id '" + session.getId() + "' has been created...");
 
-          List<AllocationDto> allocations =
-              optimizationEngine.evolve(session, regions, distanceMatrix);
+          allocations = optimizationEngine.evolve(session, regions, distanceMatrix);
           allocationService.insertAll(allocations);
+
+          session.setStatus(SessionStatus.COMPLETED);
+          notificationService.publishData(
+              session.getId(),
+              MessageSubject.SESSION_STATUS,
+              "Session status changed to " + session.getStatus(),
+              Map.of("status", session.getStatus()));
 
           return sessionDto;
         };
@@ -85,22 +123,25 @@ public class LocationAllocationController {
               return null;
             });
 
+
+    session.setStatus(SessionStatus.STARTING);
+
     return ResponseEntity.ok().body(session);
   }
-
 
   @RequestMapping(value = "/abort", method = RequestMethod.POST)
   @ResponseBody
   public ResponseEntity<?> abortLocationAlgorithm(@RequestBody SessionDto sessionDto)
       throws Exception {
-//    sessionDto = optimizationJobManager.stop(sessionDto);
+    //    sessionDto = optimizationJobManager.stop(sessionDto);
     return ResponseEntity.ok().body(sessionDto);
   }
 
   @RequestMapping(value = "/resume", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity<?> resumeLocationAlgorithm(@RequestBody SessionDto sessionDto) throws Exception {
- //   optimizationJobManager.resume(sessionDto);
+  public ResponseEntity<?> resumeLocationAlgorithm(@RequestBody SessionDto sessionDto)
+      throws Exception {
+    //   optimizationJobManager.resume(sessionDto);
     return ResponseEntity.ok().body(sessionDto);
   }
 }

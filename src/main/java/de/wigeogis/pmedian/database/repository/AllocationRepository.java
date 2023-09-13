@@ -4,13 +4,17 @@ package de.wigeogis.pmedian.database.repository;
 import de.wigeogis.pmedian.database.entity.Allocation;
 import jakarta.persistence.Tuple;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@Transactional
 public interface AllocationRepository extends JpaRepository<Allocation, UUID> {
 
 
@@ -32,4 +36,19 @@ public interface AllocationRepository extends JpaRepository<Allocation, UUID> {
               + ") as subquery;",
       nativeQuery = true)
   Tuple findAllocationExtentBySessionId(UUID sessionId);
+
+
+  @Query(
+      value =
+          "WITH inserted AS (" +
+              "    INSERT INTO allocation (session_id, region_id, facility_region_id, travel_cost) " +
+              "    SELECT ?1 as session_id, \"id\" as region_id, '-1' as facility_region_id, 0.0 as travel_cost " +
+              "    FROM region " +
+              "    WHERE ST_Intersects(geom, ST_Transform(ST_GeomFromText(?2, 4326), 3857)) " +
+              "    RETURNING * " +
+              ")" +
+              "SELECT * FROM inserted;",
+      nativeQuery = true)
+  List<Allocation> insertAndFetchRegionsByWKTPolygon(UUID sessionId, String wktPolygon);
+
 }

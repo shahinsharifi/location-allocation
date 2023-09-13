@@ -5,10 +5,9 @@ import {websocketActions} from "./websocket.actions";
 import {WebsocketService} from "../websocket.service";
 
 
-
 @Injectable()
 export class WebSocketEffects {
-  constructor(private actions$: Actions, private webSocketService: WebsocketService) {
+  constructor(private actions$: Actions, private websocketService: WebsocketService) {
   }
 
   initConnectionSuccess$ = createEffect(
@@ -20,26 +19,13 @@ export class WebSocketEffects {
     {dispatch: false}
   );
 
-  sendMessage$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(websocketActions.sendMessage),
-        tap(({topic, message}) => this.webSocketService.sendMessage(topic, message))
-      ),
-    {dispatch: false}
-  );
-
 
   receiveMessage$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(websocketActions.receiveMessage),
         tap(({message}) => {
-          console.log(message.topic);
-          switch (message.topic) {
-            default:
-              console.warn('Unhandled WebSocket message type:', message.topic);
-          }
+          this.websocketService.handleMessage(message);
         })
       ),
     {dispatch: false}

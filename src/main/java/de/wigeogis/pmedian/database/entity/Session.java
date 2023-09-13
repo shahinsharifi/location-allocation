@@ -2,9 +2,12 @@ package de.wigeogis.pmedian.database.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
@@ -27,14 +30,17 @@ public class Session {
   @Column(nullable = false, updatable = false)
   private UUID id;
 
+  @Column(columnDefinition = "TEXT")
+  private String spatialQuery;
+
   private Integer numberOfFacilities;
   private Double maxTravelTimeInMinutes;
   private Double maxTravelDistanceInMeters;
   private Double maxTravelDistanceInKilometers;
 
-  // represents the status of the session (running or finished)
-  private Boolean running;
+  // represents the status of the session
+  @Enumerated(EnumType.STRING)
+  private SessionStatus status;
 
   private final String createdAt = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss z").format(new Date());
-
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import {CommandService} from "./http/command.service";
 import {HttpClientModule} from "@angular/common/http";
 import {WebsocketService} from "./websocket/websocket.service";
+import {RemoteDataService} from "./http/data.service";
 
 @NgModule({
   declarations: [],
@@ -10,6 +11,7 @@ import {WebsocketService} from "./websocket/websocket.service";
     CommonModule,
     HttpClientModule
   ],
-  providers:[CommandService, WebsocketService]
+  providers:[CommandService, RemoteDataService, WebsocketService],
+
 })
 export class CoreModule { }

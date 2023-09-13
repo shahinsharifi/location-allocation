@@ -3,6 +3,7 @@ package de.wigeogis.pmedian.optimizer.logger;
 import de.wigeogis.pmedian.database.dto.SessionDto;
 import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
+import de.wigeogis.pmedian.websocket.NotificationService;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -41,10 +42,12 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
 
   private final UUID sessionId;
   private final ApplicationEventPublisher publisher;
+  private final NotificationService notificationService;
 
-  public EvolutionLogger(UUID sessionId, ApplicationEventPublisher publisher) {
+  public EvolutionLogger(UUID sessionId, ApplicationEventPublisher publisher, NotificationService notificationService) {
     this.sessionId = sessionId;
     this.publisher = publisher;
+    this.notificationService = notificationService;
   }
 
 
@@ -93,8 +96,8 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
     List<BasicGenome> bestCandidate = (List<BasicGenome>) data.getBestCandidate();
     int numberOfFacilities =
         bestCandidate.stream().collect(Collectors.groupingBy(BasicGenome::getRegionId)).size();
-    log.info(
-        "Generation "
+    String logMessage =
+        ("Generation "
             + data.getGenerationNumber()
             + " [\u001B[33mMutation Rate: "
             + String.format("%.3f", currentMutationRate)
@@ -103,7 +106,8 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
             + numberOfFacilities
             + " facilities) -> "
             + data.getBestCandidateFitness());
-  }
+    log.info(logMessage);
+    }
 
   public Map<Integer, Double> getProgress() {
     return new TreeMap<>(progress);

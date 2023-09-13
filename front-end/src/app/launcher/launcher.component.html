@@ -1,43 +1,92 @@
-<div class="input-container">
-  <mat-stepper linear #stepper>
-    <mat-step [stepControl]="firstFormGroup">
-      <form [formGroup]="firstFormGroup">
-        <ng-template matStepLabel>Specify the number of location for the Location-Allocation process:</ng-template>
-        <mat-form-field>
-          <mat-label>Number of Locations</mat-label>
-          <input matInput placeholder="30" formControlName="facilityNumber" type="number" required>
-        </mat-form-field>
-        <div>
-          <button mat-button matStepperNext>Next</button>
+<div class="launcher-container" fxLayout="column" fxLayoutAlign="center left">
+  <mat-stepper fxLayout="column" fxFlex="100%" linear #stepper orientation="horizontal" class="stepper custom-stepper">
+    <mat-step label="Step 1" state="phone" [stepControl]="firstFormGroup">
+      <form [formGroup]="firstFormGroup" fxLayout="column">
+        <ng-template matStepLabel>Select Regions</ng-template>
+        <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
+          <span class="feature-number">Number of Selected Features: {{numSelectedRegions$ | async}}</span>
+          <mat-button-toggle-group name="options" aria-label="Options" class="button-group">
+            <mat-button-toggle value="clear" (click)="clearSelection()" matTooltip="Clear polygon">
+              <mat-icon>delete_forever</mat-icon>
+            </mat-button-toggle>
+            <mat-button-toggle value="draw" (click)="activateSelectByPolygon()" matTooltip="Draw polygon">
+              <mat-icon>photo_size_select_small</mat-icon>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+        <div fxLayout="row" FXLayoutAlign="end center" class="button-group">
+          <button mat-stroked-button [disabled]="firstFormGroup.controls['spatialQuery'].value === null" matStepperNext matTooltip="Next Step">
+            <mat-icon>arrow_forward</mat-icon>
+            Next
+          </button>
         </div>
       </form>
     </mat-step>
-    <mat-step [stepControl]="secondFormGroup" [optional]="isOptional">
-      <form [formGroup]="secondFormGroup">
-        <ng-template matStepLabel>Fill out your address</ng-template>
-        <mat-form-field>
-          <mat-label>Address</mat-label>
-          <input matInput formControlName="secondCtrl" placeholder="Ex. 1 Main St, New York, NY"
-                 required>
-        </mat-form-field>
-        <div>
-          <button mat-button matStepperPrevious>Back</button>
-          <button mat-button matStepperNext>Next</button>
+
+    <mat-step label="Step 2" state="chat" [stepControl]="secondFormGroup">
+      <form [formGroup]="secondFormGroup" fxLayout="column">
+        <ng-template matStepLabel>Specify Parameters</ng-template>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <mat-form-field appearance="outline" class="example-form-field">
+            <mat-label>Nr. of Facilities</mat-label>
+            <input matInput formControlName="numberOfFacilities" type="number" placeholder="No. Facilities">
+            <mat-hint>(only required if 'Max Travel Time' is not provided)</mat-hint>
+            <mat-error *ngIf="secondFormGroup.controls['numberOfFacilities'].invalid &&
+    (secondFormGroup.controls['numberOfFacilities'].dirty || secondFormGroup.controls['numberOfFacilities'].touched)">
+              Number of Facilities is required
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="example-form-field">
+            <mat-label>Max Travel Time (min)</mat-label>
+            <input matInput formControlName="maxTravelTimeInMinutes" type="number" placeholder="Max Travel Time">
+            <mat-hint>(only required if 'Nr. of Facilities' is not provided)</mat-hint>
+            <mat-error *ngIf="secondFormGroup.controls['maxTravelTimeInMinutes'].invalid &&
+    (secondFormGroup.controls['maxTravelTimeInMinutes'].dirty || secondFormGroup.controls['maxTravelTimeInMinutes'].touched)">
+              Max Travel Time In Minutes is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
+          <button mat-stroked-button matStepperPrevious matTooltip="Go Back" class="example-margin">
+            <mat-icon>arrow_back</mat-icon>
+            Back
+          </button>
+          <button mat-stroked-button [disabled]="!(secondFormGroup.controls['numberOfFacilities'].value || secondFormGroup.controls['maxTravelTimeInMinutes'].value)" matStepperNext matTooltip="Next Step" class="example-margin">
+            <mat-icon>arrow_forward</mat-icon>
+            Next
+          </button>
         </div>
       </form>
     </mat-step>
-    <mat-step>
-      <ng-template matStepLabel>Done</ng-template>
+
+    <mat-step label="Step 3">
+      <ng-template matStepLabel>Run</ng-template>
       <p>You are now done.</p>
-      <div>
-        <button mat-button matStepperPrevious>Back</button>
-        <button mat-button (click)="stepper.reset()">Reset</button>
+      <div fxLayout="row" fxLayoutAlign="end center" class="button-group">
+        <button mat-stroked-button matStepperPrevious matTooltip="Go Back">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </button>
       </div>
     </mat-step>
+    <ng-template matStepperIcon="phone">
+      <mat-icon>call_end</mat-icon>
+    </ng-template>
+    <ng-template matStepperIcon="chat">
+      <mat-icon>forum</mat-icon>
+    </ng-template>
   </mat-stepper>
-  <div class="input-form">
-    <button mat-flat-button color="warn" (click)="stop()">STOP</button> &nbsp;
-    <button mat-flat-button color="primary" (click)="start()">RUN</button>
+  <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
+    <button mat-stroked-button color="warn" (click)="resetForm()" matTooltip="Reset form">
+      <mat-icon>refresh</mat-icon>
+      Reset
+    </button>
+    <button mat-stroked-button color="primary"
+            [disabled]="firstFormGroup.invalid || secondFormGroup.invalid"
+            (click)="startCalculation()"
+            matTooltip="Start Calculation">
+      <mat-icon>play_circle_outline</mat-icon>
+      Start
+    </button>
   </div>
-
 </div>

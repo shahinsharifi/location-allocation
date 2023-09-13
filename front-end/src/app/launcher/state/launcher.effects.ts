@@ -1,32 +1,28 @@
 import {Injectable} from '@angular/core';
-import {switchMap, map} from 'rxjs/operators';
+import {tap} from 'rxjs/operators';
 import {LauncherService} from "../launcher.service";
 import {launcherActions} from "./launcher.actions";
 import {Actions, createEffect, ofType} from "@ngrx/effects";
 
 
+
 @Injectable()
 export class LauncherEffects {
+  constructor(private actions$: Actions, private launcherService: LauncherService) {}
 
   run$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(launcherActions.run),
-      switchMap((session) => this.launcherService.start(session)),
-      map((session) => launcherActions.runSuccess({session}))
-    );
-  });
-
-  stop$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(launcherActions.stop),
-      switchMap(session =>
-        this.launcherService.stop(session).pipe(
-          map(session => launcherActions.stopSuccess({session}))
-        )
-      )
+      tap(session => this.launcherService.start(session)),
     )
-  );
+  }, {dispatch: false});
 
-  constructor(private actions$: Actions, private launcherService: LauncherService) {}
+  stop$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(launcherActions.stop),
+      tap(session => this.launcherService.stop(session)),
+    )
+  }, {dispatch: false});
+
 }
 

@@ -3,6 +3,7 @@ import {AppState} from "./app.state";
 import {webSocketFeature} from "../websocket/state/websocket.reducer";
 import {launcherFeature} from "../../launcher/state/launcher.reducer";
 import {sessionFeature} from "../../session/state/session.reducer";
+import {mapFeature} from "../../map/state/map.reducer";
 import {localStorageSync} from "ngrx-store-localstorage";
 
 
@@ -10,6 +11,7 @@ export const appReducers: ActionReducerMap<AppState> = {
   websocket: webSocketFeature.reducer,
   launcher: launcherFeature.reducer,
   session: sessionFeature.reducer,
+  map: mapFeature.reducer
 };
 
 function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {

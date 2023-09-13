@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {MapComponent} from "../map/map.component";
 import {FlexLayoutModule} from "@angular/flex-layout";
@@ -17,12 +17,5 @@ import {CoreModule} from "../core/core.module";
 })
 export class MainComponent {
 
-  @ViewChild('mapComponent') mapComponent: MapComponent;
 
-  sessionId: string | null = null;
-
-  handleSessionId(sessionId: string) {
-    this.sessionId = sessionId;
-    this.mapComponent.loadResultLayer(sessionId);
-  }
 }
