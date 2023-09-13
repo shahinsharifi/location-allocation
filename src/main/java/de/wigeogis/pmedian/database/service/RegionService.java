@@ -6,9 +6,7 @@ import de.wigeogis.pmedian.database.dto.VectorTileLayerDto.BoundingBoxDto;
 import de.wigeogis.pmedian.database.entity.Region;
 import de.wigeogis.pmedian.database.repository.RegionRepository;
 import jakarta.persistence.Tuple;
-
 import java.util.List;
-
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;

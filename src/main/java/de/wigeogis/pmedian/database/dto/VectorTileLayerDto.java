@@ -18,12 +18,20 @@ public class VectorTileLayerDto implements Serializable {
   private String id;
   private String type;
   private Map<String, String> source;
-  @JsonProperty("source-layer") private String sourceLayer;
+
+  @JsonProperty("source-layer")
+  private String sourceLayer;
+
   private Map<String, String> fields;
   private Map<String, Object> paint;
   private Map<String, Object> layout;
   private BoundingBoxDto bounds;
   private String description;
+
+  public List<Double> getBounds() {
+    return new ArrayList<>(
+        List.of(bounds.getMinX(), bounds.getMinY(), bounds.getMaxX(), bounds.getMaxY()));
+  }
 
   // add inner class of 'BoundingBox' here
   @Getter
@@ -35,12 +43,5 @@ public class VectorTileLayerDto implements Serializable {
     private double minY;
     private double maxX;
     private double maxY;
-  }
-
-
-
-  public List<Double> getBounds() {
-    return new ArrayList<>(
-        List.of(bounds.getMinX(), bounds.getMinY(), bounds.getMaxX(), bounds.getMaxY()));
   }
 }

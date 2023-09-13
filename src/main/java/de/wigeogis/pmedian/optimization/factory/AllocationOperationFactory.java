@@ -4,7 +4,8 @@ package de.wigeogis.pmedian.optimization.factory;
 import de.wigeogis.pmedian.optimization.model.BasicGenome;
 import de.wigeogis.pmedian.optimization.operation.allocation.AllocationCrossOver;
 import de.wigeogis.pmedian.optimization.operation.allocation.AllocationMutation;
-import de.wigeogis.pmedian.optimization.operation.location.CoverageMutation;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -14,10 +15,6 @@ import org.uncommons.maths.random.Probability;
 import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 import org.uncommons.watchmaker.framework.operators.EvolutionPipeline;
 import org.uncommons.watchmaker.framework.operators.ListOperator;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
 
 @Log4j2
 @AllArgsConstructor
@@ -38,9 +35,9 @@ public class AllocationOperationFactory {
 
     // Installing mutation operator
     AllocationMutation coverageMutation = new AllocationMutation(
-        mutationRate,
         demands,
-        costMatrix);
+        costMatrix,
+        mutationRate);
 
     operators.add(
         new ListOperator<>(

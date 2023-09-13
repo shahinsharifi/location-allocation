@@ -1,14 +1,10 @@
 package de.wigeogis.pmedian.database.repository;
 
-import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.database.entity.Region;
 import jakarta.persistence.Tuple;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

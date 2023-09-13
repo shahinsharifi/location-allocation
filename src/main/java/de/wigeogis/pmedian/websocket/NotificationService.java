@@ -1,9 +1,7 @@
 package de.wigeogis.pmedian.websocket;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
-import javax.swing.text.html.Option;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

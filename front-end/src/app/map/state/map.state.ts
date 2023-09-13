@@ -1,5 +1,5 @@
 export interface MapState {
-  selectionActive: boolean | null;
+  selectionActive: boolean;
   spatialQuery: string | null;
-  numSelectedRegions: number | null;
+  numSelectedRegions: number;
 }

@@ -4,31 +4,22 @@ import com.google.common.collect.ImmutableTable;
 import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.database.dto.SessionDto;
-import de.wigeogis.pmedian.database.entity.Allocation;
-import de.wigeogis.pmedian.database.entity.Session;
-import de.wigeogis.pmedian.database.service.AllocationService;
 import de.wigeogis.pmedian.optimizer.evaluator.CoverageEvaluator;
 import de.wigeogis.pmedian.optimizer.evaluator.TravelCostEvaluator;
 import de.wigeogis.pmedian.optimizer.factory.AllocationOperationFactory;
-import de.wigeogis.pmedian.optimizer.factory.LocationOperationFactory;
 import de.wigeogis.pmedian.optimizer.factory.AllocationPopulationFactory;
+import de.wigeogis.pmedian.optimizer.factory.LocationOperationFactory;
 import de.wigeogis.pmedian.optimizer.factory.LocationPopulationFactory;
 import de.wigeogis.pmedian.optimizer.logger.EvolutionLogger;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
-import de.wigeogis.pmedian.optimizer.util.FileUtils;
-
 import de.wigeogis.pmedian.websocket.NotificationService;
-import java.security.SecureRandom;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
-import org.nd4j.common.primitives.Pair;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.uncommons.maths.number.AdjustableNumberGenerator;
 import org.uncommons.maths.random.Probability;
@@ -39,10 +30,7 @@ import org.uncommons.watchmaker.framework.GenerationalEvolutionEngine;
 import org.uncommons.watchmaker.framework.SelectionStrategy;
 import org.uncommons.watchmaker.framework.selection.TournamentSelection;
 import org.uncommons.watchmaker.framework.termination.ElapsedTime;
-import org.uncommons.watchmaker.framework.termination.GenerationCount;
 import org.uncommons.watchmaker.framework.termination.Stagnation;
-
-import java.util.*;
 import org.uncommons.watchmaker.framework.termination.TargetFitness;
 import org.uncommons.watchmaker.framework.termination.UserAbort;
 
@@ -64,13 +52,11 @@ public class OptimizationEngine {
 
   public List<AllocationDto> evolve(
       SessionDto session,
-      List<RegionDto> regions,
+      List<AllocationDto> allocationDtos,
       ImmutableTable<String, String, Double> distanceMatrix) {
 
-//    List<RegionDto> regions =
-//        allocationDtos.stream()
-//            .map(AllocationDto::toRegionDto)
-//            .collect(Collectors.toList());
+    List<RegionDto> regions =
+        allocationDtos.stream().map(AllocationDto::toRegionDto).collect(Collectors.toList());
 
     Random rng = new XORShiftRNG();
 
@@ -180,36 +166,37 @@ public class OptimizationEngine {
     List<RegionDto> facilitiesCodes =
         resultAllocation.stream().map(BasicGenome::getRegionDto).toList();
 
-        Map<RegionDto, RegionDto> coveredDemands =
-            FacilityCandidateUtil.findNearestFacilities(regions, facilitiesCodes, distanceMatrix);
-        log.info(
-            resultAllocation.size()
-                + " demands points have been allocated by the "
-                + facilitiesCodes.size()
-                + " facilities ...");
+    //        Map<RegionDto, RegionDto> coveredDemands =
+    //            FacilityCandidateUtil.findNearestFacilities(regions, facilitiesCodes,
+    // distanceMatrix);
+    //        log.info(
+    //            resultAllocation.size()
+    //                + " demands points have been allocated by the "
+    //                + facilitiesCodes.size()
+    //                + " facilities ...");
+    //
+    //        List<AllocationDto> allocations =
+    //            coveredDemands.keySet().stream()
+    //                .map(
+    //                    demandDto ->
+    //                        new AllocationDto()
+    //                            .setSessionId(session.getId())
+    //                            .setRegionId(demandDto.getId())
+    //                            .setFacilityRegionId(coveredDemands.get(demandDto).getId())
+    //                            .setTravelCost(distanceMatrix.get(demandDto.getId(),
+    //     coveredDemands.get(demandDto).getId())))
+    //                .toList();
 
-        List<AllocationDto> allocations =
-            coveredDemands.keySet().stream()
-                .map(
-                    demandDto ->
-                        new AllocationDto()
-                            .setSessionId(session.getId())
-                            .setRegionId(demandDto.getId())
-                            .setFacilityRegionId(coveredDemands.get(demandDto).getId())
-                            .setTravelCost(distanceMatrix.get(demandDto.getId(),
-     coveredDemands.get(demandDto).getId())))
-                .toList();
-
-//    List<AllocationDto> optimizedAllocations =
-//        FacilityCandidateUtil.findNearestFacilitiesForDemands(
-//            allocationDtos, facilitiesCodes, distanceMatrix);
+    List<AllocationDto> optimizedAllocations =
+        FacilityCandidateUtil.findNearestFacilitiesForDemands(
+            allocationDtos, facilitiesCodes, distanceMatrix);
 
     log.info("Allocated demands are saved into the database ...");
 
     log.info("End of processing ...");
     log.info("Exe. time: " + (end - start) / 1000);
 
-    return allocations;
+    return optimizedAllocations;
   }
 
   public void abortLocationEngine(UUID sessionId) {

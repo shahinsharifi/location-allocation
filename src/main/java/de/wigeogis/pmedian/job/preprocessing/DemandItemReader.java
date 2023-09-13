@@ -11,7 +11,6 @@ import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-
 @Component
 @AllArgsConstructor
 public class DemandItemReader {

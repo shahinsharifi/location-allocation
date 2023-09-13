@@ -1,8 +1,6 @@
 package de.wigeogis.pmedian.database.service;
 
-import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.SessionDto;
-import de.wigeogis.pmedian.database.entity.Allocation;
 import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.database.repository.SessionRepository;
 import java.util.List;

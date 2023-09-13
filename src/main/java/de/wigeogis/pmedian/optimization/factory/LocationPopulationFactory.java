@@ -1,6 +1,5 @@
 package de.wigeogis.pmedian.optimization.factory;
 
-
 import de.wigeogis.pmedian.optimization.model.BasicGenome;
 import de.wigeogis.pmedian.optimization.utils.LocationUtils;
 import java.util.ArrayList;
@@ -24,7 +23,8 @@ public class LocationPopulationFactory<T> extends AbstractCandidateFactory<List<
     List<T> candidate = new ArrayList<>();
 
     List<String> candidateSeed =
-        LocationUtils.findFacilityCandidates(numberOfFacilities, maxTravelTime, regions, rng, costMatrix);
+        LocationUtils.findFacilityCandidates(
+            numberOfFacilities, maxTravelTime, regions, rng, costMatrix);
 
     for (String facility : candidateSeed) {
       candidate.add((T) new BasicGenome(facility));

@@ -2,7 +2,9 @@ package de.wigeogis.pmedian.optimization.operation.allocation;
 
 import de.wigeogis.pmedian.optimization.model.BasicGenome;
 import de.wigeogis.pmedian.optimization.utils.AllocationUtils;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -11,16 +13,13 @@ import org.uncommons.maths.number.NumberGenerator;
 import org.uncommons.maths.random.Probability;
 import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 
-import java.util.List;
-import java.util.Random;
-
 @Log4j2
 @AllArgsConstructor
 public class AllocationMutation implements EvolutionaryOperator<BasicGenome> {
 
-  private Double mutationRate;
   private final List<String> demands;
   private final ConcurrentHashMap<String, ConcurrentHashMap<String, Double>> costMatrix;
+  private Double mutationRate;
 
   @Override
   public List<BasicGenome> apply(List<BasicGenome> chromosome, Random random) {

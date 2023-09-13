@@ -3,13 +3,12 @@ package de.wigeogis.pmedian.optimization.evaluator;
 
 import de.wigeogis.pmedian.optimization.model.BasicGenome;
 import de.wigeogis.pmedian.optimization.utils.LocationUtils;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
-
-import java.util.List;
 
 @Log4j2
 public class TravelCostEvaluator implements FitnessEvaluator<List<BasicGenome>> {

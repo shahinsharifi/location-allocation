@@ -2,14 +2,12 @@ package de.wigeogis.pmedian.optimizer.factory;
 
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
-import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
-import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.uncommons.watchmaker.framework.factories.AbstractCandidateFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.uncommons.watchmaker.framework.factories.AbstractCandidateFactory;
 
 @Log4j2
 @AllArgsConstructor

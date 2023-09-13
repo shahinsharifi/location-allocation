@@ -1,6 +1,5 @@
 package de.wigeogis.pmedian.optimization.model;
 
-import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

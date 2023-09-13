@@ -1,5 +1,4 @@
 export interface ResultState {
-  error: string | undefined;
-  loaded: boolean;
-  data: any;
+  logs: Array<string> | undefined;
+  progress: Array<Object> | undefined;
 }

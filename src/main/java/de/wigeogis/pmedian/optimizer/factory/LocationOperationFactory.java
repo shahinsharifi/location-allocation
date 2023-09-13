@@ -23,8 +23,8 @@ public class LocationOperationFactory {
 
   private final UUID sessionId;
 
-  public EvolutionaryOperator<List<BasicGenome>> createEvolutionPipeline(List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix) {
-
+  public EvolutionaryOperator<List<BasicGenome>> createEvolutionPipeline(
+      List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix) {
 
     List<EvolutionaryOperator<List<BasicGenome>>> operators = new LinkedList<>();
 
@@ -33,9 +33,7 @@ public class LocationOperationFactory {
         new AllocationCrossOver<>(
             new ConstantGenerator<>(1), new AdjustableNumberGenerator<>(new Probability(0.9))));
 
-    operators.add(
-        new ListOperator<>(
-            new CoverageMutation(sessionId,demands,dMatrix)));
+    operators.add(new ListOperator<>(new CoverageMutation(sessionId, demands, dMatrix)));
 
     return new EvolutionPipeline<>(operators);
   }

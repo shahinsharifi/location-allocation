@@ -29,38 +29,32 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     String[] allowedOrigins =
         new String[] {
-            "*://localhost:*",
-            "*://127.0.0.1:*",
-            "*://10.1.2.*:*",
-            "*://192.168.*.*:*",
-            "https://social-data.wigeogis.com/"
+          "*://localhost:*",
+          "*://127.0.0.1:*",
+          "*://10.1.2.*:*",
+          "*://192.168.*.*:*",
+          "https://social-data.wigeogis.com/"
         };
 
-    registry
-        .addEndpoint("/ws")
-        .setAllowedOriginPatterns(allowedOrigins);
+    registry.addEndpoint("/ws").setAllowedOriginPatterns(allowedOrigins);
 
-    registry
-        .addEndpoint("/ws")
-        .setAllowedOriginPatterns(allowedOrigins)
-        .withSockJS();
+    registry.addEndpoint("/ws").setAllowedOriginPatterns(allowedOrigins).withSockJS();
   }
 
   @Override
   public void configureClientInboundChannel(ChannelRegistration registration) {
-    registration.interceptors(new ChannelInterceptor() {
-      @Override
-      public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-	      assert accessor != null;
-	      if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-          MessageHeaders headers = message.getHeaders();
-        }
-        return message;
-      }
-    });
+    registration.interceptors(
+        new ChannelInterceptor() {
+          @Override
+          public Message<?> preSend(Message<?> message, MessageChannel channel) {
+            StompHeaderAccessor accessor =
+                MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+            assert accessor != null;
+            if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+              MessageHeaders headers = message.getHeaders();
+            }
+            return message;
+          }
+        });
   }
-
-
-
 }

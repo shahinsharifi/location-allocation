@@ -5,7 +5,6 @@ import jakarta.persistence.Query;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,10 +12,9 @@ import org.springframework.stereotype.Service;
 public class AllocationTileService {
 
 
-  private EntityManager entityManager;
-
   private static final double TILE_SIZE = 256.0;
   private static final double HALF_CIRCUMFERENCE = 20037508.34;
+  private EntityManager entityManager;
 
   private void setTileBoundsToQuery(Query query, int z, int x, int y) {
     double resolution = (2 * HALF_CIRCUMFERENCE) / (TILE_SIZE * Math.pow(2, z));

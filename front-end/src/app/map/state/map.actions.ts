@@ -1,6 +1,5 @@
 import {createActionGroup, emptyProps, props} from "@ngrx/store";
 
-
 export const mapActions = createActionGroup({
   source: 'Map',
   events: {

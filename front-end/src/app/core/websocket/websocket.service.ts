@@ -9,7 +9,9 @@ import { Session } from "../../session/session";
 import {Message, MessageSubject} from "./message";
 import { distinctUntilChanged } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
-import { fromSession } from "../../session/state/session.selectors";
+import {sessionActions} from "../../session/state/session.actions";
+import {fromSessionSelectors} from "../../session/state/session.selectors";
+import {resultActions} from "../../result/state/result.actions";
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +27,7 @@ export class WebsocketService extends RxStomp {
     this.configure(websocketConfig);
     this.connectionState$.pipe(distinctUntilChanged())
     .subscribe(this.connectionStateChange.bind(this));
-    this.sessionState$ = this.store.select(state => fromSession.selectActiveSession(state));
+    this.sessionState$ = this.store.select(state => fromSessionSelectors.selectActiveSession(state));
     this.sessionState$.subscribe(this.sessionStateChange.bind(this));
     this.activate();
   }
@@ -59,10 +61,10 @@ export class WebsocketService extends RxStomp {
   handleMessage(message: Message) {
     switch (message.subject) {
       case MessageSubject.SESSION_STATUS:
-        console.log('SESSION_STATUS', message.data);
+        this.store.dispatch(sessionActions.updateSession({activeSession: message.data as Session}));
         break;
       case MessageSubject.SESSION_LOG:
-        console.log('SESSION_LOG', message.data);
+        this.store.dispatch(resultActions.updateLogs({log: message.message}));
         break;
       case MessageSubject.SESSION_PROGRESS_DATA:
         console.log('SESSION_PROGRESS_DATA', message.data);

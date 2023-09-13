@@ -1,9 +1,6 @@
 package de.wigeogis.pmedian.job.preprocessing;
 
-import de.wigeogis.pmedian.database.entity.Allocation;
 import de.wigeogis.pmedian.database.entity.Region;
-import de.wigeogis.pmedian.database.entity.Session;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.batch.item.ItemProcessor;
 

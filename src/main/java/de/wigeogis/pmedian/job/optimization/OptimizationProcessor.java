@@ -1,7 +1,6 @@
 package de.wigeogis.pmedian.job.optimization;
 
 import de.wigeogis.pmedian.database.dto.AllocationDto;
-import de.wigeogis.pmedian.database.dto.SessionDto;
 import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.database.service.TravelCostService;
 import de.wigeogis.pmedian.optimization.OptimizationEngine;

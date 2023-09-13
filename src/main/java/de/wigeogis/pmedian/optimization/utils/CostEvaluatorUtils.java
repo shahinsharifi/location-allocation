@@ -1,18 +1,19 @@
 package de.wigeogis.pmedian.optimization.utils;
 
 import com.google.common.collect.ImmutableTable;
-import java.util.concurrent.ConcurrentHashMap;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-public class CostEvaluatorUtils {
-  private List<String> regions;
-  private ConcurrentHashMap<String, ConcurrentHashMap<String, Double>> costSparseMatrixMap;
-  private Map<List<String>, Double> memoizedCosts;
+import java.util.concurrent.ConcurrentHashMap;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
-  private INDArray matrixR;  // Matrix of travel costs
+public class CostEvaluatorUtils {
+  private final List<String> regions;
+  private final ConcurrentHashMap<String, ConcurrentHashMap<String, Double>> costSparseMatrixMap;
+  private final Map<List<String>, Double> memoizedCosts;
+
+  private final INDArray matrixR;  // Matrix of travel costs
 
   public CostEvaluatorUtils(List<String> regions, ImmutableTable<String, String, Double> costSparseMatrix) {
     this.regions = regions;

@@ -6,7 +6,6 @@ import de.wigeogis.pmedian.optimization.operation.allocation.AllocationCrossOver
 import de.wigeogis.pmedian.optimization.operation.location.CoverageMutation;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -36,9 +35,9 @@ public class LocationOperationFactory {
 
     // Installing mutation operator
     CoverageMutation coverageMutation = new CoverageMutation(
-        mutationRate,
         demands,
-        costMatrix);
+        costMatrix,
+        mutationRate);
 
     operators.add(
         new ListOperator<>(

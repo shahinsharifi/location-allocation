@@ -80,7 +80,8 @@ public class VectorTileController {
     return layer;
   }
 
-  private VectorTileLayerDto createAllocationLayer(UUID sessionId, List<String> facilities, BoundingBoxDto layerBounds) {
+  private VectorTileLayerDto createAllocationLayer(
+      UUID sessionId, List<String> facilities, BoundingBoxDto layerBounds) {
     VectorTileLayerDto layer = new VectorTileLayerDto();
 
     Map<String, String> source =
@@ -114,7 +115,8 @@ public class VectorTileController {
     return layer;
   }
 
-  private VectorTileLayerDto createLocationLayer(UUID sessionId, List<String> facilities, BoundingBoxDto layerBounds) {
+  private VectorTileLayerDto createLocationLayer(
+      UUID sessionId, List<String> facilities, BoundingBoxDto layerBounds) {
     VectorTileLayerDto layer = new VectorTileLayerDto();
 
     Map<String, String> source =
@@ -142,7 +144,6 @@ public class VectorTileController {
 
     return layer;
   }
-
 
   private List<String> fetchFacilities(UUID sessionId) {
     return allocationService.getAllocationsBySessionId(sessionId).stream()

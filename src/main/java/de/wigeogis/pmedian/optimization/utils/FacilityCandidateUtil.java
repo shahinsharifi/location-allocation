@@ -3,7 +3,6 @@ package de.wigeogis.pmedian.optimization.utils;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import de.wigeogis.pmedian.database.dto.RegionDto;
-import de.wigeogis.pmedian.database.dto.RegionDto;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;

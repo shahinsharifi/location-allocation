@@ -1,24 +1,19 @@
 package de.wigeogis.pmedian.job;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.wigeogis.pmedian.database.entity.Region;
-import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.database.repository.RegionPageableRepository;
 import de.wigeogis.pmedian.database.service.AllocationService;
-import de.wigeogis.pmedian.database.service.RegionService;
 import de.wigeogis.pmedian.job.preprocessing.DemandItemProcessor;
 import de.wigeogis.pmedian.job.preprocessing.DemandItemReader;
 import de.wigeogis.pmedian.job.preprocessing.DemandItemWriter;
 import de.wigeogis.pmedian.job.preprocessing.PreprocessingListener;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.UUID;
-import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
@@ -30,17 +25,10 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
-
 
 @Log4j2
 @Component

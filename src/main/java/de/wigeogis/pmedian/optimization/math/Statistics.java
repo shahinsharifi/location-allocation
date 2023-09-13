@@ -1,12 +1,11 @@
 package de.wigeogis.pmedian.optimization.math;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
 import java.util.List;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class Statistics {
 
-    private DescriptiveStatistics ds = new DescriptiveStatistics();
+    private final DescriptiveStatistics ds = new DescriptiveStatistics();
 
     public <T> Statistics(List<T> input) {
         for (T item : input) {

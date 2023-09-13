@@ -14,6 +14,4 @@ public class MutationRateEvent extends ApplicationEvent {
     this.mutationRate = mutationRate;
     this.sessionId = sessionId;
   }
-
 }
-

@@ -17,22 +17,24 @@ import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 @AllArgsConstructor
 public class CoverageMutation implements EvolutionaryOperator<BasicGenome> {
 
-  private Double mutationRate;
   private final List<String> demands;
   private final ConcurrentHashMap<String, ConcurrentHashMap<String, Double>> costMatrix;
-
+  private Double mutationRate;
 
   @Override
   public List<BasicGenome> apply(List<BasicGenome> chromosome, Random random) {
-    NumberGenerator<Probability> mutationProbability = new AdjustableNumberGenerator<>(new Probability(mutationRate));
+    NumberGenerator<Probability> mutationProbability =
+        new AdjustableNumberGenerator<>(new Probability(mutationRate));
     List<String> facilities = chromosome.stream().map(BasicGenome::getRegionId).toList();
     for (BasicGenome genome : chromosome) {
       if (mutationProbability.nextValue().nextEvent(random)) {
-        double uncoveredBefore = LocationUtils.calculateUncoveredRegions(facilities, demands, costMatrix);
+        double uncoveredBefore =
+            LocationUtils.calculateUncoveredRegions(facilities, demands, costMatrix);
         String beforeFid = genome.getRegionId();
         String afterFid = mutateGenome(chromosome, genome, random).getRegionId();
         genome.setRegionId(afterFid);
-        double uncoveredAfter = LocationUtils.calculateUncoveredRegions(facilities, demands, costMatrix);
+        double uncoveredAfter =
+            LocationUtils.calculateUncoveredRegions(facilities, demands, costMatrix);
         if (uncoveredAfter > uncoveredBefore) genome.setRegionId(beforeFid);
       }
     }
@@ -41,35 +43,37 @@ public class CoverageMutation implements EvolutionaryOperator<BasicGenome> {
 
   private BasicGenome mutateGenome(List<BasicGenome> chromosome, BasicGenome genome, Random rng) {
 
-    List<String> reachableRegionCodes = costMatrix.get(genome.getRegionId()).keySet().stream().toList();
-    //String nearestCandidate = reachableRegion.entrySet().stream().min(Map.Entry.comparingByValue()).get().getKey();
-    List<String> top10NearestCandidate = costMatrix.get(genome.getRegionId())
-        .entrySet()
-        .stream()
-        .sorted(Map.Entry.comparingByValue())
-        .limit(10)
-        .map(Map.Entry::getKey)
-        .toList();
+    List<String> reachableRegionCodes =
+        costMatrix.get(genome.getRegionId()).keySet().stream().toList();
+    // String nearestCandidate =
+    // reachableRegion.entrySet().stream().min(Map.Entry.comparingByValue()).get().getKey();
+    List<String> top10NearestCandidate =
+        costMatrix.get(genome.getRegionId()).entrySet().stream()
+            .sorted(Map.Entry.comparingByValue())
+            .limit(10)
+            .map(Map.Entry::getKey)
+            .toList();
     int randomNumber = rng.nextInt(top10NearestCandidate.size());
     String candidate = top10NearestCandidate.get(randomNumber);
 
-    List<String> newReachableRegionCodes = costMatrix.get(genome.getRegionId()).keySet().stream().toList();
+    List<String> newReachableRegionCodes =
+        costMatrix.get(genome.getRegionId()).keySet().stream().toList();
 
     BasicGenome testGenome = new BasicGenome(candidate);
-    if (!chromosome.contains(testGenome) && newReachableRegionCodes.size() >= reachableRegionCodes.size()) genome.setRegionId(candidate);
+    if (!chromosome.contains(testGenome)
+        && newReachableRegionCodes.size() >= reachableRegionCodes.size())
+      genome.setRegionId(candidate);
 
     return genome;
   }
 
-
-
-//  @EventListener
-//  public void handleMutationRateEvent(MutationRateEvent event) {
-//    // Handle the mutation rate update
-//    double newMutationRate = event.getMutationRate();
-//    if(newMutationRate != this.mutationRate) {
-//      this.mutationRate = newMutationRate;
-//      this.setMutationProbability(newMutationRate);
-//    }
-//  }
+  //  @EventListener
+  //  public void handleMutationRateEvent(MutationRateEvent event) {
+  //    // Handle the mutation rate update
+  //    double newMutationRate = event.getMutationRate();
+  //    if(newMutationRate != this.mutationRate) {
+  //      this.mutationRate = newMutationRate;
+  //      this.setMutationProbability(newMutationRate);
+  //    }
+  //  }
 }

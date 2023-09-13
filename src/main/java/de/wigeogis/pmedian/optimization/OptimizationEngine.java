@@ -2,38 +2,30 @@ package de.wigeogis.pmedian.optimization;
 
 
 import de.wigeogis.pmedian.database.dto.AllocationDto;
-import de.wigeogis.pmedian.database.dto.SessionDto;
 import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.optimization.evaluator.CoverageEvaluator;
 import de.wigeogis.pmedian.optimization.evaluator.TravelCostEvaluator;
 import de.wigeogis.pmedian.optimization.factory.AllocationOperationFactory;
-import de.wigeogis.pmedian.optimization.factory.LocationOperationFactory;
 import de.wigeogis.pmedian.optimization.factory.AllocationPopulationFactory;
+import de.wigeogis.pmedian.optimization.factory.LocationOperationFactory;
 import de.wigeogis.pmedian.optimization.factory.LocationPopulationFactory;
 import de.wigeogis.pmedian.optimization.logger.EvolutionObserver;
 import de.wigeogis.pmedian.optimization.model.BasicGenome;
-
-
 import de.wigeogis.pmedian.optimization.utils.LocationUtils;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.nd4j.common.primitives.Pair;
-import org.springframework.stereotype.Component;
-
 import org.uncommons.maths.number.AdjustableNumberGenerator;
 import org.uncommons.maths.random.MersenneTwisterRNG;
 import org.uncommons.maths.random.Probability;
-
 import org.uncommons.watchmaker.framework.CandidateFactory;
 import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 import org.uncommons.watchmaker.framework.GenerationalEvolutionEngine;
 import org.uncommons.watchmaker.framework.SelectionStrategy;
 import org.uncommons.watchmaker.framework.selection.TournamentSelection;
 import org.uncommons.watchmaker.framework.termination.Stagnation;
-
-import java.util.*;
 import org.uncommons.watchmaker.framework.termination.TargetFitness;
 import org.uncommons.watchmaker.framework.termination.UserAbort;
 

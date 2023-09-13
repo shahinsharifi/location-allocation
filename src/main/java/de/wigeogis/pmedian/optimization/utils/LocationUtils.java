@@ -1,6 +1,5 @@
 package de.wigeogis.pmedian.optimization.utils;
 
-import de.wigeogis.pmedian.optimization.model.BasicGenome;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;

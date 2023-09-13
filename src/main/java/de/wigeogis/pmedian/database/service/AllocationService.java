@@ -1,24 +1,16 @@
 package de.wigeogis.pmedian.database.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.VectorTileLayerDto.BoundingBoxDto;
 import de.wigeogis.pmedian.database.entity.Allocation;
-import de.wigeogis.pmedian.database.entity.Region;
-import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.database.repository.AllocationRepository;
 import jakarta.persistence.Tuple;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
-import org.springframework.batch.item.Chunk;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +37,9 @@ public class AllocationService {
 
   @Async
   public CompletableFuture<Integer> insertAllAsync(List<AllocationDto> allocations) {
-    List<Allocation> savedAllocations = repository.saveAll(allocations.stream().map(this::dtoToEntity).collect(Collectors.toList()));
+    List<Allocation> savedAllocations =
+        repository.saveAll(
+            allocations.stream().map(this::dtoToEntity).collect(Collectors.toList()));
     return CompletableFuture.completedFuture(savedAllocations.size());
   }
 
@@ -68,12 +62,11 @@ public class AllocationService {
         result.get("maxY", Double.class));
   }
 
-
   public List<AllocationDto> insertAndFetchRegionsByWKTPolygon(UUID sessionId, String wktPolygon) {
-    List<Allocation> allocations = repository.insertAndFetchRegionsByWKTPolygon(sessionId, wktPolygon);
-    return allocations.stream().map(m -> new AllocationDto()).collect(Collectors.toList());
+    List<Allocation> allocations =
+        repository.insertAndFetchRegionsByWKTPolygon(sessionId, wktPolygon);
+    return allocations.stream().map(this::entityToDto).collect(Collectors.toList());
   }
-
 
   public AllocationDto entityToDto(Allocation allocation) {
     return new ModelMapper().map(allocation, AllocationDto.class);
@@ -82,5 +75,4 @@ public class AllocationService {
   public Allocation dtoToEntity(AllocationDto allocationDto) {
     return new ModelMapper().map(allocationDto, Allocation.class);
   }
-
 }

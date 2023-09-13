@@ -1,8 +1,6 @@
 package de.wigeogis.pmedian.job.optimization;
 
 import de.wigeogis.pmedian.database.dto.AllocationDto;
-import de.wigeogis.pmedian.database.dto.SessionDto;
-import de.wigeogis.pmedian.database.entity.Region;
 import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.database.service.AllocationService;
 import de.wigeogis.pmedian.database.service.TravelCostService;
@@ -14,7 +12,6 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -40,7 +37,7 @@ public class OptimizationStepBuilder {
 
 
 	private ItemReader<List<String>> createReader(Session session) {
-		return new DemandReader(session, allocationService);
+		return new DemandReader(allocationService, session);
 	}
 
 	private ItemProcessor<List<String>, List<AllocationDto>> createProcessor(Session session) {

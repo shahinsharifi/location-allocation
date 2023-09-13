@@ -5,21 +5,13 @@ import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.logger.MutationRateEvent;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.uncommons.maths.number.AdjustableNumberGenerator;
 import org.uncommons.maths.number.NumberGenerator;
 import org.uncommons.maths.random.Probability;
@@ -29,12 +21,12 @@ import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 @RequiredArgsConstructor
 public class CoverageMutation implements EvolutionaryOperator<BasicGenome> {
 
-  private Double mutationRate = 0.001;
-  private NumberGenerator<Probability> mutationProbability =
-      new AdjustableNumberGenerator<>(new Probability(mutationRate));
   private final UUID sessionId;
   private final List<RegionDto> demands;
   private final ImmutableTable<String, String, Double> distanceMatrix;
+  private Double mutationRate = 0.001;
+  private NumberGenerator<Probability> mutationProbability =
+      new AdjustableNumberGenerator<>(new Probability(mutationRate));
 
   @Override
   public List<BasicGenome> apply(List<BasicGenome> chromosome, Random random) {

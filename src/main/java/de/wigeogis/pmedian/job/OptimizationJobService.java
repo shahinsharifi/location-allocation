@@ -1,33 +1,15 @@
 package de.wigeogis.pmedian.job;
 
-import com.google.common.collect.ImmutableTable;
-import de.wigeogis.pmedian.database.dto.AllocationDto;
-import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.database.dto.SessionDto;
-import de.wigeogis.pmedian.database.entity.Session;
-import de.wigeogis.pmedian.database.entity.SessionStatus;
 import de.wigeogis.pmedian.database.service.AllocationService;
 import de.wigeogis.pmedian.database.service.RegionService;
-import de.wigeogis.pmedian.database.service.SessionService;
 import de.wigeogis.pmedian.database.service.TravelCostService;
 import de.wigeogis.pmedian.optimizer.OptimizationEngine;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Properties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.configuration.support.ReferenceJobFactory;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Log4j2

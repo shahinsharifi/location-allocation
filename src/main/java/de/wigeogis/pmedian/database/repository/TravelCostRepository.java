@@ -2,7 +2,6 @@ package de.wigeogis.pmedian.database.repository;
 
 import de.wigeogis.pmedian.database.entity.TravelCost;
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.transaction.annotation.Transactional;

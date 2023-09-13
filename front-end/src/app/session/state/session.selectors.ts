@@ -10,7 +10,7 @@ export const selectActiveSession = createSelector(
 );
 
 
-export const fromSession = {
+export const fromSessionSelectors = {
   selectSessionState,
   selectActiveSession
 };

@@ -1,13 +1,12 @@
 package de.wigeogis.pmedian.optimization.factory;
 
 import de.wigeogis.pmedian.optimization.model.BasicGenome;
-import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.uncommons.watchmaker.framework.factories.AbstractCandidateFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.uncommons.watchmaker.framework.factories.AbstractCandidateFactory;
 
 @Log4j2
 @AllArgsConstructor

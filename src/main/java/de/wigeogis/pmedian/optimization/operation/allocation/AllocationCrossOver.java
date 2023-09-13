@@ -1,10 +1,9 @@
 package de.wigeogis.pmedian.optimization.operation.allocation;
 
+import java.util.*;
 import org.uncommons.maths.number.NumberGenerator;
 import org.uncommons.maths.random.Probability;
 import org.uncommons.watchmaker.framework.operators.AbstractCrossover;
-
-import java.util.*;
 
 public class AllocationCrossOver<T> extends AbstractCrossover<List<T>> {
 

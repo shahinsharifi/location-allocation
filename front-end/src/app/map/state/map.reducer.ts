@@ -1,31 +1,27 @@
-import {createFeature, createReducer, on} from '@ngrx/store';
-import {mapActions} from './map.actions';
-import {MapState} from "./map.state";
+import { createReducer, on } from '@ngrx/store';
+import { MapState } from "./map.state";
+import {mapActions} from "./map.actions";
+
 export const initialState: MapState = {
   selectionActive: false,
   spatialQuery: null,
   numSelectedRegions: 0
 }
 
-export const mapFeature = createFeature({
-  name: 'map',
-  reducer: createReducer<MapState>(
-    initialState,
-    on(mapActions.regionsSelected, (state, {numSelectedRegions, spatialQuery}) => ({
-      ...state,
-      spatialQuery: spatialQuery,
-      numSelectedRegions: numSelectedRegions
-    })),
-    on(mapActions.activatePolygonDrawing, state => ({
-      ...state,
-      selectionActive: true
-    })),
-    on(mapActions.clearSelection, state => ({
-      ...state,
-      spatialQuery: null,
-      numSelectedRegions: 0,
-      selectionActive: false
-    }))
-  ),
-});
-
+export const mapReducer = createReducer<MapState>(
+  initialState,
+  on(mapActions.regionsSelected, (state, {numSelectedRegions, spatialQuery}) => ({
+    ...state,
+    spatialQuery,
+    numSelectedRegions
+  })),
+  on(mapActions.activatePolygonDrawing, state => ({
+    ...state,
+    selectionActive: true
+  })),
+  on(mapActions.deactivatePolygonDrawing, state => ({
+    ...state,
+    selectionActive: false
+  })),
+  on(mapActions.clearSelection, () => initialState)
+);

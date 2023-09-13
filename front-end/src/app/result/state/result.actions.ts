@@ -1,6 +1,10 @@
-import { createAction, props } from '@ngrx/store';
+import {createActionGroup, props} from '@ngrx/store';
 
+export const resultActions = createActionGroup({
+  source: 'Result',
+  events: {
+    'Update Logs': props<{ log: string }>(),
+    'Update Progress': props<{ progress: Array<Object> }>()
+  },
+});
 
-
-// Result actions
-export const updateProgress = createAction('[Result] Update Progress', props<{ progress: number }>());

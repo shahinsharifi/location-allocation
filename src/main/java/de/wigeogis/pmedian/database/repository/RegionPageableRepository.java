@@ -20,5 +20,4 @@ public interface RegionPageableRepository extends PagingAndSortingRepository<Reg
       countQuery = "select count(*) from region where id ~ ?1",
       nativeQuery = true)
   Page<Region> getRegionsByRegionCodePattern(String regExp, Pageable pageable);
-
 }

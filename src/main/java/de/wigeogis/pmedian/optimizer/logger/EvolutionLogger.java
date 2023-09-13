@@ -1,25 +1,18 @@
 package de.wigeogis.pmedian.optimizer.logger;
 
-import de.wigeogis.pmedian.database.dto.SessionDto;
-import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
+import de.wigeogis.pmedian.websocket.MessageSubject;
 import de.wigeogis.pmedian.websocket.NotificationService;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Component;
-import org.uncommons.watchmaker.framework.PopulationData;
-import org.uncommons.watchmaker.framework.islands.IslandEvolutionObserver;
-
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.context.ApplicationEventPublisher;
+import org.uncommons.watchmaker.framework.PopulationData;
+import org.uncommons.watchmaker.framework.islands.IslandEvolutionObserver;
 
 @Log4j2
 public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionObserver<T> {
@@ -31,25 +24,23 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
   private final int STAGNATION_THRESHOLD =
       100; // Number of generations with minimal decrease before adapting mutation rate
   private final double MIN_IMPROVEMENT = 1.0; // Minimal decrease to reset stagnation counter
-
+  private final UUID sessionId;
+  private final ApplicationEventPublisher publisher;
+  private final NotificationService notificationService;
   private double lastBestFitness =
       Double.POSITIVE_INFINITY; // For minimization, start with a very high value
   private int stagnationCounter = 0;
   private double currentMutationRate = INIT_MUTATION_RATE;
+  private final Map<Integer, Double> progress = new HashMap<>();
 
-  private Map<Integer, Double> progress = new HashMap<>();
-
-
-  private final UUID sessionId;
-  private final ApplicationEventPublisher publisher;
-  private final NotificationService notificationService;
-
-  public EvolutionLogger(UUID sessionId, ApplicationEventPublisher publisher, NotificationService notificationService) {
+  public EvolutionLogger(
+      UUID sessionId,
+      ApplicationEventPublisher publisher,
+      NotificationService notificationService) {
     this.sessionId = sessionId;
     this.publisher = publisher;
     this.notificationService = notificationService;
   }
-
 
   public void populationUpdate(PopulationData<? extends T> data) {
 
@@ -66,7 +57,7 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
       stagnationCounter = 0;
     } else if (stagnationCounter >= STAGNATION_THRESHOLD) {
       currentMutationRate += 0.001; // Increase mutation rate to escape potential local optima
-    }else{
+    } else {
       currentMutationRate -= 0.001;
     }
 
@@ -96,6 +87,7 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
     List<BasicGenome> bestCandidate = (List<BasicGenome>) data.getBestCandidate();
     int numberOfFacilities =
         bestCandidate.stream().collect(Collectors.groupingBy(BasicGenome::getRegionId)).size();
+
     String logMessage =
         ("Generation "
             + data.getGenerationNumber()
@@ -106,8 +98,11 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
             + numberOfFacilities
             + " facilities) -> "
             + data.getBestCandidateFitness());
+
     log.info(logMessage);
-    }
+    notificationService.publishLog(sessionId, MessageSubject.SESSION_LOG, logMessage);
+
+  }
 
   public Map<Integer, Double> getProgress() {
     return new TreeMap<>(progress);

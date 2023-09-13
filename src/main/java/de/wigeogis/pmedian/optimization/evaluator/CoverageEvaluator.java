@@ -1,6 +1,5 @@
 package de.wigeogis.pmedian.optimization.evaluator;
 
-
 import de.wigeogis.pmedian.optimization.model.BasicGenome;
 import de.wigeogis.pmedian.optimization.utils.LocationUtils;
 import java.util.List;
@@ -9,12 +8,12 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 public class CoverageEvaluator implements FitnessEvaluator<List<BasicGenome>> {
 
-
   private final List<String> demands;
   private final ConcurrentHashMap<String, ConcurrentHashMap<String, Double>> costMatrix;
 
   public CoverageEvaluator(
-      List<String> demands, ConcurrentHashMap<String, ConcurrentHashMap<String, Double>> costMatrix) {
+      List<String> demands,
+      ConcurrentHashMap<String, ConcurrentHashMap<String, Double>> costMatrix) {
     this.costMatrix = costMatrix;
     this.demands = demands;
   }
@@ -22,11 +21,10 @@ public class CoverageEvaluator implements FitnessEvaluator<List<BasicGenome>> {
   @Override
   public double getFitness(List<BasicGenome> chromosome, List<? extends List<BasicGenome>> list) {
     List<String> facilities = chromosome.stream().map(BasicGenome::getRegionId).toList();
-	  return LocationUtils.calculateUncoveredRegions(facilities, demands, costMatrix);
+    return LocationUtils.calculateUncoveredRegions(facilities, demands, costMatrix);
   }
 
-
-    @Override
+  @Override
   public boolean isNatural() {
     return false;
   }

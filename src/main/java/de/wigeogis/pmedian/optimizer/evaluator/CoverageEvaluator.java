@@ -2,8 +2,6 @@ package de.wigeogis.pmedian.optimizer.evaluator;
 
 import com.google.common.collect.ImmutableTable;
 import de.wigeogis.pmedian.database.dto.RegionDto;
-import de.wigeogis.pmedian.database.dto.RegionDto;
-import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import java.util.List;

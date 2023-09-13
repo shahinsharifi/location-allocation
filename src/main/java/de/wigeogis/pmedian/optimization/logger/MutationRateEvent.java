@@ -3,7 +3,7 @@ package de.wigeogis.pmedian.optimization.logger;
 import org.springframework.context.ApplicationEvent;
 
 public class MutationRateEvent extends ApplicationEvent {
-  private double mutationRate;
+  private final double mutationRate;
 
   public MutationRateEvent(Object source, double mutationRate) {
     super(source);
@@ -14,4 +14,3 @@ public class MutationRateEvent extends ApplicationEvent {
     return mutationRate;
   }
 }
-

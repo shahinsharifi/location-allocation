@@ -4,33 +4,17 @@ app:
   mapping:
     style: style-base.json
 
-resilience:
-  thread-pool:
-    core-size: 8
-    max-size: 10
-    queue-capacity: 20
-
-
 spring:
   batch:
     jdbc:
       initialize-schema: always
     job:
       enabled: true
-
   datasource:
     driverClassName: org.postgresql.Driver
     password: demo123
     url: jdbc:postgresql://localhost:5434/location_allocation
     username: postgres
-
-  devtools:
-    add-properties: false
-
-  docker:
-    compose:
-      enabled: false
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -41,9 +25,11 @@ spring:
         format_sql: true
     show-sql: false
 
-#levelDB configuration
-leveldb:
-  root: C:\\Data\\ATP\\neo4j\\dmatrix\\
+resilience:
+  thread-pool:
+    core-size: 8
+    max-size: 10
+    queue-capacity: 20
 
 logging:
   level:
@@ -52,4 +38,3 @@ logging:
       springframework: INFO
       hibernate:
         type: TRACE
-

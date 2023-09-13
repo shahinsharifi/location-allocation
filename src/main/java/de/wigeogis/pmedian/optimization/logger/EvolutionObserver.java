@@ -1,30 +1,26 @@
 package de.wigeogis.pmedian.optimization.logger;
 
 import de.wigeogis.pmedian.optimization.model.BasicGenome;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Component;
 import org.uncommons.watchmaker.framework.PopulationData;
 import org.uncommons.watchmaker.framework.islands.IslandEvolutionObserver;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
 
 @Log4j2
 public class EvolutionObserver<T extends BasicGenome> implements IslandEvolutionObserver<T> {
 
 
+  private final double INIT_MUTATION_RATE = 0.005;
+  private final Map<Integer, Double> progress = new HashMap<>();
   private int stagnationCounter = 0;
   private Double globalMutationRate;
-  private final double INIT_MUTATION_RATE = 0.005;
   private double currentMutationRate = INIT_MUTATION_RATE;
   private double lastBestFitness = Double.POSITIVE_INFINITY;
-  private final Map<Integer, Double> progress = new HashMap<>();
 
 
   public EvolutionObserver(Double globalMutationRate) {

@@ -10,21 +10,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class OptimizationListener implements ItemWriteListener<AllocationDto> {
 
+  @Override
+  public void beforeWrite(Chunk<? extends AllocationDto> items) {}
 
-	@Override
-	public void beforeWrite(Chunk<? extends AllocationDto> items) {
+  @Override
+  public void afterWrite(Chunk<? extends AllocationDto> items) {
+    log.info("afterWrite: " + items.size());
+  }
 
-	}
+  @Override
+  public void onWriteError(Exception exception, Chunk<? extends AllocationDto> items) {
 
-	@Override
-	public void afterWrite(Chunk<? extends AllocationDto> items) {
-		log.info("afterWrite: " + items.size());
-	}
-
-	@Override
-	public void onWriteError(Exception exception, Chunk<? extends AllocationDto> items) {
-
-		log.error("onWriteError: " + exception.getMessage());
-
-	}
+    log.error("onWriteError: " + exception.getMessage());
+  }
 }

@@ -1,6 +1,5 @@
 package de.wigeogis.pmedian.job;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.wigeogis.pmedian.database.dto.SessionDto;
 import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.database.entity.SessionStatus;
@@ -14,7 +13,6 @@ import org.quartz.Scheduler;
 import org.quartz.SimpleTrigger;
 import org.quartz.TriggerBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Log4j2
 @Service

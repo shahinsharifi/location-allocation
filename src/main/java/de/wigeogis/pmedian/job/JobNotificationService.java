@@ -11,29 +11,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class JobNotificationService {
 
-	private SimpMessagingTemplate template;
-	private final Map<String, Set<String>> userUUIDMap = new ConcurrentHashMap<>();
+  private final Map<String, Set<String>> userUUIDMap = new ConcurrentHashMap<>();
+  private SimpMessagingTemplate template;
 
-	public void sendLog(UUID uuid, String log) {
-		// Iterate over userUUIDMap and find which users are interested in this UUID
-		for (Map.Entry<String, Set<String>> entry : userUUIDMap.entrySet()) {
-			if (entry.getValue().contains(uuid)) {
-				String user = entry.getKey();
-				this.template.convertAndSendToUser(user, "/queue/logs", log);
-			}
-		}
-	}
+  public void sendLog(UUID uuid, String log) {
+    // Iterate over userUUIDMap and find which users are interested in this UUID
+    for (Map.Entry<String, Set<String>> entry : userUUIDMap.entrySet()) {
+      if (entry.getValue().contains(uuid)) {
+        String user = entry.getKey();
+        this.template.convertAndSendToUser(user, "/queue/logs", log);
+      }
+    }
+  }
 
-	// Methods to manage user's UUID interests
-	public void addUserUUID(String user, String uuid) {
-		userUUIDMap.computeIfAbsent(user, k -> new HashSet<>()).add(uuid);
-	}
+  // Methods to manage user's UUID interests
+  public void addUserUUID(String user, String uuid) {
+    userUUIDMap.computeIfAbsent(user, k -> new HashSet<>()).add(uuid);
+  }
 
-	public void removeUserUUID(String user, String uuid) {
-		Set<String> uuids = userUUIDMap.get(user);
-		if (uuids != null) {
-			uuids.remove(uuid);
-		}
-	}
-
+  public void removeUserUUID(String user, String uuid) {
+    Set<String> uuids = userUUIDMap.get(user);
+    if (uuids != null) {
+      uuids.remove(uuid);
+    }
+  }
 }

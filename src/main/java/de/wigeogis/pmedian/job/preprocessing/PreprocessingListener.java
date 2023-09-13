@@ -1,6 +1,5 @@
 package de.wigeogis.pmedian.job.preprocessing;
 
-import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.entity.Allocation;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.batch.core.ItemWriteListener;
