@@ -24,7 +24,7 @@ export class MapService {
   ) {
   }
 
-  initializeMap(map: Map, session: Session | null): void {
+  public initializeMap(map: Map, session: Session | null): void {
     this.map = map;
     this.map.addControl(new NavigationControl());
 
@@ -35,11 +35,11 @@ export class MapService {
       session.status === SessionStatus.COMPLETED ||
       session.status === SessionStatus.INTERRUPTED
     ) {
-      this.loadResultLayer(session.id);
+      this.loadResultLayer(session.id).then(() => console.log('Loaded result layer'));
     }
   }
 
-  initializeDrawing(): void {
+  private initializeDrawing(): void {
     if (this.map == null) return;
     this.draw = new MapboxDraw({
       displayControlsDefault: false,
@@ -55,30 +55,18 @@ export class MapService {
     this.map.on('draw.update', this.selectFeatures.bind(this));
   }
 
-  activateDrawing(): void {
+  public enableDrawing(): void {
     if (this.map == null || this.draw == null) return;
     this.map.getCanvasContainer().style.cursor = 'crosshair';
     this.draw.changeMode(MapboxDraw.constants.modes.DRAW_POLYGON);
   }
 
-  deActivateDrawing(): void {
+  public disableDrawing(): void {
     if (this.map == null || this.draw == null) return;
     this.clearSelection();
     this.map.getCanvasContainer().style.cursor = '';
   }
 
-  sessionStateChange(session: Session): void {
-    if (session == null) return;
-    if (session.id != null && (session.status == SessionStatus.RUNNING ||
-      session.status == SessionStatus.COMPLETED ||
-      session.status == SessionStatus.INTERRUPTED)) {
-      this.loadResultLayer(session.id).then(() => {
-        if (this.draw == null) {
-          this.initializeDrawing();
-        }
-      });
-    }
-  }
 
   private loadBaseLayer(): void {
     this.map.boxZoom.disable();
@@ -88,7 +76,7 @@ export class MapService {
     ).subscribe((layer: VectorTileLayer) => {
       this.map.addLayer(layer as LayerSpecification);
       this.map.addLayer({
-        'id': 'region-highlighted',
+        'id': 'region-selection',
         'type': 'fill',
         'source': layer.source,
         'source-layer': layer['source-layer'],
@@ -104,16 +92,15 @@ export class MapService {
     });
   }
 
-  private async loadResultLayer(sessionId?: string): Promise<void> {
+  public async loadResultLayer(sessionId?: string): Promise<void> {
     if (!this.map) return;
-
     const loadImageAndAdd = (): Promise<void> => {
       return new Promise((resolve, reject) => {
         if (this.map.hasImage('facility')) {
           resolve();
           return;
         }
-        this.map.loadImage('/assets/icon.png', (error, image) => {
+        this.map.loadImage('/assets/icons/facility.png', (error, image) => {
           if (error) {
             reject(error);
             return;
@@ -126,7 +113,6 @@ export class MapService {
 
     try {
       await loadImageAndAdd();
-
       this.commandService.execute(
         `tiles/allocation/${sessionId}`, 'GET', 'json', null, true
       ).subscribe((layer: VectorTileLayer) => {
@@ -145,6 +131,9 @@ export class MapService {
         } else {
           this.map.addLayer(layer as LayerSpecification);
           this.map.fitBounds(layer.bounds as LngLatBoundsLike, {padding: 20});
+        }
+        if (this.draw == null) {
+          this.initializeDrawing();
         }
       });
     } catch (error) {
@@ -168,34 +157,62 @@ export class MapService {
       const spatialQuery = <Array<number[]>>drawnPolygon.geometry['coordinates'][0];
 
       this.store.dispatch(mapActions.regionsSelected({
-        spatialQuery: this.mapUtils.toWKTPolygon(spatialQuery),
-        numSelectedRegions: region_codes.length
+        regionSelection: {
+          wkt: this.mapUtils.toWKTPolygon(spatialQuery),
+          selectedRegions: region_codes.length > 0 ? region_codes : null
+        }
       }));
 
-      this.map.setFilter('region-highlighted', ['in', 'region_code', ...region_codes]);
+      this.map.setFilter('region-selection', ['in', 'region_code', ...region_codes]);
       this.draw.deleteAll(); // The drawn polygon should disappear
     } else {
-      this.map.setFilter('region-highlighted', ['in', 'region_code', '']);
+      this.map.setFilter('region-selection', ['in', 'region_code', '']);
       this.clearSelection();
     }
   }
 
-  clearSelection(): void {
+  public clearSelection(): void {
     if (this.draw == null) return;
     this.draw.deleteAll();
-    this.map.setFilter('region-highlighted', ['in', 'region_code', '']);
+    this.map.setFilter('region-selection', ['in', 'region_code', '']);
     this.store.dispatch(mapActions.clearSelection());
   }
 
-  showLayer(layerName: string): void {
-    if (this.map.getLayer(layerName) && this.map.getLayoutProperty(layerName, 'visibility') === 'none') {
-      this.map.setLayoutProperty(layerName, 'visibility', 'visible');
+
+  public updateLayerVisibility(visibility: object): void {
+    if (this.map == null) return;
+    Object.keys(visibility).forEach(layerName => {
+      if (this.map.getLayer(layerName)) {
+        const visibilityValue = visibility[layerName] ? 'visible' : 'none';
+        this.map.setLayoutProperty(layerName, 'visibility', visibilityValue);
+      }
+    });
+  }
+
+
+  public toggleLayer(layerName: string): void {
+    if (this.map == null) return;
+    if (this.map.getLayer(layerName)) {
+      const visibility = this.map.getLayoutProperty(layerName, 'visibility');
+      if (visibility === 'none') {
+        this.map.setLayoutProperty(layerName, 'visibility', 'visible');
+      } else {
+        this.map.setLayoutProperty(layerName, 'visibility', 'none');
+      }
     }
   }
 
-  hideLayer(layerName: string): void {
-    if (this.map.getLayer(layerName) && this.map.getLayoutProperty(layerName, 'visibility') !== 'none') {
-      this.map.setLayoutProperty(layerName, 'visibility', 'none');
+  public zoomToLayer(layerName: string): void {
+    if (this.map.getLayer(layerName)) {
+      const layerObject: VectorTileLayer = this.map.getStyle().layers?.find(layer => layer.id === layerName) as VectorTileLayer;
+      const bounds = layerObject?.bounds;
+      if (bounds) {
+        this.map.fitBounds(bounds as LngLatBoundsLike, {padding: 20});
+      } else {
+        console.log(`Could not retrieve bounds for layer ${layerName}`);
+      }
+    } else {
+      console.log(`Layer ${layerName} does not exist on the map`);
     }
   }
 }

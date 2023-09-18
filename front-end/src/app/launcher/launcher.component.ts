@@ -9,7 +9,7 @@ import {MatInputModule} from "@angular/material/input";
 import {MatStepper, MatStepperModule} from "@angular/material/stepper";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatExpansionModule} from "@angular/material/expansion";
-import {Store} from "@ngrx/store";
+import {select, Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
 import {Session} from "../session/session";
 import {MatIconModule} from "@angular/material/icon";
@@ -23,7 +23,7 @@ import {launcherActions} from "./state/launcher.actions";
 
 
 @Component({
-  selector: 'app-input',
+  selector: 'app-launcher',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatProgressBarModule, MatListModule, MatButtonModule, MatButtonModule,
     MatStepperModule,
@@ -35,31 +35,31 @@ import {launcherActions} from "./state/launcher.actions";
   styleUrls: ['./launcher.component.scss']
 })
 export class LauncherComponent implements OnInit, OnDestroy {
-  @ViewChild('stepper') private myStepper: MatStepper;
+  @ViewChild('stepper') stepper: MatStepper;
   firstFormGroup: FormGroup;
   secondFormGroup: FormGroup;
   sessionState$: Observable<Session>;
-  spatialQuery$: Observable<string>; // polygon
-  numSelectedRegions$: Observable<number>;
+  selectionRegions$: Observable<number>;
+  WKT$: Observable<string>;
 
   constructor(private _formBuilder: FormBuilder, private store: Store<AppState>) {
     this.sessionState$ = this.store.select(state => state.session.activeSession);
-    this.spatialQuery$ = this.store.select(state => state.map.spatialQuery);
-    this.numSelectedRegions$ = this.store.select(state => state.map.numSelectedRegions);
+    this.selectionRegions$ = this.store.pipe(select(state => state.map.regionSelection.selectionRegions));
+    this.WKT$ = this.store.pipe(select(state => state.map.regionSelection.wkt));
   }
 
   private subs: Subscription[] = [];  // to hold all active subscriptions
 
   ngOnInit() {
     this.subs.push(
-        this.sessionState$.subscribe(session => {
-          if (!session) return;
-          this.firstFormGroup.setValue({spatialQuery: session.spatialQuery || []});
-          this.secondFormGroup.setValue({
-            numberOfFacilities: session.numberOfFacilities || '',
-            maxTravelTimeInMinutes: session.maxTravelTimeInMinutes || ''
-          });
-        })
+      this.sessionState$.subscribe(session => {
+        if (!session) return;
+        this.firstFormGroup.setValue({spatialQuery: session.spatialQuery || []});
+        this.secondFormGroup.setValue({
+          numberOfFacilities: session.numberOfFacilities || '',
+          maxTravelTimeInMinutes: session.maxTravelTimeInMinutes || ''
+        });
+      })
     );
 
     this.firstFormGroup = this._formBuilder.group({
@@ -72,10 +72,11 @@ export class LauncherComponent implements OnInit, OnDestroy {
     });
 
     this.subs.push(
-        this.spatialQuery$.subscribe(coordinates => {
-          this.firstFormGroup.controls['spatialQuery'].setValue(coordinates);
-        })
+      this.WKT$.subscribe(wkt => {
+        this.firstFormGroup.controls['spatialQuery'].setValue(wkt);
+      })
     );
+
   }
 
   startCalculation() {
@@ -88,14 +89,18 @@ export class LauncherComponent implements OnInit, OnDestroy {
   }
 
   resetForm(){
-    this.myStepper.reset();
+    this.stepper.reset();
     this.firstFormGroup.reset();
     this.secondFormGroup.reset();
-   // this.store.dispatch(resetSession()); // Reset the state
+    this.store.dispatch(mapActions.resetMap());
   }
 
-  activateSelectByPolygon(){
-    this.store.dispatch(mapActions.activatePolygonDrawing());
+  enableDrawing(isChecked: boolean): void {
+    if (isChecked) {
+      this.store.dispatch(mapActions.enableDrawing());
+    } else {
+      this.store.dispatch(mapActions.disableDrawing());
+    }
   }
 
   clearSelection(){

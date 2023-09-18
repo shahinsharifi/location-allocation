@@ -1,3 +1,5 @@
-<div *ngFor="let log of logs" class="console-content">
-  {{log}}
+<div class="app-console-content" #scrollBottom>
+  <div *ngFor="let log of logs" >
+    {{log}}
+  </div>
 </div>

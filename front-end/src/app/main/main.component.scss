@@ -6,116 +6,41 @@
   left: 0;
   height: 100%;
   background-color: #FFFFFF;
+  padding: 5px; // Added padding for breathing space
 }
 
-.map-container {
-  width: 100%;
-  height: 100%;
+.left-panel, .right-panel {
+  padding: 20px;
+  border-radius: 4px;
 }
 
-.input-container {
+.input-section{
+  padding: 10px;
+  max-height: 350px;
+}
+
+.result-section {
+  padding: 10px;
+  flex-grow: 1;
+}
+
+.input-container, .result-container {
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 5px;
 }
 
-
-mat-sidenav-container, mat-sidenav-content, mat-sidenav {
-  height: 100%;
-}
-
-mat-sidenav {
-  width: 250px;
-}
-
-a {
-  text-decoration: none;
-  color: white;
-}
-
-a:hover,
-a:active {
-  color: lightgray;
-}
-
-.example-card {
-  margin-bottom: 50px;
-}
-
-
-.card-fix {
-  padding: 0;
-
-  .card-fix-container {
-    box-sizing: border-box;
-    height: 100%;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-
-    .mat-card-content {
-      flex: 1;
-    }
-
-    & > .mat-card-actions:last-child {
-      margin-bottom: -16px;
-      padding-bottom: 0;
-    }
-  }
-}
-
-.instruction-toolbar{
-  box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12) !important;
-  z-index: 99999999;
-  background-color: #3f51b5;
-}
-
-.instruction-title{
-  font-size: larger;
-}
-
-.instruction{
-  margin-left: 20px;
-  font-weight: 200;
-  font-size: large;
-}
-
-.instruction-button{
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.backdrop{
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
-  z-index: 20;
-  background-color: rgba(0,0,0,0.9);
-}
-
-.flexExpand {
-  flex: 1 1 auto;
-}
-
-.input-section, .result-section {
-  padding: 10px;
-}
-
-.input-section:hover, .result-section:hover {
-  background-color: #f2f2f2;
-}
-
 .map-container {
-  padding: 20px;
-  border-radius: 4px;
-  background-color: #ffffff;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px; // Consistent border-radius
+  overflow: hidden; // In case the map has any overflowing elements
 }
 
 .mat-elevation-z6, .mat-elevation-z4 {
   margin: 5px;
   border-radius: 4px;
 }
+
 

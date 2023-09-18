@@ -1,27 +1,27 @@
-import { createSelector } from '@ngrx/store';
+import {createFeatureSelector, createSelector} from "@ngrx/store";
 import {MapState} from "./map.state";
-import {AppState} from "../../core/state/app.state";
 
-export const selectMapState = (state: AppState) => state.map;
+export const selectMapState = createFeatureSelector<MapState>('map');
 
-export const selectSelectionActive = createSelector(
+export const selectDrawing = createSelector(
   selectMapState,
-  (mapState: MapState) => mapState.selectionActive
+  (state: MapState) => state.drawing
 );
 
-export const selectSpatialQuery = createSelector(
+export const selectRegionSelection = createSelector(
   selectMapState,
-  (mapState: MapState) => mapState.spatialQuery
+  (state: MapState) => state.regionSelection
 );
 
-export const selectNumSelectedRegions = createSelector(
+export const selectVisibility = createSelector(
   selectMapState,
-  (mapState: MapState) => mapState.numSelectedRegions
+  (state: MapState) => state.visibility
 );
+
 
 export const fromMapSelectors = {
   selectMapState,
-  selectSelectionActive,
-  selectSpatialQuery,
-  selectNumSelectedRegions
+  selectDrawing,
+  selectRegionSelection,
+  selectVisibility
 };

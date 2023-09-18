@@ -1,18 +1,26 @@
 <div class="main-content">
-  <div fxLayout="column" fxFill fxLayoutGap="10px">
-    <div fxLayout fxFlex fxLayoutGap="10px">
-      <div fxFlex="30" fxLayoutAlign="center center" class="mat-elevation-z6">
+  <div fxLayout="column" fxFill fxLayoutGap="5px">
+    <div fxLayout fxFlex fxLayoutGap="5px">
+
+      <!-- Left Panel -->
+      <div fxFlex="30">
         <div fxLayout="column" fxFill fxLayoutGap="10px">
-          <div fxLayoutAlign="center center" class="input-section" fxFlex="40">
-            <app-input class="input-container"></app-input>
+
+          <!-- Input Section -->
+          <div fxLayoutAlign="center center" class="input-section mat-elevation-z6">
+            <app-launcher class="input-container"></app-launcher>
           </div>
-          <mat-divider></mat-divider>
-          <div fxLayoutAlign="center center" class="result-section"  fxFlex="60">
-            <app-result></app-result>
+
+          <!-- Result Section -->
+          <div fxLayoutAlign="center center" class="result-section  mat-elevation-z6">
+            <app-result class="result-container"></app-result>
           </div>
+
         </div>
       </div>
-      <div fxFlex="70" fxLayoutAlign="center center" class="mat-elevation-z4">
+
+      <!-- Map Section -->
+      <div fxFlex="70" class="right-panel mat-elevation-z4">
         <app-map #mapComponent class="map-container"></app-map>
       </div>
     </div>

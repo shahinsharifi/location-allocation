@@ -1,11 +1,10 @@
-<section class="result-section">
-  <div fxLayout="column" fxFill>
-    <div class="centered-content" fxFlex="40">
-      <app-console></app-console>
-    </div>
-    <mat-divider></mat-divider>
-    <div class="centered-content" fxFlex="60">
-      <app-timeline-chart class="app-timeline-chart" #chartComponent></app-timeline-chart>
-    </div>
+<div class="result-content" fxLayout="column" fxLayoutAlign="center left">
+  <div fxLayoutAlign="center center" class="app-console-container" fxFlex="40">
+    <app-console></app-console>
   </div>
-</section>
+  <mat-divider></mat-divider>
+  <div fxLayoutAlign="center center" class="app-chart-container" fxFlex="60">
+   Chart
+  </div>
+</div>
+

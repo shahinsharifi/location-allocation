@@ -1,9 +1,10 @@
-:host {
-  display: block;
+.app-console-content {
+  height: 100%;
+  width: 100%;
+  margin-top: auto;
   background-color: black;
   color: limegreen;
   font-family: 'Courier New', monospace;
-  white-space: pre-wrap;
-  padding: 10px;
-  height: 150px;
+  overflow-y: auto;
 }
+

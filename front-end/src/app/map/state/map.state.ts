@@ -1,5 +1,13 @@
 export interface MapState {
-  selectionActive: boolean;
-  spatialQuery: string | null;
-  numSelectedRegions: number;
+  drawing: boolean;
+  regionSelection: {
+    selectionRegions: number;
+    wkt: string | null;
+  }
+  visibility: {
+    region: boolean;
+    regionSelection: boolean;
+    location: boolean;
+    allocation: boolean;
+  }
 }

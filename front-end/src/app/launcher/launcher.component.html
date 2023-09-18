@@ -1,21 +1,25 @@
 <div class="launcher-container" fxLayout="column" fxLayoutAlign="center left">
-  <mat-stepper fxLayout="column" fxFlex="100%" linear #stepper orientation="horizontal" class="stepper custom-stepper">
-    <mat-step label="Step 1" state="phone" [stepControl]="firstFormGroup">
+  <mat-stepper fxLayout="column" fxFlex="100%" linear #stepper orientation="horizontal"
+               class="stepper custom-stepper">
+    <mat-step label="Step 1" [stepControl]="firstFormGroup">
       <form [formGroup]="firstFormGroup" fxLayout="column">
         <ng-template matStepLabel>Select Regions</ng-template>
         <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
-          <span class="feature-number">Number of Selected Features: {{numSelectedRegions$ | async}}</span>
-          <mat-button-toggle-group name="options" aria-label="Options" class="button-group">
-            <mat-button-toggle value="clear" (click)="clearSelection()" matTooltip="Clear polygon">
-              <mat-icon>delete_forever</mat-icon>
-            </mat-button-toggle>
-            <mat-button-toggle value="draw" (click)="activateSelectByPolygon()" matTooltip="Draw polygon">
-              <mat-icon>photo_size_select_small</mat-icon>
-            </mat-button-toggle>
-          </mat-button-toggle-group>
+          <span
+            class="feature-number">Number of Selected Features: {{selectionRegions$ | async}}</span>
+          <button mat-stroked-button matTooltip="Clear selected regions" (click)="clearSelection()">
+            <mat-icon [svgIcon]="'wgg_icons:trash'">delete_forever</mat-icon>
+            Clear Selection
+          </button>
+          <mat-button-toggle #toggleBtn (click)="enableDrawing(toggleBtn.checked)"
+                             matTooltip="Select regions by drawing a polygon">
+            <mat-icon [svgIcon]="'wgg_icons:select_polygon'"></mat-icon>
+          </mat-button-toggle>
         </div>
-        <div fxLayout="row" FXLayoutAlign="end center" class="button-group">
-          <button mat-stroked-button [disabled]="firstFormGroup.controls['spatialQuery'].value === null" matStepperNext matTooltip="Next Step">
+        <div fxLayout="row" fxLayoutAlign="end center" class="button-group">
+          <button mat-stroked-button
+                  [disabled]="firstFormGroup.controls['spatialQuery'].value === null" matStepperNext
+                  matTooltip="Next Step">
             <mat-icon>arrow_forward</mat-icon>
             Next
           </button>
@@ -23,22 +27,24 @@
       </form>
     </mat-step>
 
-    <mat-step label="Step 2" state="chat" [stepControl]="secondFormGroup">
+    <mat-step label="Step 2" [stepControl]="secondFormGroup">
       <form [formGroup]="secondFormGroup" fxLayout="column">
         <ng-template matStepLabel>Specify Parameters</ng-template>
-        <div fxLayout="row" fxLayoutAlign="space-between center">
-          <mat-form-field appearance="outline" class="example-form-field">
-            <mat-label>Nr. of Facilities</mat-label>
-            <input matInput formControlName="numberOfFacilities" type="number" placeholder="No. Facilities">
+        <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="15px">
+          <mat-form-field appearance="outline" class="example-form-field" fxFlex="50">
+            <mat-label>Number of Facilities</mat-label>
+            <input matInput formControlName="numberOfFacilities" type="number"
+                   placeholder="E.g. 50">
             <mat-hint>(only required if 'Max Travel Time' is not provided)</mat-hint>
             <mat-error *ngIf="secondFormGroup.controls['numberOfFacilities'].invalid &&
     (secondFormGroup.controls['numberOfFacilities'].dirty || secondFormGroup.controls['numberOfFacilities'].touched)">
               Number of Facilities is required
             </mat-error>
           </mat-form-field>
-          <mat-form-field appearance="outline" class="example-form-field">
+          <mat-form-field appearance="outline" class="example-form-field" fxFlex="50">
             <mat-label>Max Travel Time (min)</mat-label>
-            <input matInput formControlName="maxTravelTimeInMinutes" type="number" placeholder="Max Travel Time">
+            <input matInput formControlName="maxTravelTimeInMinutes" type="number"
+                   placeholder="E.g. 35">
             <mat-hint>(only required if 'Nr. of Facilities' is not provided)</mat-hint>
             <mat-error *ngIf="secondFormGroup.controls['maxTravelTimeInMinutes'].invalid &&
     (secondFormGroup.controls['maxTravelTimeInMinutes'].dirty || secondFormGroup.controls['maxTravelTimeInMinutes'].touched)">
@@ -51,7 +57,9 @@
             <mat-icon>arrow_back</mat-icon>
             Back
           </button>
-          <button mat-stroked-button [disabled]="!(secondFormGroup.controls['numberOfFacilities'].value || secondFormGroup.controls['maxTravelTimeInMinutes'].value)" matStepperNext matTooltip="Next Step" class="example-margin">
+          <button mat-stroked-button
+                  [disabled]="!(secondFormGroup.controls['numberOfFacilities'].value || secondFormGroup.controls['maxTravelTimeInMinutes'].value)"
+                  matStepperNext matTooltip="Next Step" class="example-margin">
             <mat-icon>arrow_forward</mat-icon>
             Next
           </button>
@@ -62,20 +70,16 @@
     <mat-step label="Step 3">
       <ng-template matStepLabel>Run</ng-template>
       <p>You are now done.</p>
-      <div fxLayout="row" fxLayoutAlign="end center" class="button-group">
+      <div fxLayout="row" fxLayoutAlign="start center" class="button-group">
         <button mat-stroked-button matStepperPrevious matTooltip="Go Back">
           <mat-icon>arrow_back</mat-icon>
           Back
         </button>
       </div>
     </mat-step>
-    <ng-template matStepperIcon="phone">
-      <mat-icon>call_end</mat-icon>
-    </ng-template>
-    <ng-template matStepperIcon="chat">
-      <mat-icon>forum</mat-icon>
-    </ng-template>
+
   </mat-stepper>
+  <mat-divider></mat-divider>
   <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
     <button mat-stroked-button color="warn" (click)="resetForm()" matTooltip="Reset form">
       <mat-icon>refresh</mat-icon>
@@ -90,3 +94,4 @@
     </button>
   </div>
 </div>
+
