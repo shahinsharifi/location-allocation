@@ -1,13 +1,8 @@
+import {RegionSelection} from "../region-selection";
+import {LayerVisibility} from "../layer-visibility";
+
 export interface MapState {
-  drawing: boolean;
-  regionSelection: {
-    selectionRegions: number;
-    wkt: string | null;
-  }
-  visibility: {
-    region: boolean;
-    regionSelection: boolean;
-    location: boolean;
-    allocation: boolean;
-  }
+  layers?: Array<string>;
+  selection: RegionSelection;
+  visibility: LayerVisibility
 }

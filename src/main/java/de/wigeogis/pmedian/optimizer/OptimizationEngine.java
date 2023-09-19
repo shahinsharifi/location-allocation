@@ -48,8 +48,6 @@ public class OptimizationEngine {
   private final ConcurrentHashMap<UUID, UserAbort> allocationAbortSignalMap =
       new ConcurrentHashMap<>();
 
-  private final ElapsedTime elapsedTime = new ElapsedTime(30 * 60 * 1000);
-
   public List<AllocationDto> evolve(
       SessionDto session,
       List<AllocationDto> allocationDtos,
@@ -57,6 +55,8 @@ public class OptimizationEngine {
 
     List<RegionDto> regions =
         allocationDtos.stream().map(AllocationDto::toRegionDto).collect(Collectors.toList());
+
+    ElapsedTime elapsedTime = new ElapsedTime(session.getMaxRunningTimeInMinutes() * 60000);
 
     Random rng = new XORShiftRNG();
 

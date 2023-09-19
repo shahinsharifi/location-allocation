@@ -14,5 +14,6 @@ export interface Session {
   maxTravelTimeInMinutes?: number;
   maxTravelDistanceInMeters?: number;
   maxTravelDistanceInKilometers?: number;
-  spatialQuery?: Array<number>[];
+  wkt?: string;
+  maxRunningTimeInMinutes?: number;
 }

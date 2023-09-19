@@ -6,6 +6,7 @@ import de.wigeogis.pmedian.database.dto.VectorTileLayerDto.BoundingBoxDto;
 import de.wigeogis.pmedian.database.service.AllocationService;
 import de.wigeogis.pmedian.database.service.RegionService;
 import de.wigeogis.pmedian.utils.VectorTileUtils;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +51,7 @@ public class VectorTileController {
   private VectorTileLayerDto createBaseLayer(BoundingBoxDto layerBounds) {
     VectorTileLayerDto layer = new VectorTileLayerDto();
 
-    Map<String, String> source = Map.of("type", "vector", "url", "http://localhost:3000/region");
+    Map<String, String> source = Map.of("type", "vector", "url", "http://localhost:3000/region", "promoteId", "id");
 
     Map<String, String> fields =
         Map.of(
@@ -66,10 +67,21 @@ public class VectorTileController {
     layer.setBounds(layerBounds);
     layer.setDescription("region.geom");
     layer.setLayout(new HashMap<>());
+
+    // Define fill-color using the conditional feature state logic
+    List<Object> fillColorValue =
+        new ArrayList<>(
+            Arrays.asList(
+                "case",
+                Arrays.asList("boolean", Arrays.asList("feature-state", "highlight"), false),
+                "#ff9900", // Highlight color
+                String.format("#%02x%02x%02x", 163, 163, 163) // Original color
+                ));
+
     layer.setPaint(
         Map.of(
             "fill-color",
-            String.format("#%02x%02x%02x", 163, 163, 163),
+            fillColorValue,
             "fill-opacity",
             0.5,
             "fill-antialias",

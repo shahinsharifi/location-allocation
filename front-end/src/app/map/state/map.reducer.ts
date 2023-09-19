@@ -1,77 +1,46 @@
-import {createReducer, on} from '@ngrx/store';
 import {MapState} from "./map.state";
 import {mapActions} from "./map.actions";
+import {createReducer, on} from "@ngrx/store";
 
 export const initialState: MapState = {
-  drawing: false,
-  regionSelection: {
-    selectionRegions: 0,
-    wkt: ''
+  selection: {
+    active: false,
+    wkt: null,
+    selectedRegions: 0
   },
   visibility: {
-    region: true,
-    regionSelection: false,
+    region: true,  // Assuming regions are visible by default.
     location: false,
     allocation: false
   }
 };
 
-
 export const mapReducer = createReducer<MapState>(
   initialState,
-  on(mapActions.enableDrawing, state => ({
+  on(mapActions.enableSelection, state => ({
     ...state,
-    drawing: true
-  })),
-  on(mapActions.disableDrawing, state => ({
-    ...state,
-    drawing: false
-  })),
-  on(mapActions.regionsSelected, (state, regionSelection) => ({
-    ...state,
-    regionSelection: {
-      ...state.regionSelection,
-      ...regionSelection.regionSelection
+    selection: {
+      ...state.selection,
+      active: true
     }
   })),
-  on(mapActions.clearSelection, state => ({
-    ...state,
-    regionSelection: {
-      selectionRegions: 0,
-      wkt: ''
-    }
-  })),
-  on(mapActions.toggleRegionLayer, state => ({
+  on(mapActions.disableSelection, state => ({
       ...state,
-      visibility: {
-        ...state.visibility,
-        baseLayer: !state.visibility.region
+      selection: {
+        ...state.selection,
+        active: false
       }
     }
   )),
-  on(mapActions.toggleRegionSelectionLayer, state => ({
+  on(mapActions.regionsSelected, (state, selection) => ({
       ...state,
-      visibility: {
-        ...state.visibility,
-        selectedRegionsLayer: !state.visibility.regionSelection
-      }
+      selection: selection
     }
   )),
-  on(mapActions.toggleLocationLayer, state => ({
+  on(mapActions.changeLayerVisibility, (state, visibility) => ({
       ...state,
-      visibility: {
-        ...state.visibility,
-        facilityLayer: !state.visibility.location
-      }
+      visibility: visibility
     }
   )),
-  on(mapActions.toggleAllocationLayer, state => ({
-      ...state,
-      visibility: {
-        ...state.visibility,
-        allocationLayer: !state.visibility.allocation
-      }
-    }
-  )),
-  on(mapActions.resetMap, () => initialState)
 );
+

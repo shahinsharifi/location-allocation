@@ -1,10 +1,23 @@
-.app-console-content {
+.parent-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ensure it takes the full height of its parent */
+}
+
+mat-card {
+  display: flex;
+  flex-direction: column; /* Set mat-card as a column flex container */
+  flex: 1; /* This will make mat-card grow and take available space */
+}
+
+mat-card-content {
+  flex: 1; /* Let the content grow and shrink within mat-card */
+  overflow-y: auto; /* Scroll if content is larger than available space */
   height: 100%;
   width: 100%;
   margin-top: auto;
   background-color: black;
   color: limegreen;
   font-family: 'Courier New', monospace;
-  overflow-y: auto;
-}
 
+}

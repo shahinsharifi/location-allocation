@@ -18,14 +18,15 @@ import lombok.experimental.Accessors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SessionDto implements Serializable {
   private UUID id;
-  private String spatialQuery;
+  private String wkt;
   private Integer numberOfFacilities;
   private Double maxTravelTimeInMinutes;
   private Double maxTravelDistanceInMeters;
   private Double maxTravelDistanceInKilometers;
 
   private SessionStatus status;
-
   private String createdAt = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss z").format(new Date());
+
+  private Integer maxRunningTimeInMinutes;
 }
 

@@ -4,11 +4,12 @@ import {MatButtonModule} from "@angular/material/button";
 import {FlexModule} from "@angular/flex-layout";
 import {Observable} from "rxjs";
 import {select, Store} from "@ngrx/store";
+import {MatCardModule} from "@angular/material/card";
 
 @Component({
   selector: 'app-console',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, FlexModule],
+  imports: [CommonModule, MatButtonModule, FlexModule, MatCardModule],
   templateUrl: './console.component.html',
   styleUrls: ['./console.component.scss']
 })

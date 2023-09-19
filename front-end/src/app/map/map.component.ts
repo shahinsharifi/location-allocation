@@ -1,14 +1,14 @@
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { StyleSpecification } from 'maplibre-gl';
+import {Component, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
+import {Map, StyleSpecification} from 'maplibre-gl';
 import {Observable, Subject, takeUntil} from 'rxjs';
-import { NgxMapLibreGLModule } from '@maplibre/ngx-maplibre-gl';
-import { MatDialogModule } from '@angular/material/dialog';
+import {NgxMapLibreGLModule} from '@maplibre/ngx-maplibre-gl';
+import {MatDialogModule} from '@angular/material/dialog';
 import style from '../../assets/style-de-at.json';
-import { Session } from '../session/session';
-import { Store, select } from '@ngrx/store';
-import { AppState } from '../core/state/app.state';
 import {MapService} from "./map.service";
-import { Map } from 'maplibre-gl';
+import {Session} from "../session/session";
+import {select, Store} from "@ngrx/store";
+import {AppState} from "../core/state/app.state";
+import {RegionSelection} from "./region-selection";
 
 @Component({
   selector: 'app-map',
@@ -22,36 +22,33 @@ import { Map } from 'maplibre-gl';
   encapsulation: ViewEncapsulation.None
 })
 export class MapComponent implements OnInit, OnDestroy {
-  style = style as StyleSpecification;
-  private destroy$ = new Subject<void>();
 
-  drawing$: Observable<boolean>;
-  sessionState$: Observable<Session>
-  regionSelection$: Observable<object>;
-  layerVisibility$: Observable<object>;
+  style = style as StyleSpecification;
+  destroy$ = new Subject<void>();
+  sessionState$:Observable<Session>;
+  launcherState$:Observable<RegionSelection>;
 
   constructor(
     private store: Store<AppState>,
     private mapService: MapService
   ) {
-    this.drawing$ = this.store.pipe(select(state => state.map.drawing));
     this.sessionState$ = this.store.pipe(select(state => state.session.activeSession));
-    this.regionSelection$ = this.store.pipe(select(state => state.map.regionSelection));
-    this.layerVisibility$ = this.store.pipe(select(state => state.map.visibility));
+    this.launcherState$ = this.store.pipe(select(state => state.launcher.selection));
   }
 
   ngOnInit(): void {
-
-this.drawing$
+    this.launcherState$
     .pipe(takeUntil(this.destroy$))
-    .subscribe(drawing => {
-      if (drawing) {
+    .subscribe(selection => {
+      if (selection.active) {
         this.mapService.enableDrawing();
       } else {
         this.mapService.disableDrawing();
       }
-    }
-    );
+      if (selection.wkt == null && selection.selectedRegions === 0) {
+        this.mapService.clearSelection();
+      }
+    });
 
     this.sessionState$
     .pipe(takeUntil(this.destroy$))
@@ -62,25 +59,14 @@ this.drawing$
         }
       }
     });
-
-
-    this.layerVisibility$
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(visibility => {
-      this.mapService.updateLayerVisibility(visibility)
-    }
-    );
-
-
   }
 
   initializeMap(map: Map): void {
-    this.mapService.initializeMap(map, null); // Handle session accordingly
+    this.mapService.initializeMap(map, null);
   }
 
-
-
   ngOnDestroy() {
+    this.mapService.destroyMap(); // Ensure map resources are cleaned up
     this.destroy$.next();
     this.destroy$.complete();
   }

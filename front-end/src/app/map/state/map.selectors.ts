@@ -3,25 +3,37 @@ import {MapState} from "./map.state";
 
 export const selectMapState = createFeatureSelector<MapState>('map');
 
-export const selectDrawing = createSelector(
+export const selectMapSelection = createSelector(
   selectMapState,
-  (state: MapState) => state.drawing
+  (state: MapState) => state.selection
+);
+
+export const selectActiveSelection = createSelector(
+  selectMapSelection,
+  (selection) => selection.active
 );
 
 export const selectRegionSelection = createSelector(
-  selectMapState,
-  (state: MapState) => state.regionSelection
+  selectMapSelection,
+  (selection) => selection.wkt
 );
 
-export const selectVisibility = createSelector(
+export const selectRegionSelectedCount = createSelector(
+  selectMapSelection,
+  (selection) => selection.selectedRegions
+);
+
+export const selectLayerVisibility = createSelector(
   selectMapState,
-  (state: MapState) => state.visibility
+  (state) => state.visibility
 );
 
 
 export const fromMapSelectors = {
   selectMapState,
-  selectDrawing,
+  selectMapSelection,
+  selectActiveSelection,
   selectRegionSelection,
-  selectVisibility
+  selectRegionSelectedCount,
+  selectLayerVisibility
 };

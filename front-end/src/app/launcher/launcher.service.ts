@@ -12,17 +12,25 @@ export class LauncherService {
 
   constructor(private commandService: CommandService, private store: Store<AppState>) { }
 
-  start(payload: Session) {
+  startProcess(session: Session) {
     this.commandService.execute(
-      `start`, 'POST', 'json', payload, true
+      `start`, 'POST', 'json', session, true
     ).subscribe((session) => {
       this.store.dispatch(sessionActions.createSession({activeSession: session}));
     });
   }
 
-  stop(payload: Session) {
+  stopProcess(session: String) {
     this.commandService.execute(
-      `stop`, 'POST', 'json', payload, true
+      `stop`, 'POST', 'json', session, true
+    ).subscribe((session) => {
+      this.store.dispatch({type: 'Create Session', payload: session});
+    });
+  }
+
+  resumeProcess(session: String) {
+    this.commandService.execute(
+      `resume`, 'POST', 'json', session, true
     ).subscribe((session) => {
       this.store.dispatch({type: 'Create Session', payload: session});
     });

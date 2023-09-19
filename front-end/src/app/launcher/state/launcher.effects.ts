@@ -10,17 +10,17 @@ import {Actions, createEffect, ofType} from "@ngrx/effects";
 export class LauncherEffects {
   constructor(private actions$: Actions, private launcherService: LauncherService) {}
 
-  run$ = createEffect(() => {
+  startProcess$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(launcherActions.run),
-      tap(session => this.launcherService.start(session)),
+      ofType(launcherActions.startProcess),
+      tap(session => this.launcherService.startProcess(session))
     )
   }, {dispatch: false});
 
-  stop$ = createEffect(() => {
+  stopProcess$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(launcherActions.stop),
-      tap(session => this.launcherService.stop(session)),
+      ofType(launcherActions.stopProcess),
+      tap(sessionId => this.launcherService.stopProcess(sessionId))
     )
   }, {dispatch: false});
 

@@ -2,79 +2,78 @@
   width: 100%;
   height: 100%;
 
-  .custom-stepper .mat-step-label {
-    color: #808080;  // Change color of step labels
-    font-size: 14px; // Change font size of step labels
-  }
+  .stepper.custom-stepper {
 
-  .custom-stepper .mat-horizontal-stepper-header {
-    border-bottom: 1px solid #808080;  // Add a border to the bottom of the stepper header
-  }
+    .mat-step-label {
+      color: #808080;
+      font-size: 14px;
+    }
 
-  .custom-stepper .mat-horizontal-stepper-header-container {
-    background-color: #f0f0f0;  // Change background color of stepper header
-  }
+    .mat-horizontal-stepper-header {
+      border-bottom: 1px solid #808080;
+    }
 
-  .custom-stepper .mat-stepper-horizontal-line {
-    border-top-width: 2px;  // Increase horizontal line thickness
+    .mat-horizontal-stepper-header-container {
+      background-color: #f0f0f0;
+    }
+
+    .mat-stepper-horizontal-line {
+      border-top-width: 2px;
+    }
+
+    ::ng-deep {
+      .launcher-input-form {
+        height: 160px
+      }
+
+      .mat-horizontal-content-container {
+        height: 180px;
+      }
+
+    }
   }
 
   .feature-number {
-    font-size: 1.2em;  /* Adjust as necessary */
-    /* Other styles as necessary */
-  }
-
-  .input-form {
-    bottom: 0;
-    right: 0;
-    display: flex;
-    flex-direction: row;
-    justify-content: right;
-    margin-right: 10px;
-  }
-
-  .mat-button-toggle-checked {
-    background-color: #4CAF50; /* this is green color, change to your liking */
-    color: white;
-  }
-
-  .mat-stepper-horizontal {
-    margin-top: 8px;
-  }
-
-  .mat-mdc-form-field {
-    margin-top: 16px;
-  }
-
-  ::ng-deep .stepper {
-    max-width: 600px;
-    width: 100%;
-  }
-
-  ::ng-deep .form-field {
-    margin-bottom: 1rem;
-  }
-
-  ::ng-deep button:not(:last-child) {
-    margin-right: 0.5rem;
+    font-size: 1.2em;
   }
 
   .button-group {
-    margin-top: 1rem;
-  }
-
-  .w-full {
-    width: 100%;
+    margin-top: 10px;
+    mat-label:first-child{
+      margin-right: 20px;
+    }
+    button {
+      margin-right: 10px;
+      font-weight: normal;
+    }
+    .close-icon {
+      color: red;
+    }
   }
 
   .example-form-field {
-    margin: 16px 0;
+    margin: 5px 0;
   }
 
-  .example-margin {
-    margin-right: 8px;
+  .travel-time-slider {
+    margin: 0;
+    width: 100%;
   }
 
+  .toggle-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 36px;
+    line-height: inherit;
+    vertical-align: middle;
+  }
+
+
+  .next-button {
+    margin-top: 25px;
+    margin-left: auto;
+  }
 }
-
-

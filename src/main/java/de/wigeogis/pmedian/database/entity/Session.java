@@ -29,11 +29,12 @@ public class Session {
   @Column(nullable = false, updatable = false)
   private UUID id;
   @Column(columnDefinition = "TEXT")
-  private String spatialQuery;
+  private String wkt;
   private Integer numberOfFacilities;
   private Double maxTravelTimeInMinutes;
   private Double maxTravelDistanceInMeters;
   private Double maxTravelDistanceInKilometers;
+  private Integer maxRunningTimeInMinutes;
   // represents the status of the session
   @Enumerated(EnumType.STRING)
   private SessionStatus status;

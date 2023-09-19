@@ -1,16 +1,17 @@
 import {createActionGroup, emptyProps, props} from "@ngrx/store";
+import {RegionSelection} from "../region-selection";
+import {LayerVisibility} from "../layer-visibility";
 
 export const mapActions = createActionGroup({
   source: 'Map',
   events: {
-    'Enable Drawing': emptyProps(),
-    'Disable Drawing': emptyProps(),
+    'Enable Selection': emptyProps(),
+    'Disable Selection': emptyProps(),
+    'Regions Selected': props<RegionSelection>(),
     'Clear Selection': emptyProps(),
-    'Regions Selected': props<{ regionSelection: object }>(),
-    'Toggle Region Layer': emptyProps(),
-    'Toggle Region Selection Layer': emptyProps(),
-    'Toggle Location Layer': emptyProps(),
-    'Toggle Allocation Layer': emptyProps(),
+    'Change Layer Visibility': props<LayerVisibility>(),
     'Reset Map': emptyProps()
   }
 });
+
+

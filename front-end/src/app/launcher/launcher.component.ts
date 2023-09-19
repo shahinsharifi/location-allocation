@@ -9,106 +9,107 @@ import {MatInputModule} from "@angular/material/input";
 import {MatStepper, MatStepperModule} from "@angular/material/stepper";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatExpansionModule} from "@angular/material/expansion";
-import {select, Store} from "@ngrx/store";
-import {AppState} from "../core/state/app.state";
-import {Session} from "../session/session";
+import {Session, SessionStatus} from "../session/session";
 import {MatIconModule} from "@angular/material/icon";
 import {FlexModule} from "@angular/flex-layout";
 import {MatTooltipModule} from "@angular/material/tooltip";
-import {mapActions} from "../map/state/map.actions";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
-import {Observable, Subscription} from "rxjs";
+import {Observable, Subject} from "rxjs";
+import {select, Store} from "@ngrx/store";
+import {AppState} from "../core/state/app.state";
 import {launcherActions} from "./state/launcher.actions";
-
-
+import {mapActions} from "../map/state/map.actions";
+import {MatSliderModule} from "@angular/material/slider";
+import {RegionSelection} from "../map/region-selection";
 
 @Component({
   selector: 'app-launcher',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatListModule, MatButtonModule, MatButtonModule,
-    MatStepperModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule, MatExpansionModule, MatIconModule, FlexModule, MatTooltipModule, MatButtonToggleModule],
+  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatListModule, MatButtonModule,
+    MatButtonModule, MatStepperModule, FormsModule, ReactiveFormsModule, MatFormFieldModule,
+    MatInputModule, MatExpansionModule, MatIconModule, FlexModule, MatTooltipModule,
+    MatButtonToggleModule, MatSliderModule],
   templateUrl: './launcher.component.html',
-  styleUrls: ['./launcher.component.scss']
+  styleUrls: ['./launcher.component.scss'],
 })
 export class LauncherComponent implements OnInit, OnDestroy {
   @ViewChild('stepper') stepper: MatStepper;
-  firstFormGroup: FormGroup;
-  secondFormGroup: FormGroup;
-  sessionState$: Observable<Session>;
-  selectionRegions$: Observable<number>;
-  WKT$: Observable<string>;
+  isChecked: boolean = false;
+  regionSelectionFormGroup: FormGroup;
+  parametersFormGroup: FormGroup;
 
-  constructor(private _formBuilder: FormBuilder, private store: Store<AppState>) {
-    this.sessionState$ = this.store.select(state => state.session.activeSession);
-    this.selectionRegions$ = this.store.pipe(select(state => state.map.regionSelection.selectionRegions));
-    this.WKT$ = this.store.pipe(select(state => state.map.regionSelection.wkt));
+  destroy$ = new Subject<void>();
+  sessionState$:Observable<Session>;
+  mapSelectionState$:Observable<RegionSelection>;
+
+  constructor(
+    private store: Store<AppState>,
+    private formBuilder: FormBuilder) {
+    this.sessionState$ = this.store.pipe(select(state => state.session.activeSession));
+    this.mapSelectionState$ = this.store.pipe(select(state => state.map.selection));
   }
 
-  private subs: Subscription[] = [];  // to hold all active subscriptions
-
-  ngOnInit() {
-    this.subs.push(
-      this.sessionState$.subscribe(session => {
-        if (!session) return;
-        this.firstFormGroup.setValue({spatialQuery: session.spatialQuery || []});
-        this.secondFormGroup.setValue({
-          numberOfFacilities: session.numberOfFacilities || '',
-          maxTravelTimeInMinutes: session.maxTravelTimeInMinutes || ''
-        });
-      })
-    );
-
-    this.firstFormGroup = this._formBuilder.group({
-      spatialQuery: [[], Validators.required]
+  ngOnInit(): void {
+    this.initializeForm();
+    this.mapSelectionState$.subscribe(selection => {
+      if (!selection) return;
+      this.regionSelectionFormGroup.setValue(selection);
     });
-
-    this.secondFormGroup = this._formBuilder.group({
-      numberOfFacilities: ['65', Validators.required],
-      maxTravelTimeInMinutes: ['30', Validators.required]
+    this.sessionState$.subscribe(session => {
+      if (!session) return;
+      this.regionSelectionFormGroup.setValue(session);
+      this.parametersFormGroup.setValue(session);
     });
-
-    this.subs.push(
-      this.WKT$.subscribe(wkt => {
-        this.firstFormGroup.controls['spatialQuery'].setValue(wkt);
-      })
-    );
-
   }
 
-  startCalculation() {
-    if(!this.firstFormGroup.invalid && !this.secondFormGroup.invalid){
-      const session: Session = {...this.firstFormGroup.value, ...this.secondFormGroup.value};
-      this.store.dispatch(launcherActions.run(session));
+  private initializeForm(): void {
+    this.regionSelectionFormGroup = this.formBuilder.group({spatialQuery: [null, Validators.required]});
+    this.parametersFormGroup = this.formBuilder.group({
+      numberOfFacilities: [null, Validators.required],
+      maxTravelTimeInMinutes: [null, Validators.required]
+    });
+  }
+
+
+  start() {
+    if (!this.regionSelectionFormGroup.invalid && !this.parametersFormGroup.invalid) {
+      const session: Session = {...this.regionSelectionFormGroup.value, ...this.parametersFormGroup.value};
+      this.store.dispatch(launcherActions.startProcess(session));
     } else {
       console.log('Form is not valid')
     }
   }
 
-  resetForm(){
+  stop() {
+
+  }
+
+  reset() {
     this.stepper.reset();
-    this.firstFormGroup.reset();
-    this.secondFormGroup.reset();
+    this.regionSelectionFormGroup.reset();
+    this.parametersFormGroup.reset();
     this.store.dispatch(mapActions.resetMap());
   }
 
-  enableDrawing(isChecked: boolean): void {
+
+
+  toggleSelection(isChecked: boolean): void {
+    this.isChecked = isChecked;
     if (isChecked) {
-      this.store.dispatch(mapActions.enableDrawing());
+      this.store.dispatch(mapActions.enableSelection());
     } else {
-      this.store.dispatch(mapActions.disableDrawing());
+      this.store.dispatch(mapActions.disableSelection());
     }
   }
 
-  clearSelection(){
+  clearSelection() {
     this.store.dispatch(mapActions.clearSelection());
   }
 
   ngOnDestroy() {
-    this.subs.forEach(sub => sub.unsubscribe());
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
+  protected readonly SessionStatus = SessionStatus;
 }

@@ -60,7 +60,7 @@ public class LocationAllocationController {
 
           List<AllocationDto> allocations =
               allocationService.insertAndFetchRegionsByWKTPolygon(
-                  session.getId(), session.getSpatialQuery());
+                  session.getId(), session.getWkt());
           session.setStatus(SessionStatus.RUNNING);
           notificationService.publishData(
               session.getId(),

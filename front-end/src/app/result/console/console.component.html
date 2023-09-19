@@ -1,5 +1,11 @@
-<div class="app-console-content" #scrollBottom>
-  <div *ngFor="let log of logs" >
-    {{log}}
-  </div>
+<div class="parent-container">
+  <mat-card>
+    <mat-card-content>
+      <div class="app-console-content" #scrollBottom>
+        <div *ngFor="let log of logs">
+          {{log}}
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>
