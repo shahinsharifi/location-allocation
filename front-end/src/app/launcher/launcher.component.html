@@ -74,15 +74,23 @@
       </form>
     </mat-step>
 
-    <mat-step label="Step 3">
-      <ng-template matStepLabel>Run</ng-template>
-      <p>You are now done.</p>
-      <div fxLayout="row" fxLayoutAlign="start center" class="button-group">
-        <button mat-stroked-button matStepperPrevious matTooltip="Go Back">
-          <mat-icon>arrow_back</mat-icon>
-          Back
-        </button>
-      </div>
+    <mat-step label="Step 3" [stepControl]="runningTimeFormGroup">
+      <form [formGroup]="runningTimeFormGroup" fxLayout="column">
+        <ng-template matStepLabel>Run</ng-template>
+        <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
+          <mat-form-field class="location-number-field" appearance="outline" fxFlex="90">
+            <mat-label>Running Time</mat-label>
+            <input matInput formControlName="maxRunningTimeInMinutes" type="number" max="30"
+                   placeholder="Maximum Running Time">
+          </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
+          <button mat-stroked-button matStepperPrevious matTooltip="Go Back" class="example-margin">
+            <mat-icon>arrow_back</mat-icon>
+            Back
+          </button>
+        </div>
+      </form>
     </mat-step>
 
   </mat-stepper>

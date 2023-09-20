@@ -1,12 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  OnDestroy,
-  OnInit,
-  QueryList,
-  ViewChildren, ViewEncapsulation
-} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
@@ -30,7 +23,6 @@ import {ResultComponent} from "./result/result.component";
 import {LauncherComponent} from "./launcher/launcher.component";
 
 
-
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -52,7 +44,7 @@ import {LauncherComponent} from "./launcher/launcher.component";
     MapComponent, MainComponent, SessionComponent, ResultComponent, LauncherComponent, MatToolbarModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  encapsulation: ViewEncapsulation.None
+
 })
 export class AppComponent implements OnInit, OnDestroy {
 

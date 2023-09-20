@@ -1,11 +1,7 @@
 <div class="parent-container">
   <mat-card>
-    <mat-card-content>
-      <div class="app-console-content" #scrollBottom>
-        <div *ngFor="let log of logs">
-          {{log}}
-        </div>
-      </div>
+    <mat-card-content >
+      <div *ngFor="let log of logs"> {{log}} </div>
     </mat-card-content>
   </mat-card>
 </div>

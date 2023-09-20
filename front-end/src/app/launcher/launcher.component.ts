@@ -37,10 +37,11 @@ export class LauncherComponent implements OnInit, OnDestroy {
   isChecked: boolean = false;
   regionSelectionFormGroup: FormGroup;
   parametersFormGroup: FormGroup;
-
+  runningTimeFormGroup: FormGroup;
   destroy$ = new Subject<void>();
-  sessionState$:Observable<Session>;
-  mapSelectionState$:Observable<RegionSelection>;
+  sessionState$: Observable<Session>;
+  mapSelectionState$: Observable<RegionSelection>;
+  protected readonly SessionStatus = SessionStatus;
 
   constructor(
     private store: Store<AppState>,
@@ -53,27 +54,35 @@ export class LauncherComponent implements OnInit, OnDestroy {
     this.initializeForm();
     this.mapSelectionState$.subscribe(selection => {
       if (!selection) return;
-      this.regionSelectionFormGroup.setValue(selection);
+      this.regionSelectionFormGroup.setValue({wkt: selection.wkt});
     });
     this.sessionState$.subscribe(session => {
       if (!session) return;
-      this.regionSelectionFormGroup.setValue(session);
-      this.parametersFormGroup.setValue(session);
+      this.regionSelectionFormGroup.setValue({wkt: session.wkt});
+      this.parametersFormGroup.setValue({
+        numberOfFacilities: session.numberOfFacilities,
+        maxTravelTimeInMinutes: session.maxTravelTimeInMinutes
+      });
     });
   }
 
   private initializeForm(): void {
-    this.regionSelectionFormGroup = this.formBuilder.group({spatialQuery: [null, Validators.required]});
+    this.regionSelectionFormGroup = this.formBuilder.group({
+      wkt: [null, Validators.required]
+    });
     this.parametersFormGroup = this.formBuilder.group({
       numberOfFacilities: [null, Validators.required],
       maxTravelTimeInMinutes: [null, Validators.required]
+    });
+    this.runningTimeFormGroup = this.formBuilder.group({
+      maxRunningTimeInMinutes: [null, Validators.required]
     });
   }
 
 
   start() {
     if (!this.regionSelectionFormGroup.invalid && !this.parametersFormGroup.invalid) {
-      const session: Session = {...this.regionSelectionFormGroup.value, ...this.parametersFormGroup.value};
+      const session: Session = {...this.regionSelectionFormGroup.value, ...this.parametersFormGroup.value, ...this.runningTimeFormGroup.value};
       this.store.dispatch(launcherActions.startProcess(session));
     } else {
       console.log('Form is not valid')
@@ -88,18 +97,14 @@ export class LauncherComponent implements OnInit, OnDestroy {
     this.stepper.reset();
     this.regionSelectionFormGroup.reset();
     this.parametersFormGroup.reset();
-    this.store.dispatch(mapActions.resetMap());
+    this.runningTimeFormGroup.reset();
+    this.store.dispatch(launcherActions.resetSession());
   }
-
 
 
   toggleSelection(isChecked: boolean): void {
     this.isChecked = isChecked;
-    if (isChecked) {
-      this.store.dispatch(mapActions.enableSelection());
-    } else {
-      this.store.dispatch(mapActions.disableSelection());
-    }
+    this.store.dispatch(launcherActions.toggleSelection({active: isChecked}));
   }
 
   clearSelection() {
@@ -111,5 +116,5 @@ export class LauncherComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  protected readonly SessionStatus = SessionStatus;
+
 }

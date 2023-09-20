@@ -44,9 +44,9 @@ export class MapComponent implements OnInit, OnDestroy {
         this.mapService.enableDrawing();
       } else {
         this.mapService.disableDrawing();
-      }
-      if (selection.wkt == null && selection.selectedRegions === 0) {
-        this.mapService.clearSelection();
+        if (selection.wkt == null && selection.selectedRegions === 0) {
+          this.mapService.clearSelection();
+        }
       }
     });
 
