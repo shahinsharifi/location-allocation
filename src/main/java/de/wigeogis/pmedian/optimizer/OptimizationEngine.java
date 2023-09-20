@@ -93,12 +93,12 @@ public class OptimizationEngine {
     EvolutionaryOperator<List<BasicGenome>> locationPipeline =
         new LocationOperationFactory(session.getId())
             .createEvolutionPipeline(regions, distanceMatrix);
-    CoverageEvaluator coverageEvaluator = new CoverageEvaluator(regions, distanceMatrix);
+    CoverageEvaluator coverageEvaluator = new CoverageEvaluator(session.getId(), regions, distanceMatrix, notificationService);
     GenerationalEvolutionEngine<List<BasicGenome>> locationEngine =
         new GenerationalEvolutionEngine<>(
             locationCandidateFactory, locationPipeline, coverageEvaluator, selection, rng);
     locationEngine.addEvolutionObserver(
-        new EvolutionLogger(session.getId(), eventPublisher, notificationService));
+        new EvolutionLogger(session.getId(), allocationDtos, distanceMatrix, eventPublisher, notificationService));
     locationEngine.setSingleThreaded(true);
 
     log.info("Running location engine...");
@@ -136,12 +136,12 @@ public class OptimizationEngine {
     EvolutionaryOperator<List<BasicGenome>> allocationPipeline =
         new AllocationOperationFactory(session.getId())
             .createEvolutionPipeline(regions, distanceMatrix);
-    TravelCostEvaluator travelCostEvaluator = new TravelCostEvaluator(regions, distanceMatrix);
+    TravelCostEvaluator travelCostEvaluator = new TravelCostEvaluator(session.getId(), regions, distanceMatrix, notificationService);
     GenerationalEvolutionEngine<List<BasicGenome>> allocationEngine =
         new GenerationalEvolutionEngine<>(
             allocationCandidateFactory, allocationPipeline, travelCostEvaluator, selection, rng);
     allocationEngine.addEvolutionObserver(
-        new EvolutionLogger(session.getId(), eventPublisher, notificationService));
+        new EvolutionLogger(session.getId(), allocationDtos, distanceMatrix, eventPublisher, notificationService));
     allocationEngine.setSingleThreaded(true);
 
     // Running allocation engine

@@ -14,5 +14,9 @@ export const resultReducer = createReducer<ResultState>(
   on(resultActions.updateLogs, (state, {log}) => {
     const logs = state.logs ? [...state.logs, log] : [log];
     return { ...state, logs };
+  }),
+  on(resultActions.updateProgress, (state, {progress}) => {
+    const newProgress = state.progress ? [...state.progress, progress] : [progress];
+    return { ...state, progress: newProgress };
   })
 );

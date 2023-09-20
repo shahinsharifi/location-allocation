@@ -1,15 +1,23 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Input,
   OnDestroy,
-  OnInit,
+  OnInit, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import {IgxCategoryChartModule, IgxLegendModule} from 'igniteui-angular-charts';
+import {
+  IgxCategoryChartComponent,
+  IgxCategoryChartModule,
+  IgxLegendModule
+} from 'igniteui-angular-charts';
 import {CommonModule} from "@angular/common";
-import {CountryRenewableElectricity} from './chart-data';
+import {OptimizationProgress} from './optimization-progress';
 import {FlexModule} from "@angular/flex-layout";
 import {MatCardModule} from "@angular/material/card";
+import {Observable, Subject} from "rxjs";
+import {AppState} from "../../core/state/app.state";
+import {select, Store} from "@ngrx/store";
 
 @Component({
   selector: 'app-chart',
@@ -22,25 +30,39 @@ import {MatCardModule} from "@angular/material/card";
 })
 export class ChartComponent implements OnInit, OnDestroy {
 
-  public constructor() {
+  @Input()
+  includedProperties: string;
 
-  }
+  @ViewChild('chart', {static: true})
+  public chart: IgxCategoryChartComponent;
 
-  private _countryRenewableElectricity: CountryRenewableElectricity = null;
-  public get countryRenewableElectricity(): CountryRenewableElectricity {
-    if (this._countryRenewableElectricity == null)
-    {
-      this._countryRenewableElectricity = new CountryRenewableElectricity();
-    }
-    return this._countryRenewableElectricity;
-  }
+  _optimizationProgress: OptimizationProgress = null;
 
-  ngOnDestroy(): void {
+  destroy$ = new Subject<void>();
+  progressDataStream$: Observable<any>;
+
+  constructor(private store: Store<AppState>) {
+    this._optimizationProgress = new OptimizationProgress();
+    this.progressDataStream$ = this.store.pipe(select(state => state.result.progress));
   }
 
   ngOnInit(): void {
-
+    this.progressDataStream$.subscribe(progress => {
+      if (this._optimizationProgress != null) {
+        this._optimizationProgress.updateData({generation: progress.generation, value: progress.value});
+        if(this.optimizationProgress.length > 0) {
+          this.chart.notifyInsertItem(this.optimizationProgress, this._optimizationProgress.length - 1, progress);
+        }
+      }
+    });
   }
 
+  public get optimizationProgress(): OptimizationProgress {
+    return this._optimizationProgress;
+  }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

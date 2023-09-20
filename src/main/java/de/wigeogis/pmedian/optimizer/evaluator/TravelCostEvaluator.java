@@ -5,25 +5,41 @@ import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.util.CostEvaluatorUtils;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
+import de.wigeogis.pmedian.websocket.MessageSubject;
+import de.wigeogis.pmedian.websocket.NotificationService;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.LoggerFactory;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
+import org.uncommons.watchmaker.framework.PopulationData;
 
 public class TravelCostEvaluator implements FitnessEvaluator<List<BasicGenome>> {
 
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(TravelCostEvaluator.class);
+  private final List<RegionDto> demands;
   private final ImmutableTable<String, String, Double> dMatrix;
   private  final ConcurrentHashMap<String, ConcurrentHashMap<String, Double>> sparseCostMatrix;
-  private final List<RegionDto> demands;
+
+  private final UUID sessionId;
+  private final NotificationService notificationService;
+  private final Map<String, Object> generationFitnessProgress;
+  private final Map<String, Object> overallStandardDeviationOfTravelTime;
+
 
   public TravelCostEvaluator(
-      List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix) {
+      UUID sessionId, List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix, NotificationService notificationService) {
+    this.demands = demands;
     this.dMatrix = dMatrix;
     this.sparseCostMatrix = CostEvaluatorUtils.convertToSparseMatrix(dMatrix);
-    this.demands = demands;
+    this.notificationService = notificationService;
+
+    this.sessionId = sessionId;
+    this.generationFitnessProgress = new HashMap<>();
+    this.overallStandardDeviationOfTravelTime = new HashMap<>();
   }
 
   @Override
@@ -66,6 +82,7 @@ public class TravelCostEvaluator implements FitnessEvaluator<List<BasicGenome>> 
     });
     return ds.getStandardDeviation();
   }
+
 
   @Override
   public boolean isNatural() {

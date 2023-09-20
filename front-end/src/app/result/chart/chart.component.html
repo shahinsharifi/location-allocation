@@ -10,10 +10,12 @@
   </div>
 
   <igx-category-chart
+
     #chart
     chartType="Spline"
-    [dataSource]="countryRenewableElectricity"
+    [dataSource]="optimizationProgress"
     [legend]="legend"
+
     yAxisTitle="TWh"
     isTransitionInEnabled="true"
     isVerticalZoomEnabled="false"
@@ -25,4 +27,5 @@
     computedPlotAreaMarginMode="Series"
     fxLayoutAlign="center center" fxFill>
   </igx-category-chart>
+
 </div>

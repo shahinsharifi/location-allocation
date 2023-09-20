@@ -8,4 +8,4 @@ public record Message(
     MessageType type,
     MessageSubject subject,
     String message,
-    Map<String, Object> data) {}
+    Object data) {}

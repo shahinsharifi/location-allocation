@@ -1,8 +1,13 @@
 package de.wigeogis.pmedian.optimizer.logger;
 
+import com.google.common.collect.ImmutableTable;
+import de.wigeogis.pmedian.database.dto.AllocationDto;
+import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
+import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import de.wigeogis.pmedian.websocket.MessageSubject;
 import de.wigeogis.pmedian.websocket.NotificationService;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +15,8 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.math3.stat.Frequency;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.springframework.context.ApplicationEventPublisher;
 import org.uncommons.watchmaker.framework.PopulationData;
 import org.uncommons.watchmaker.framework.islands.IslandEvolutionObserver;
@@ -31,13 +38,22 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
       Double.POSITIVE_INFINITY; // For minimization, start with a very high value
   private int stagnationCounter = 0;
   private double currentMutationRate = INIT_MUTATION_RATE;
+
+  private final List<AllocationDto> allocationDtos;
+  private final ImmutableTable<String, String, Double> costMatrix;
+
   private final Map<Integer, Double> progress = new HashMap<>();
+  private final Map<String, Object> generationFitnessProgress = new HashMap<>();
 
   public EvolutionLogger(
       UUID sessionId,
+      List<AllocationDto> allocationDtos,
+      ImmutableTable<String, String, Double> costMatrix,
       ApplicationEventPublisher publisher,
       NotificationService notificationService) {
     this.sessionId = sessionId;
+    this.allocationDtos = allocationDtos;
+    this.costMatrix = costMatrix;
     this.publisher = publisher;
     this.notificationService = notificationService;
   }
@@ -67,8 +83,20 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
 
     lastBestFitness = currentBestFitness;
 
-    if (data.getGenerationNumber() % 100 == 0) {
-      writeProgress(data, currentMutationRate);
+    progress.put(data.getGenerationNumber(), data.getBestCandidateFitness());
+    // generationFitnessProgress.put(String.valueOf(data.getGenerationNumber()),
+    // data.getBestCandidateFitness());
+    List<BasicGenome> bestCandidate = (List<BasicGenome>) data.getBestCandidate();
+    int numberOfFacilities =
+        bestCandidate.stream().collect(Collectors.groupingBy(BasicGenome::getRegionId)).size();
+
+    if (data.getGenerationNumber() % 10 == 0) {
+      //     publishOverallStandardDeviation(bestCandidate);
+      //publishLogs(data, numberOfFacilities, currentMutationRate);
+      publishProgress(data.getGenerationNumber(), data.getBestCandidateFitness());
+    }
+    if (data.getGenerationNumber() % 50 == 0) {
+      writeLogs(data, numberOfFacilities, currentMutationRate);
       publishMutationRate(currentMutationRate);
     }
   }
@@ -82,11 +110,8 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
     // Do nothing.
   }
 
-  public void writeProgress(PopulationData<? extends T> data, double currentMutationRate) {
-    progress.put(data.getGenerationNumber(), data.getBestCandidateFitness());
-    List<BasicGenome> bestCandidate = (List<BasicGenome>) data.getBestCandidate();
-    int numberOfFacilities =
-        bestCandidate.stream().collect(Collectors.groupingBy(BasicGenome::getRegionId)).size();
+  private void writeLogs(
+      PopulationData<? extends T> data, int numberOfFacilities, double currentMutationRate) {
 
     String logMessage =
         ("Generation "
@@ -100,8 +125,70 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
             + data.getBestCandidateFitness());
 
     log.info(logMessage);
-    notificationService.publishLog(sessionId, MessageSubject.SESSION_LOG, logMessage);
+  }
 
+  private void publishLogs(
+      PopulationData<? extends T> data, int numberOfFacilities, double currentMutationRate) {
+
+    String logMessage =
+        "Generation "
+            + data.getGenerationNumber()
+            + " [Mutation Rate: "
+            + String.format("%.3f", currentMutationRate)
+            + "]: "
+            + "("
+            + numberOfFacilities
+            + " facilities) -> "
+            + data.getBestCandidateFitness();
+    notificationService.publishLog(sessionId, MessageSubject.SESSION_LOG, logMessage);
+  }
+
+  private void publishProgress(int generation, double fitness) {
+    notificationService.publishData(
+        this.sessionId,
+        MessageSubject.SESSION_PROGRESS_DATA,
+        Map.of("generation", generation, "value", fitness));
+  }
+
+  private void publishOverallStandardDeviation(List<BasicGenome> bestCandidate) {
+
+    List<RegionDto> facilitiesCodes =
+        bestCandidate.stream().map(BasicGenome::getRegionDto).toList();
+
+    List<AllocationDto> allocations =
+        FacilityCandidateUtil.findNearestFacilitiesForDemands(
+            allocationDtos, facilitiesCodes, costMatrix);
+
+    Map<String, Object> overallStandardDeviationOfTravelTime = new HashMap<>();
+    DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics();
+    Frequency frequency = new Frequency(); // Create a Frequency instance
+
+    for (AllocationDto allocation : allocations) {
+
+      descriptiveStatistics.addValue(allocation.getTravelCost()); // the weight return travel time
+      frequency.addValue(
+          allocation.getTravelCost()); // Add the weight into the frequency for histogram
+    }
+
+    // Generating the histogram. We know that our range is 0 to 60, and interval is 5.
+    for (int i = 0; i <= 60; i += 5) {
+      // creates a key in the format "0-5", "5-10", "10-15" etc.
+      String key = i + "-" + (i + 5);
+      // counts the weight that is in the interval i and i+5
+      long count = frequency.getCount(i / (i + 5));
+      // put this into your map
+      overallStandardDeviationOfTravelTime.put(key, count);
+    }
+
+    List<Map<String, Object>> result = new ArrayList<>();
+
+
+    for(String key : overallStandardDeviationOfTravelTime.keySet()) {
+      result.add(Map.of("generation", key, "value", overallStandardDeviationOfTravelTime.get(key)));
+    }
+
+    notificationService.publishData(
+        this.sessionId, MessageSubject.SESSION_PROGRESS_DATA, result);
   }
 
   public Map<Integer, Double> getProgress() {

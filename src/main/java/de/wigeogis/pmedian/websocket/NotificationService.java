@@ -1,5 +1,6 @@
 package de.wigeogis.pmedian.websocket;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,11 @@ public class NotificationService {
   }
 
   public void publishData(
+      UUID sessionId, MessageSubject subject, List<Map<String, Object>> data) {
+    this.sendMessage(sessionId, MessageType.DATA, subject, null, data);
+  }
+
+  public void publishData(
       UUID sessionId, MessageSubject subject, String message, Map<String, Object> data) {
     this.sendMessage(sessionId, MessageType.DATA, subject, message, data);
   }
@@ -33,8 +39,9 @@ public class NotificationService {
       MessageType type,
       MessageSubject subject,
       String message,
-      Map<String, Object> data) {
+      Object data) {
     Message msg = new Message(sessionId, type, subject, message, data);
     messagingTemplate.convertAndSend("/topic/" + sessionId, msg);
   }
+
 }

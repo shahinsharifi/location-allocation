@@ -4,8 +4,10 @@ import com.google.common.collect.ImmutableTable;
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
+import de.wigeogis.pmedian.websocket.NotificationService;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 public class CoverageEvaluator implements FitnessEvaluator<List<BasicGenome>> {
@@ -14,10 +16,15 @@ public class CoverageEvaluator implements FitnessEvaluator<List<BasicGenome>> {
   private final List<RegionDto> demands;
   private final ImmutableTable<String, String, Double> distanceMatrix;
 
+  private final UUID sessionId;
+  private final NotificationService notificationService;
+
   public CoverageEvaluator(
-      List<RegionDto> demands, ImmutableTable<String, String, Double> distanceMatrix) {
+      UUID sessionId, List<RegionDto> demands, ImmutableTable<String, String, Double> distanceMatrix, NotificationService notificationService) {
     this.distanceMatrix = distanceMatrix;
     this.demands = demands;
+    this.sessionId = sessionId;
+    this.notificationService = notificationService;
   }
 
   @Override
