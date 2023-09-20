@@ -107,7 +107,7 @@ export class MapService {
     this.map.boxZoom.disable();
     if (!this.map) return;
     this.commandService.execute(
-      `tiles/base`, 'GET', 'json', null, true
+      `tiles/base`, 'GET',  null
     ).subscribe((layer: VectorTileLayer) => {
       this.map.addLayer(layer as LayerSpecification);
       this.map.addLayer({
@@ -151,7 +151,7 @@ export class MapService {
     try {
       await loadImageAndAdd();
       this.commandService.execute(
-        `tiles/allocation/${sessionId}`, 'GET', 'json', null, true
+        `tiles/allocation/${sessionId}`, 'GET', null
       ).subscribe((layer: VectorTileLayer) => {
         if (this.map.getLayer("allocation")) {
           this.map.removeLayer('allocation');

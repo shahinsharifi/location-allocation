@@ -5,14 +5,15 @@ import {mapReducer} from "../../map/state/map.reducer";
 import {webSocketReducer} from "../websocket/state/websocket.reducer";
 import {launcherReducer} from "../../launcher/state/launcher.reducer";
 import {sessionReducer} from "../../session/state/session.reducer";
-import {resultReducer} from "../../result/state/result.reducer";
+import {reportReducer} from "../../report/state/report.reducer";
+
 
 
 export const appReducers: ActionReducerMap<AppState> = {
   websocket: webSocketReducer,
   launcher: launcherReducer,
   session: sessionReducer,
-  result: resultReducer,
+  result: reportReducer,
   map: mapReducer
 };
 

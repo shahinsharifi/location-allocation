@@ -53,11 +53,11 @@ export class LauncherComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initializeForm();
     this.mapSelectionState$.subscribe(selection => {
-      if (!selection) return;
+      if (!selection || !selection.wkt) return;
       this.regionSelectionFormGroup.setValue({wkt: selection.wkt});
     });
     this.sessionState$.subscribe(session => {
-      if (!session) return;
+      if (!session || !session.wkt) return;
       this.regionSelectionFormGroup.setValue({wkt: session.wkt});
       this.parametersFormGroup.setValue({
         numberOfFacilities: session.numberOfFacilities,

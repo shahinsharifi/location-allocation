@@ -1,21 +1,21 @@
-import {ResultState} from "./result.state";
+import {ReportState} from "./report.state";
 import {createReducer, on} from "@ngrx/store";
-import {resultActions} from "./result.actions";
+import {reportActions} from "./report.actions";
 
 
 
-export const initialState: ResultState = {
+export const initialState: ReportState = {
   logs: [],
   progress: []
 };
 
-export const resultReducer = createReducer<ResultState>(
+export const reportReducer = createReducer<ReportState>(
   initialState,
-  on(resultActions.updateLogs, (state, {log}) => {
+  on(reportActions.updateLogs, (state, {log}) => {
     const logs = state.logs ? [...state.logs, log] : [log];
     return { ...state, logs };
   }),
-  on(resultActions.updateProgress, (state, {progress}) => {
+  on(reportActions.updateProgress, (state, {progress}) => {
     const newProgress = state.progress ? [...state.progress, progress] : [progress];
     return { ...state, progress: newProgress };
   })

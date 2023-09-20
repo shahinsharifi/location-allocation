@@ -18,18 +18,11 @@ export class CommandService {
     })
   };
 
-  constructor(private http: HttpClient) {
-    console.log('Hi');
-  }
+  constructor(private http: HttpClient) {}
 
 
-  public execute(cmd: string, method: string, responseType: string, data: any, isRemoteServer: boolean) {
-    console.log(method + responseType);
-    let url = '';
-    if (isRemoteServer)
-      url = this.baseUrl + '/' + this.appContext + '/' + cmd;
-    else
-      url = cmd;
+  public execute(cmd: string, method: string, data: any) {
+    const url = this.baseUrl + '/' + this.appContext + '/' + cmd;
     return (method.toLocaleLowerCase() === 'post') ? this.http.post<any>(url, data) : this.http.get<any>(url);
   }
 

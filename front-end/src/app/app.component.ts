@@ -19,8 +19,8 @@ import {MapComponent} from "./map/map.component";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {MainComponent} from "./main/main.component";
 import {SessionComponent} from "./session/session.component";
-import {ResultComponent} from "./result/result.component";
 import {LauncherComponent} from "./launcher/launcher.component";
+import {ReportComponent} from "./report/report.component";
 
 
 @Component({
@@ -41,7 +41,7 @@ import {LauncherComponent} from "./launcher/launcher.component";
     MatSidenavModule,
     MatPaginatorModule,
     MatSlideToggleModule,
-    MapComponent, MainComponent, SessionComponent, ResultComponent, LauncherComponent, MatToolbarModule],
+    MapComponent, MainComponent, SessionComponent, ReportComponent, LauncherComponent, MatToolbarModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 

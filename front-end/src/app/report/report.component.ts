@@ -17,16 +17,16 @@ import {MatTooltipModule} from "@angular/material/tooltip";
 import {ChartComponent} from "./chart/chart.component";
 
 @Component({
-  selector: 'app-result',
+  selector: 'app-report',
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatDividerModule, ConsoleComponent, FlexModule,
     LauncherComponent, FormsModule, MatButtonToggleModule, MatCardModule, MatFormFieldModule,
     MatIconModule, MatInputModule, MatSliderModule, MatStepperModule, MatTooltipModule,
     ReactiveFormsModule, ChartComponent],
-  templateUrl: './result.component.html',
-  styleUrls: ['./result.component.scss']
+  templateUrl: './report.component.html',
+  styleUrls: ['./report.component.scss']
 })
-export class ResultComponent implements AfterViewInit, OnDestroy{
+export class ReportComponent implements AfterViewInit, OnDestroy{
 
   constructor() {
 

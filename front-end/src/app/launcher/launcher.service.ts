@@ -14,7 +14,7 @@ export class LauncherService {
 
   startProcess(session: Session) {
     this.commandService.execute(
-      `start`, 'POST', 'json', session, true
+      `start`, 'POST', session
     ).subscribe((session) => {
       this.store.dispatch(sessionActions.createSession({activeSession: session}));
     });
@@ -22,7 +22,7 @@ export class LauncherService {
 
   stopProcess(session: String) {
     this.commandService.execute(
-      `stop`, 'POST', 'json', session, true
+      `stop`, 'POST', session
     ).subscribe((session) => {
       this.store.dispatch({type: 'Create Session', payload: session});
     });
@@ -30,7 +30,7 @@ export class LauncherService {
 
   resumeProcess(session: String) {
     this.commandService.execute(
-      `resume`, 'POST', 'json', session, true
+      `resume`, 'POST', session
     ).subscribe((session) => {
       this.store.dispatch({type: 'Create Session', payload: session});
     });

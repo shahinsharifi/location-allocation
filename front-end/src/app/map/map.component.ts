@@ -60,7 +60,7 @@ export class MapComponent implements OnInit, OnDestroy {
             location: true,
             allocation: true
           })
-          this.mapService.loadResultLayer(session.id).then(() => console.log('Loaded result layer'));
+          this.mapService.loadResultLayer(session.id).then(() => console.log('Loading allocation layer'));
         }
       }
     });
