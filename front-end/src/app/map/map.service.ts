@@ -11,6 +11,7 @@ import bbox from "@turf/bbox";
 import proj4 from "proj4";
 import {AppState} from "../core/state/app.state";
 import {Store} from "@ngrx/store";
+import {LayerVisibility} from "./layer-visibility";
 
 @Injectable({
   providedIn: 'root'
@@ -218,7 +219,7 @@ export class MapService {
     this.map.setFeatureState({source: 'region', sourceLayer: 'region'}, {highlight: false});
   }
 
-  public updateLayerVisibility(visibility: object): void {
+  public updateLayerVisibility(visibility: LayerVisibility): void {
     if (this.map == null) return;
     Object.keys(visibility).forEach(layerName => {
       if (this.map.getLayer(layerName)) {

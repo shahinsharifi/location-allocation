@@ -1,101 +1,104 @@
-<div class="launcher-container" fxLayout="column"  fxLayoutAlign="center left">
-  <mat-stepper fxLayout="column" fxFlex="100%"  linear #stepper orientation="horizontal"
-               class="stepper custom-stepper">
-    <mat-step label="Step 1" [stepControl]="regionSelectionFormGroup">
-      <form [formGroup]="regionSelectionFormGroup" fxLayout="column" class="launcher-input-form">
-        <ng-template matStepLabel>Select Regions</ng-template>
+<mat-card class="launcher-container mat-elevation-z4">
+  <mat-card-content>
+    <mat-stepper fxLayout="column" fxFlex="100%"  linear #stepper orientation="horizontal"
+                 class="stepper custom-stepper">
+      <mat-step label="Step 1" [stepControl]="regionSelectionFormGroup">
+        <form [formGroup]="regionSelectionFormGroup" fxLayout="column" class="launcher-input-form">
+          <ng-template matStepLabel>Select Regions</ng-template>
 
-        <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="10px" class="launcher-input-form">
-          <div fxLayout="row" fxFill fxLayoutAlign="start center" class="button-group">
-            <div>
-              <mat-label> Number of Selected Features: {{ (mapSelectionState$ | async)?.selectedRegions || 0 }}</mat-label>
+          <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="10px" class="launcher-input-form">
+            <div fxLayout="row" fxFill fxLayoutAlign="start center" class="button-group">
+              <div>
+                <mat-label> Number of Selected Features: {{ (mapSelectionState$ | async)?.selectedRegions || 0 }}</mat-label>
+              </div>
+
+              <!-- Updated button appearance -->
+              <button mat-stroked-button matTooltip="Clear selected regions" (click)="clearSelection()">
+                <mat-icon [svgIcon]="'wgg_icons:close'" class="close-icon"></mat-icon>
+                Deselect
+              </button>
+
+              <mat-button-toggle class="toggle-button" [checked]="isChecked" #toggleBtn (click)="toggleSelection(toggleBtn.checked)" matTooltip="Select regions by drawing a polygon">
+                <mat-icon [svgIcon]="'wgg_icons:convex_hull'">convex_hull</mat-icon>
+                Select
+              </mat-button-toggle>
+
             </div>
+          </div>
 
-            <!-- Updated button appearance -->
-            <button mat-stroked-button matTooltip="Clear selected regions" (click)="clearSelection()">
-              <mat-icon [svgIcon]="'wgg_icons:close'" class="close-icon"></mat-icon>
-              Deselect
+          <div fxLayout="row" fxFlex="20" fxLayoutAlign="end center" class="button-group">
+            <button mat-stroked-button matStepperNext matTooltip="Next Step" class="example-margin"
+                    [disabled]="regionSelectionFormGroup.invalid">
+              <mat-icon>arrow_forward</mat-icon>
+              Next
             </button>
-
-            <mat-button-toggle class="toggle-button" [checked]="isChecked" #toggleBtn (click)="toggleSelection(toggleBtn.checked)" matTooltip="Select regions by drawing a polygon">
-              <mat-icon [svgIcon]="'wgg_icons:convex_hull'">convex_hull</mat-icon>
-              Select
-            </mat-button-toggle>
-
           </div>
-        </div>
-
-        <div fxLayout="row" fxFlex="20" fxLayoutAlign="end center" class="button-group">
-          <button mat-stroked-button matStepperNext matTooltip="Next Step" class="example-margin"
-                  [disabled]="regionSelectionFormGroup.invalid">
-            <mat-icon>arrow_forward</mat-icon>
-            Next
-          </button>
-        </div>
-      </form>
-    </mat-step>
+        </form>
+      </mat-step>
 
 
-    <mat-step label="Step 2" [stepControl]="parametersFormGroup">
-      <form [formGroup]="parametersFormGroup" fxLayout="column">
-        <ng-template matStepLabel>Specify Parameters</ng-template>
-        <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
-          <mat-form-field class="location-number-field" appearance="outline" fxFlex="40">
-            <mat-label>Number of Facilities</mat-label>
-            <input matInput formControlName="numberOfFacilities" type="number"
-                   placeholder="Desired Number of Locations">
-          </mat-form-field>
-          <div class="example-label-container" fxFlex="60">
-            <mat-label id="example-name-label" class="example-name-label">
-              <b>Max. Travel Time:</b> {{slider.value}} minutes
-            </mat-label>
-            <mat-slider
-              class="travel-time-slider"
-              [max]="60"
-              [min]="10"
-              [step]="5"
-              [discrete]="true"
-              [showTickMarks]="true">
-              <input #slider matSliderThumb formControlName="maxTravelTimeInMinutes">
-            </mat-slider>
+      <mat-step label="Step 2" [stepControl]="parametersFormGroup">
+        <form [formGroup]="parametersFormGroup" fxLayout="column" class="launcher-input-form">
+          <ng-template matStepLabel>Specify Parameters</ng-template>
+          <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
+            <mat-form-field class="location-number-field" appearance="outline" fxFlex="40">
+              <mat-label>Number of Facilities</mat-label>
+              <input matInput formControlName="numberOfFacilities" type="number"
+                     placeholder="Desired Number of Locations">
+            </mat-form-field>
+            <div class="example-label-container" fxFlex="60">
+              <mat-label id="example-name-label" class="example-name-label">
+                <b>Max. Travel Time:</b> {{slider.value}} minutes
+              </mat-label>
+              <mat-slider
+                class="travel-time-slider"
+                [max]="60"
+                [min]="10"
+                [step]="5"
+                [discrete]="true"
+                [showTickMarks]="true">
+                <input #slider matSliderThumb formControlName="maxTravelTimeInMinutes">
+              </mat-slider>
+            </div>
           </div>
-        </div>
-        <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
-          <button mat-stroked-button matStepperPrevious matTooltip="Go Back" class="example-margin">
-            <mat-icon>arrow_back</mat-icon>
-            Back
-          </button>
-          <button mat-stroked-button matStepperNext matTooltip="Next Step" class="example-margin"
-                  [disabled]="parametersFormGroup.invalid">
-            <mat-icon>arrow_forward</mat-icon>
-            Next
-          </button>
-        </div>
-      </form>
-    </mat-step>
+          <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
+            <button mat-stroked-button matStepperPrevious matTooltip="Go Back" class="example-margin">
+              <mat-icon>arrow_back</mat-icon>
+              Back
+            </button>
+            <button mat-stroked-button matStepperNext matTooltip="Next Step" class="example-margin"
+                    [disabled]="parametersFormGroup.invalid">
+              <mat-icon>arrow_forward</mat-icon>
+              Next
+            </button>
+          </div>
+        </form>
+      </mat-step>
 
-    <mat-step label="Step 3" [stepControl]="runningTimeFormGroup">
-      <form [formGroup]="runningTimeFormGroup" fxLayout="column">
-        <ng-template matStepLabel>Run</ng-template>
-        <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
-          <mat-form-field class="location-number-field" appearance="outline" fxFlex="90">
-            <mat-label>Running Time</mat-label>
-            <input matInput formControlName="maxRunningTimeInMinutes" type="number" max="30"
-                   placeholder="Maximum Running Time">
-          </mat-form-field>
-        </div>
-        <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
-          <button mat-stroked-button matStepperPrevious matTooltip="Go Back" class="example-margin">
-            <mat-icon>arrow_back</mat-icon>
-            Back
-          </button>
-        </div>
-      </form>
-    </mat-step>
+      <mat-step label="Step 3" [stepControl]="runningTimeFormGroup">
+        <form [formGroup]="runningTimeFormGroup" fxLayout="column" class="launcher-input-form">
+          <ng-template matStepLabel>Run</ng-template>
+          <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
+            <mat-form-field class="location-number-field" appearance="outline" fxFlex="90">
+              <mat-label>Running Time</mat-label>
+              <input matInput formControlName="maxRunningTimeInMinutes" type="number" max="30"
+                     placeholder="Maximum Running Time">
+            </mat-form-field>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
+            <button mat-stroked-button matStepperPrevious matTooltip="Go Back" class="example-margin">
+              <mat-icon>arrow_back</mat-icon>
+              Back
+            </button>
+          </div>
+        </form>
+      </mat-step>
 
-  </mat-stepper>
+    </mat-stepper>
+
+  </mat-card-content>
   <mat-divider></mat-divider>
-  <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
+  <mat-card-actions align="end">
     <button mat-stroked-button color="warn" (click)="reset()" matTooltip="Reset form">
       <mat-icon>refresh</mat-icon>
       Reset
@@ -110,6 +113,6 @@
       <mat-icon>play_circle_outline</mat-icon>
       Start
     </button>
-  </div>
-</div>
+  </mat-card-actions>
+</mat-card>
 

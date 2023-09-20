@@ -1,13 +1,5 @@
-import {
-  AfterViewChecked,
-  Component,
-  ElementRef,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  ViewEncapsulation
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {MatButtonModule} from "@angular/material/button";
 import {FlexModule} from "@angular/flex-layout";
 import {Observable} from "rxjs";
@@ -19,8 +11,7 @@ import {MatCardModule} from "@angular/material/card";
   standalone: true,
   imports: [CommonModule, MatButtonModule, FlexModule, MatCardModule],
   templateUrl: './console.component.html',
-  styleUrls: ['./console.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./console.component.scss']
 })
 export class ConsoleComponent implements OnInit, OnDestroy, AfterViewChecked {
 

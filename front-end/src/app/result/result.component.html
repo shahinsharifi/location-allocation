@@ -1,10 +1,27 @@
-<div class="result-content" fxLayout="column" fxLayoutGap="25px" fxLayoutAlign="center left">
-  <div fxLayoutAlign="center center" class="app-chart-container" fxFlex="60">
-    <app-timeline-chart></app-timeline-chart>
+<div fxLayout="column" fxFill fxLayoutGap="10px" >
+
+  <!-- Chart 1 -->
+  <div fxLayoutAlign="center center"  fxFlex="50">
+    <div fxLayout="column" fxFill>
+      <mat-card fxFill>
+        <mat-card-content fxFill fxLayout="column">
+          <app-chart fxFill></app-chart>
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
-  <mat-divider></mat-divider>
-  <div fxLayoutAlign="center center" class="app-console-container" fxFlex="40">
-    <app-console></app-console>
+
+  <!-- Chart 2 -->
+  <div fxLayoutAlign="center center"  fxFlex="50">
+    <div fxLayout="column" fxFill>
+      <mat-card fxFill>
+        <mat-card-content fxFill fxLayout="column">
+          <app-chart fxFill></app-chart>
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
+
 </div>
+
 
