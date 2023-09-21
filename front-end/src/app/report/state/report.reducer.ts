@@ -5,8 +5,8 @@ import {reportActions} from "./report.actions";
 
 
 export const initialState: ReportState = {
-  logs: [],
-  progress: []
+  logs: null,
+  progress: null
 };
 
 export const reportReducer = createReducer<ReportState>(

@@ -5,7 +5,10 @@
     <div fxLayout="column" fxFill>
       <mat-card fxFill>
         <mat-card-content fxFill fxLayout="column">
-          <app-chart fxFill></app-chart>
+          <app-chart fxFill [chartTitle]="'Live Optimization Progress'"
+                     [xAxisTitle]="'Generation'"
+                     [yAxisTitle]="'Fitness Score'"
+          ></app-chart>
         </mat-card-content>
       </mat-card>
     </div>
@@ -16,7 +19,11 @@
     <div fxLayout="column" fxFill>
       <mat-card fxFill>
         <mat-card-content fxFill fxLayout="column">
-          <app-chart fxFill></app-chart>
+          <app-chart fxFill
+                     [chartTitle]="'Distribution of Travel-time'"
+                     [xAxisTitle]="'Travel-time to Nearest Facility'"
+                     [yAxisTitle]="'Number of Demand Regions'"
+          ></app-chart>
         </mat-card-content>
       </mat-card>
     </div>

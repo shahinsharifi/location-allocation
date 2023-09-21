@@ -5,6 +5,7 @@ import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.SessionDto;
 import de.wigeogis.pmedian.database.entity.SessionStatus;
 import de.wigeogis.pmedian.database.service.AllocationService;
+import de.wigeogis.pmedian.database.service.LocationService;
 import de.wigeogis.pmedian.database.service.RegionService;
 import de.wigeogis.pmedian.database.service.SessionService;
 import de.wigeogis.pmedian.database.service.TravelCostService;
@@ -38,6 +39,7 @@ public class LocationAllocationController {
   private final SessionService sessionService;
   private final TravelCostService costService;
   private final RegionService regionService;
+  private final LocationService locationService;
   private final AllocationService allocationService;
   private final ApplicationEventPublisher publisher;
   private final OptimizationEngine optimizationEngine;
@@ -100,7 +102,9 @@ public class LocationAllocationController {
           log.info("New session with id '" + session.getId() + "' has been created...");
 
           allocations = optimizationEngine.evolve(session, allocations, distanceMatrix);
+
           allocationService.insertAll(allocations);
+          locationService.insertAllFromAllocation(allocations);
 
           session.setStatus(SessionStatus.COMPLETED);
           notificationService.publishData(

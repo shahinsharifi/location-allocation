@@ -108,7 +108,9 @@ public class VectorTileController {
             "id", "varchar",
             "session_id", "varchar",
             "demand_id", "varchar",
-            "facility_id", "varchar");
+            "facility_id", "varchar",
+            "travel_cost", "double precision"
+        );
 
     layer.setId("allocation");
     layer.setSource(source);
@@ -138,6 +140,15 @@ public class VectorTileController {
             "url",
             "http://localhost:3000/fn_location_zxy_query?session_id=" + sessionId.toString());
 
+    Map<String, String> fields =
+        Map.of(
+            "id", "varchar",
+            "session_id", "varchar",
+            "demand_id", "varchar",
+            "facility_id", "varchar",
+            "travel_cost", "double precision"
+        );
+
     layer.setId("location");
     layer.setSource(source);
     layer.setSourceLayer("location");
@@ -149,8 +160,7 @@ public class VectorTileController {
       Map<String, Object> layout = VectorTileUtils.getLayoutForCenters("demand_id", facilities);
       layer.setLayout(layout);
 
-      // Here, you might also want to define how the icons will appear, e.g. size, color, etc.
-      // But since you didn't provide specifics, I'll leave the paint as an empty map.
+      // Here, we might also want to define how the icons will appear, e.g. size, color, etc.
       layer.setPaint(new HashMap<>());
     }
 

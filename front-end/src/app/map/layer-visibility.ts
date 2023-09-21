@@ -1,5 +1,5 @@
 export interface LayerVisibility {
-  region: boolean;
-  location: boolean;
-  allocation: boolean;
+  region?: boolean;
+  location?: boolean;
+  allocation?: boolean;
 }

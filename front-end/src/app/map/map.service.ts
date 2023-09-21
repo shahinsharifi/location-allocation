@@ -1,5 +1,12 @@
 import {Injectable} from '@angular/core';
-import {IControl, LayerSpecification, LngLatBoundsLike, Map, NavigationControl} from 'maplibre-gl';
+import {
+  IControl,
+  LayerSpecification,
+  LngLatBoundsLike,
+  Map,
+  NavigationControl,
+  Popup
+} from 'maplibre-gl';
 import {MapUtils} from "./map-utils";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import {CommandService} from "../core/http/command.service";
@@ -127,8 +134,6 @@ export class MapService {
     });
   }
 
-
-
   public async loadResultLayer(sessionId?: string): Promise<void> {
     if (!this.map) return;
     const loadImageAndAdd = (): Promise<void> => {
@@ -229,7 +234,6 @@ export class MapService {
     });
   }
 
-
   public toggleLayer(layerName: string): void {
     if (!this.map) return;
     if (this.map.getLayer(layerName)) {
@@ -252,6 +256,50 @@ export class MapService {
         this.map!.fitBounds(bounds as LngLatBoundsLike, {padding: 20});
       }
     }
+  }
+
+
+  public getLayerVisibility(): LayerVisibility {
+    const layerVisibility: LayerVisibility = {};
+    if (!this.map) return layerVisibility;
+    this.map.getStyle().layers?.forEach(layer => {
+      if (layer.id === 'location' || layer.id === 'allocation' || layer.id === 'region') {
+        layerVisibility[layer.id] = this.map.getLayoutProperty(layer.id, 'visibility') === 'visible';
+      }
+    });
+    return layerVisibility;
+  }
+
+  activateMarkerPopup(): void {
+    if (!this.map) return;
+
+    this.map.on('click', 'location', (e) => {
+      const coordinates = e.features[0].geometry['coordinates'][0]
+      const description = e.features[0].properties['description'];
+
+      // Ensure that if the map is zoomed out such that multiple
+      // copies of the feature are visible, the popup appears
+      // over the copy being pointed to.
+      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+      }
+
+      new Popup()
+      .setLngLat(coordinates)
+      .setHTML(`<h3>${name}</h3><p>${description}</p>`)
+      .addTo(this.map);
+    });
+
+    // Change the cursor to a pointer when the mouse is over the places layer.
+    this.map.on('mouseenter', 'location', () => {
+      this.map.getCanvas().style.cursor = 'pointer';
+    });
+
+    // Change it back to a pointer when it leaves.
+    this.map.on('mouseleave', 'location', () => {
+      this.map.getCanvas().style.cursor = '';
+    });
+
   }
 
   public destroyMap(): void {

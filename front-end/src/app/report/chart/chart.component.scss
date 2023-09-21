@@ -3,4 +3,15 @@
   igx-category-chart{
     padding-bottom: 20px;
   }
+  #legendTitle, .legend-title {
+    width: 100%;
+    margin: 0;
+    vertical-align: middle;
+    white-space: nowrap;
+    padding: 0 0 0.75rem 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-family: 'Titillium Web', Verdana, Tahoma, sans-serif;
+    color: black;
+  }
 }

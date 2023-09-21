@@ -5,7 +5,6 @@ import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.util.CostEvaluatorUtils;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
-import de.wigeogis.pmedian.websocket.MessageSubject;
 import de.wigeogis.pmedian.websocket.NotificationService;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.LoggerFactory;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
-import org.uncommons.watchmaker.framework.PopulationData;
 
 public class TravelCostEvaluator implements FitnessEvaluator<List<BasicGenome>> {
 
