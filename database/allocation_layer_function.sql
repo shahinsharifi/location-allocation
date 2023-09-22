@@ -5,8 +5,9 @@ DECLARE
     mvt bytea;
 BEGIN
     SELECT INTO mvt ST_AsMVT(tile, 'allocation', 4096, 'geom')
-    FROM (SELECT re."id"                 as demand_id,
-                 al.facility_region_id   as facility_id,
+    FROM (SELECT al."id"                 as "id",
+                 al."region_id"          as demand_id,
+                 al."facility_region_id" as facility_id,
                  al."travel_cost"        as travel_cost,
                  ST_AsMVTGeom(
                          ST_CurveToLine(re.geom),

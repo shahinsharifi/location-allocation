@@ -1,9 +1,11 @@
 package de.wigeogis.pmedian.api;
 
 import de.wigeogis.pmedian.database.dto.AllocationDto;
+import de.wigeogis.pmedian.database.dto.LocationDto;
 import de.wigeogis.pmedian.database.dto.VectorTileLayerDto;
 import de.wigeogis.pmedian.database.dto.VectorTileLayerDto.BoundingBoxDto;
 import de.wigeogis.pmedian.database.service.AllocationService;
+import de.wigeogis.pmedian.database.service.LocationService;
 import de.wigeogis.pmedian.database.service.RegionService;
 import de.wigeogis.pmedian.utils.VectorTileUtils;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class VectorTileController {
 
   private final RegionService regionService;
+  private final LocationService locationService;
   private final AllocationService allocationService;
 
   @GetMapping("/tiles/base")
@@ -51,7 +54,8 @@ public class VectorTileController {
   private VectorTileLayerDto createBaseLayer(BoundingBoxDto layerBounds) {
     VectorTileLayerDto layer = new VectorTileLayerDto();
 
-    Map<String, String> source = Map.of("type", "vector", "url", "http://localhost:3000/region", "promoteId", "id");
+    Map<String, String> source =
+        Map.of("type", "vector", "url", "http://localhost:3000/region", "promoteId", "id");
 
     Map<String, String> fields =
         Map.of(
@@ -84,8 +88,6 @@ public class VectorTileController {
             fillColorValue,
             "fill-opacity",
             0.5,
-            "fill-antialias",
-            true,
             "fill-outline-color",
             "hsl(0, 0%, 47%)"));
 
@@ -105,12 +107,10 @@ public class VectorTileController {
 
     Map<String, String> fields =
         Map.of(
-            "id", "varchar",
-            "session_id", "varchar",
+            "id", "int4",
             "demand_id", "varchar",
             "facility_id", "varchar",
-            "travel_cost", "double precision"
-        );
+            "travel_cost", "double precision");
 
     layer.setId("allocation");
     layer.setSource(source);
@@ -131,6 +131,7 @@ public class VectorTileController {
 
   private VectorTileLayerDto createLocationLayer(
       UUID sessionId, List<String> facilities, BoundingBoxDto layerBounds) {
+
     VectorTileLayerDto layer = new VectorTileLayerDto();
 
     Map<String, String> source =
@@ -142,12 +143,10 @@ public class VectorTileController {
 
     Map<String, String> fields =
         Map.of(
-            "id", "varchar",
-            "session_id", "varchar",
-            "demand_id", "varchar",
+            "id", "int4",
             "facility_id", "varchar",
-            "travel_cost", "double precision"
-        );
+            "demand_count", "int4",
+            "travel_cost_mean", "double precision");
 
     layer.setId("location");
     layer.setSource(source);
@@ -157,7 +156,7 @@ public class VectorTileController {
     layer.setDescription("location.facility.geom");
 
     if (!facilities.isEmpty()) {
-      Map<String, Object> layout = VectorTileUtils.getLayoutForCenters("demand_id", facilities);
+      Map<String, Object> layout = VectorTileUtils.getLayoutForCenters("facility_id", facilities);
       layer.setLayout(layout);
 
       // Here, we might also want to define how the icons will appear, e.g. size, color, etc.

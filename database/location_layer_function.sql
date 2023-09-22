@@ -5,9 +5,10 @@ DECLARE
     mvt bytea;
 BEGIN
     SELECT INTO mvt ST_AsMVT(tile, 'location', 4096, 'geom')
-    FROM (SELECT loc.region_id   as "id",
-                 loc."demand_count"        as demand_count,
-                 loc."travel_cost_mean"        as travel_cost_mean,
+    FROM (SELECT loc."id"                 as "id",
+                 loc."region_id"          as facility_id,
+                 loc."demand_count"      as demand_count,
+                 loc."travel_cost_mean"  as travel_cost_mean,
                  ST_AsMVTGeom(
                          ST_Centroid(re.geom), -- Centroid of the polygon
                          ST_TileEnvelope(z, x, y),

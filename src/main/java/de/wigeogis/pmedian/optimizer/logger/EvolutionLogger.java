@@ -91,9 +91,11 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
         bestCandidate.stream().collect(Collectors.groupingBy(BasicGenome::getRegionId)).size();
 
     if (data.getGenerationNumber() % 10 == 0) {
-      //     publishOverallStandardDeviation(bestCandidate);
       //publishLogs(data, numberOfFacilities, currentMutationRate);
       publishProgress(data.getGenerationNumber(), data.getBestCandidateFitness());
+    }
+    if (data.getGenerationNumber() % 20 == 0) {
+      publishOverallStandardDeviation(bestCandidate);
     }
     if (data.getGenerationNumber() % 50 == 0) {
       writeLogs(data, numberOfFacilities, currentMutationRate);
@@ -146,7 +148,7 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
   private void publishProgress(int generation, double fitness) {
     notificationService.publishData(
         this.sessionId,
-        MessageSubject.SESSION_PROGRESS_DATA,
+        MessageSubject.SESSION_ALLOCATION_FITNESS_DATA,
         Map.of("generation", generation, "value", fitness));
   }
 
@@ -184,11 +186,11 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
 
 
     for(String key : overallStandardDeviationOfTravelTime.keySet()) {
-      result.add(Map.of("generation", key, "value", overallStandardDeviationOfTravelTime.get(key)));
+      result.add(Map.of("label", key, "value", overallStandardDeviationOfTravelTime.get(key)));
     }
 
     notificationService.publishData(
-        this.sessionId, MessageSubject.SESSION_PROGRESS_DATA, result);
+        this.sessionId, MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION, result);
   }
 
   public Map<Integer, Double> getProgress() {

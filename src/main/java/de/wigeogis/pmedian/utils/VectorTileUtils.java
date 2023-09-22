@@ -31,7 +31,7 @@ public class VectorTileUtils {
             "property", columnName,
             "type", "categorical",
             "stops", stops));
-    paint.put("fill-opacity", 0.6);
+    paint.put("fill-opacity", 0.5);
     return paint;
   }
 

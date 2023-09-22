@@ -15,6 +15,7 @@ import {MatSliderModule} from "@angular/material/slider";
 import {MatStepperModule} from "@angular/material/stepper";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {ChartComponent} from "./chart/chart.component";
+import {MessageSubject} from "../core/websocket/message";
 
 @Component({
   selector: 'app-report',
@@ -37,4 +38,6 @@ export class ReportComponent implements AfterViewInit, OnDestroy{
 
   ngOnDestroy(): void {
   }
+
+	protected readonly MessageSubject = MessageSubject;
 }

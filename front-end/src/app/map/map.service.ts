@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {
   IControl,
   LayerSpecification,
+  LngLat,
   LngLatBoundsLike,
   Map,
   NavigationControl,
@@ -25,14 +26,19 @@ import {LayerVisibility} from "./layer-visibility";
 })
 export class MapService {
 
+
   private map: Map = null;
   private draw: MapboxDraw = null;
   private mapUtils = new MapUtils();
-  constructor(private store: Store<AppState>, private commandService: CommandService){}
+
+  constructor(private store: Store<AppState>, private commandService: CommandService) {
+  }
 
   public initializeMap(map: Map, session: Session | null): void {
     this.map = map;
     this.map.addControl(new NavigationControl());
+    this.map.getCanvasContainer().style.cursor = '';
+    this.initializeDrawing();
 
     if (session === null || session.id === null) {
       this.loadBaseLayer();
@@ -74,7 +80,7 @@ export class MapService {
         'paint': {
           'fill-color': '#6699CC',
           'fill-outline-color': '#03a9f4',
-          'fill-opacity': 0.6
+          'fill-opacity': 0.5
         }
       },
       {
@@ -98,23 +104,23 @@ export class MapService {
 
   public enableDrawing(): void {
     if (this.map == null) return;
-    if(this.draw == null) this.initializeDrawing();
     this.draw.changeMode(MapboxDraw.constants.modes.DRAW_POLYGON);
     this.map.getCanvasContainer().style.cursor = 'crosshair';
   }
 
   public disableDrawing(): void {
     if (this.map == null || this.draw == null) return;
-    this.draw.deleteAll();
-    this.draw=null;
     this.map.getCanvasContainer().style.cursor = '';
+    this.draw.deleteAll();
+    this.draw = null;
+
   }
 
   private loadBaseLayer(): void {
     this.map.boxZoom.disable();
     if (!this.map) return;
     this.commandService.execute(
-      `tiles/base`, 'GET',  null
+      `tiles/base`, 'GET', null
     ).subscribe((layer: VectorTileLayer) => {
       this.map.addLayer(layer as LayerSpecification);
       this.map.addLayer({
@@ -130,12 +136,12 @@ export class MapService {
         'filter': ['in', 'region_code', '']
       } as LayerSpecification);
       this.map.fitBounds(layer.bounds as LngLatBoundsLike, {padding: 20});
-      this.initializeDrawing();
     });
   }
 
   public async loadResultLayer(sessionId?: string): Promise<void> {
     if (!this.map) return;
+    this.disableDrawing();
     const loadImageAndAdd = (): Promise<void> => {
       return new Promise((resolve, reject) => {
         if (this.map.hasImage('facility')) {
@@ -174,9 +180,8 @@ export class MapService {
           this.map.addLayer(layer as LayerSpecification);
           this.map.fitBounds(layer.bounds as LngLatBoundsLike, {padding: 20});
         }
-        if (this.draw == null) {
-          this.initializeDrawing();
-        }
+        this.enablePopupOnClick('location');
+        // this.enablePopupOnClick('allocation', {});
       });
     } catch (error) {
       console.error('Error while loading or adding image:', error);
@@ -270,36 +275,42 @@ export class MapService {
     return layerVisibility;
   }
 
-  activateMarkerPopup(): void {
+
+
+  enablePopupOnClick(layerName: string): void {
     if (!this.map) return;
+    this.map.on('click', layerName, this.handleLocationClick.bind(this));
+    this.map.on('mouseenter', layerName, this.toggleCursorPointer.bind(this, 'pointer'));
+    this.map.on('mouseleave', layerName, this.toggleCursorPointer.bind(this, ''));
+  }
 
-    this.map.on('click', 'location', (e) => {
-      const coordinates = e.features[0].geometry['coordinates'][0]
-      const description = e.features[0].properties['description'];
+  handleLocationClick(e: any): void {
+    const coordinates = e.features[0].geometry['coordinates'].slice();
+    const properties = e.features[0].properties;
 
-      // Ensure that if the map is zoomed out such that multiple
-      // copies of the feature are visible, the popup appears
-      // over the copy being pointed to.
-      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-      }
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
 
-      new Popup()
-      .setLngLat(coordinates)
-      .setHTML(`<h3>${name}</h3><p>${description}</p>`)
-      .addTo(this.map);
-    });
+    const popup = this.createPopup(coordinates, properties, {});
+    popup.addTo(this.map);
+  }
 
-    // Change the cursor to a pointer when the mouse is over the places layer.
-    this.map.on('mouseenter', 'location', () => {
-      this.map.getCanvas().style.cursor = 'pointer';
-    });
+  createPopup(coordinates: Array<number>, properties: any, columnInfo: any): Popup {
+    console.log(columnInfo);
+    return new Popup()
+    .setLngLat(new LngLat(coordinates[0], coordinates[1]))
+    .setMaxWidth('300px')
+    .setHTML(`
+    <div style="padding: 10px; color: #333; background-color: #fff; border: 1px solid rgba(0,0,0,0.2); border-radius: 0;">
+        <h6 style="margin: 0 0 10px 0; text-align: center;">${properties['facility_id']}</h6>
+        <p style="margin: 0 0 10px 0;"><strong>Number of demand regions:</strong> ${properties['demand_count']}</p>
+        <p style="margin: 0 0 10px 0;"><strong>Average of travel time:</strong> ${properties['travel_cost_mean']}</p>
+    </div>`);
+  }
 
-    // Change it back to a pointer when it leaves.
-    this.map.on('mouseleave', 'location', () => {
-      this.map.getCanvas().style.cursor = '';
-    });
-
+  toggleCursorPointer(cursorType: string): void {
+    this.map.getCanvas().style.cursor = cursorType;
   }
 
   public destroyMap(): void {

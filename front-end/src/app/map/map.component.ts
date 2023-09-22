@@ -5,7 +5,7 @@ import {NgxMapLibreGLModule} from '@maplibre/ngx-maplibre-gl';
 import {MatDialogModule} from '@angular/material/dialog';
 import style from '../../assets/style-de-at.json';
 import {MapService} from "./map.service";
-import {Session} from "../session/session";
+import {Session, SessionStatus} from "../session/session";
 import {select, Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
 import {RegionSelection} from "./region-selection";
@@ -67,6 +67,12 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   initializeMap(map: Map): void {
+    console.log(SessionStatus.COMPLETED);
+    // const session: Session = {
+    //   id: 'ae185390-2e29-48b6-b69d-35d67277e100',
+    //   status: SessionStatus.COMPLETED
+    // };
+    // this.mapService.initializeMap(map, session);
     this.mapService.initializeMap(map, null);
   }
 

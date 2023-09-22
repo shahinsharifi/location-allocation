@@ -4,7 +4,9 @@ export const reportActions = createActionGroup({
   source: 'Report',
   events: {
     'Update Logs': props<{ log: string }>(),
-    'Update Progress': props<{ progress: Object }>()
+    'Update Location Fitness': props<{ fitness: Object }>(),
+    'Update Allocation Fitness': props<{ fitness: Object }>(),
+    'Update Allocation Travel Cost Distribution': props<{ travelCostDistribution: Object }>()
   },
 });
 

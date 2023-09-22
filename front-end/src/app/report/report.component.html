@@ -8,6 +8,7 @@
           <app-chart fxFill [chartTitle]="'Live Optimization Progress'"
                      [xAxisTitle]="'Generation'"
                      [yAxisTitle]="'Fitness Score'"
+                     [chartSubject]="MessageSubject.SESSION_ALLOCATION_FITNESS_DATA"
           ></app-chart>
         </mat-card-content>
       </mat-card>
@@ -23,6 +24,7 @@
                      [chartTitle]="'Distribution of Travel-time'"
                      [xAxisTitle]="'Travel-time to Nearest Facility'"
                      [yAxisTitle]="'Number of Demand Regions'"
+                     [chartSubject]="MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION"
           ></app-chart>
         </mat-card-content>
       </mat-card>
