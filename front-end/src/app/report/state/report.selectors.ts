@@ -10,23 +10,23 @@ export const selectLogs = createSelector(
 
 export const selectLocationFitness = createSelector(
   selectReportState,
-  (state: ReportState) => state.location && state.location.fitness
+  (state: ReportState) => state.locationFitness
 );
 
 export const selectAllocationFitness = createSelector(
   selectReportState,
-  (state: ReportState) => state.allocation && state.allocation.fitness
+  (state: ReportState) => state.allocationFitness
 );
 
-export const selectAllocationTravelCostDistribution = createSelector(
+export const selectTravelCostDistribution = createSelector(
   selectReportState,
-  (state: ReportState) => state.allocation && state.allocation.travelCostDistribution
+  (state: ReportState) => state.travelCostDistribution
 );
 
-export const fromResultSelectors = {
+export const fromReportSelectors = {
   selectReportState,
   selectLogs,
   selectLocationFitness,
   selectAllocationFitness,
-  selectAllocationTravelCostDistribution
+  selectTravelCostDistribution
 }

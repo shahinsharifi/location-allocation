@@ -65,10 +65,10 @@ export class WebsocketService extends RxStomp {
         this.store.dispatch(reportActions.updateLogs({log: message.message}));
         break;
       case MessageSubject.SESSION_LOCATION_FITNESS_DATA:
-        this.store.dispatch(reportActions.updateLocationFitness({fitness: message.data}));
+        this.store.dispatch(reportActions.updateLocationFitness({locationFitness: message.data}));
         break;
       case MessageSubject.SESSION_ALLOCATION_FITNESS_DATA:
-        this.store.dispatch(reportActions.updateAllocationFitness({fitness: message.data}));
+        this.store.dispatch(reportActions.updateAllocationFitness({allocationFitness: message.data}));
         break;
       case MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION:
         this.store.dispatch(reportActions.updateAllocationTravelCostDistribution({travelCostDistribution: message.data}));

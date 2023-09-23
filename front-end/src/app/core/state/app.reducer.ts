@@ -13,7 +13,7 @@ export const appReducers: ActionReducerMap<AppState> = {
   websocket: webSocketReducer,
   launcher: launcherReducer,
   session: sessionReducer,
-  result: reportReducer,
+  report: reportReducer,
   map: mapReducer
 };
 

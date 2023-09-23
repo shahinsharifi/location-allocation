@@ -4,14 +4,10 @@ import {reportActions} from "./report.actions";
 
 
 export const initialState: ReportState = {
-  logs: undefined,
-  location: {
-    fitness: undefined,
-  },
-  allocation: {
-    fitness: undefined,
-    travelCostDistribution: undefined,
-  },
+  logs: [],
+  locationFitness: [],
+  allocationFitness: [],
+  travelCostDistribution: []
 };
 
 export const reportReducer = createReducer<ReportState>(
@@ -20,28 +16,16 @@ export const reportReducer = createReducer<ReportState>(
     const logs = state.logs ? [...state.logs, log] : [log];
     return {...state, logs};
   }),
-  on(reportActions.updateLocationFitness, (state, {fitness}) => {
-    const _fitness = state.location.fitness ? [...state.location.fitness, fitness] : [fitness];
-    return {
-      ...state,
-      ...state.location,
-      fitness: _fitness
-    };
+  on(reportActions.updateLocationFitness, (state, {locationFitness}) => {
+    const newLocationFitness = state.locationFitness ? [...state.locationFitness, locationFitness] : [locationFitness];
+    return { ...state, locationFitness: newLocationFitness };
   }),
-  on(reportActions.updateAllocationFitness, (state, {fitness}) => {
-      const _fitness = state.allocation.fitness ? [...state.allocation.fitness, fitness] : [fitness];
-      return {
-        ...state,
-        ...state.allocation,
-        fitness: _fitness
-      };
-    }),
+  on(reportActions.updateAllocationFitness, (state, {allocationFitness}) => {
+    const newAllocationFitness = state.allocationFitness ? [...state.allocationFitness, allocationFitness] : [allocationFitness];
+    return { ...state, allocationFitness: newAllocationFitness };
+  }),
   on(reportActions.updateAllocationTravelCostDistribution, (state, {travelCostDistribution}) => {
-      return {
-        ...state,
-        ...state.allocation,
-        travelCostDistribution: travelCostDistribution
-      };
-    }
-  ),
+    const newTravelCostDistribution = state.travelCostDistribution ? [...state.travelCostDistribution, travelCostDistribution] : [travelCostDistribution];
+    return { ...state, travelCostDistribution: newTravelCostDistribution };
+  })
 );

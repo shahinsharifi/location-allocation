@@ -161,36 +161,33 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
         FacilityCandidateUtil.findNearestFacilitiesForDemands(
             allocationDtos, facilitiesCodes, costMatrix);
 
-    Map<String, Object> overallStandardDeviationOfTravelTime = new HashMap<>();
-    DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics();
-    Frequency frequency = new Frequency(); // Create a Frequency instance
-
-    for (AllocationDto allocation : allocations) {
-
-      descriptiveStatistics.addValue(allocation.getTravelCost()); // the weight return travel time
-      frequency.addValue(
-          allocation.getTravelCost()); // Add the weight into the frequency for histogram
-    }
-
-    // Generating the histogram. We know that our range is 0 to 60, and interval is 5.
-    for (int i = 0; i <= 60; i += 5) {
-      // creates a key in the format "0-5", "5-10", "10-15" etc.
-      String key = i + "-" + (i + 5);
-      // counts the weight that is in the interval i and i+5
-      long count = frequency.getCount(i / (i + 5));
-      // put this into your map
-      overallStandardDeviationOfTravelTime.put(key, count);
-    }
-
-    List<Map<String, Object>> result = new ArrayList<>();
-
-
-    for(String key : overallStandardDeviationOfTravelTime.keySet()) {
-      result.add(Map.of("label", key, "value", overallStandardDeviationOfTravelTime.get(key)));
-    }
+    List<Map<String,Object>> result = this.travelCostDistribution(allocations);
 
     notificationService.publishData(
         this.sessionId, MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION, result);
+  }
+
+  private List<Map<String, Object>> travelCostDistribution(List<AllocationDto> allocations) {
+    List<Map<String, Object>> distribution = new ArrayList<>();
+
+    // Define the intervals
+    int[] intervals = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
+
+    for (int i = 0; i < intervals.length; i++) {
+      int lowerBound = (i == 0) ? 0 : intervals[i - 1];
+      int upperBound = intervals[i];
+
+      long count = allocations.stream()
+          .filter(genome -> genome.getTravelCost() > lowerBound && genome.getTravelCost() <= upperBound)
+          .count();
+
+      Map<String, Object> map = new HashMap<>();
+      map.put("label", upperBound);
+      map.put("value", count);
+      distribution.add(map);
+    }
+
+    return distribution;
   }
 
   public Map<Integer, Double> getProgress() {

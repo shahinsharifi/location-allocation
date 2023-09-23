@@ -10,7 +10,7 @@ export interface AppState {
   websocket: WebSocketState;
   session: SessionState;
   launcher: LauncherState;
-  result: ReportState;
+  report: ReportState;
   map: MapState;
 }
 

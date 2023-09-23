@@ -24,5 +24,12 @@ export class LauncherEffects {
     )
   }, {dispatch: false});
 
+  resumeProcess$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(launcherActions.resumeProcess),
+      tap(sessionId => this.launcherService.resumeProcess(sessionId))
+    )
+  }, {dispatch: false});
+
 }
 

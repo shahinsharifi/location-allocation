@@ -22,7 +22,9 @@ public class VectorTileUtils {
     String defaultColor = "#CCCCCC"; // Default grey color for facility_id = -1
 
     for (String value : distinctValues) {
-      if(!value.equals("-1")) {
+      if(value.equals("-1")) {
+        stops.add(new Object[] {value, defaultColor});
+      } else {
         stops.add(new Object[] {value, getRandomColor()});
       }
     }
