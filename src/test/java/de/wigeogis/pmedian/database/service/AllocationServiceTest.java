@@ -1,16 +1,14 @@
 package de.wigeogis.pmedian.database.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.entity.Allocation;
 import de.wigeogis.pmedian.database.entity.Region;
 import de.wigeogis.pmedian.database.entity.Session;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AllocationServiceTest {
 

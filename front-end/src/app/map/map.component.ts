@@ -68,12 +68,12 @@ export class MapComponent implements OnInit, OnDestroy {
 
   initializeMap(map: Map): void {
     console.log(SessionStatus.COMPLETED);
-    // const session: Session = {
-    //   id: 'ae185390-2e29-48b6-b69d-35d67277e100',
-    //   status: SessionStatus.COMPLETED
-    // };
-    // this.mapService.initializeMap(map, session);
-    this.mapService.initializeMap(map, null);
+    const session: Session = {
+      id: '30cf519b-f5f8-41d6-8b3d-21ea3f1d6ef0',
+      status: SessionStatus.COMPLETED
+    };
+    this.mapService.initializeMap(map, session);
+//    this.mapService.initializeMap(map, null);
   }
 
   ngOnDestroy() {

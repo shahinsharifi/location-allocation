@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
@@ -63,6 +64,7 @@ public class LocationAllocationController {
           List<AllocationDto> allocations =
               allocationService.insertAndFetchRegionsByWKTPolygon(
                   session.getId(), session.getWkt());
+
           session.setStatus(SessionStatus.RUNNING);
           notificationService.publishData(
               session.getId(),
@@ -97,7 +99,8 @@ public class LocationAllocationController {
           //                }
           //              });
 
-          ImmutableTable<String, String, Double> distanceMatrix = costService.getCostMatrix();
+          ImmutableTable<String, String, Double> distanceMatrix =
+              costService.getByRegionIdListAndTravelTime(session);
 
           log.info("New session with id '" + session.getId() + "' has been created...");
 

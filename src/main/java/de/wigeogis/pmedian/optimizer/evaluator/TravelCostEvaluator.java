@@ -49,10 +49,10 @@ public class TravelCostEvaluator implements FitnessEvaluator<List<BasicGenome>> 
       Map<RegionDto, RegionDto> allocated = FacilityCandidateUtil.findNearestFacilities(demands, facilities, dMatrix);
 
       //evaluating fitness based on the absolute total travel cost
-      fitnessValue = calculateTotalCost(allocated);
+      //fitnessValue = calculateTotalCost(allocated);
 
       //evaluating fitness based on the standard deviation of the travel cost
-     // fitnessValue = calculateStandardDeviation(allocated);
+      fitnessValue = calculateStandardDeviation(allocated);
 
     } catch (Exception e) {
       LOGGER.error("Error in TravelCostEvaluator: {}", e.getMessage());

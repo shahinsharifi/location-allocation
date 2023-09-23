@@ -71,11 +71,11 @@ export class LauncherComponent implements OnInit, OnDestroy {
       wkt: [null, Validators.required]
     });
     this.parametersFormGroup = this.formBuilder.group({
-      numberOfFacilities: [null, Validators.required],
-      maxTravelTimeInMinutes: [null, Validators.required]
+      numberOfFacilities: [30, Validators.required],
+      maxTravelTimeInMinutes: [25, Validators.required]
     });
     this.runningTimeFormGroup = this.formBuilder.group({
-      maxRunningTimeInMinutes: [null, Validators.required]
+      maxRunningTimeInMinutes: [30, Validators.required]
     });
   }
 

@@ -17,11 +17,14 @@ public class VectorTileUtils {
     return String.format("#%02x%02x%02x", r, g, b);
   }
 
-  public static Map<String, Object> getPaintForValues(
-      String columnName, List<String> distinctValues) {
+  public static Map<String, Object> getPaintForValues(String columnName, List<String> distinctValues) {
     List<Object> stops = new ArrayList<>();
+    String defaultColor = "#CCCCCC"; // Default grey color for facility_id = -1
+
     for (String value : distinctValues) {
-      stops.add(new Object[] {value, getRandomColor()});
+      if(!value.equals("-1")) {
+        stops.add(new Object[] {value, getRandomColor()});
+      }
     }
 
     Map<String, Object> paint = new HashMap<>();
@@ -30,8 +33,12 @@ public class VectorTileUtils {
         Map.of(
             "property", columnName,
             "type", "categorical",
-            "stops", stops));
-    paint.put("fill-opacity", 0.5);
+            "stops", stops,
+            "default", defaultColor  // Setting default color
+        ));
+    paint.put("fill-opacity", 0.4);
+    paint.put("fill-outline-color", "hsla(0, 0%, 0%, 0.7)");
+
     return paint;
   }
 

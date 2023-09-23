@@ -1,11 +1,16 @@
 package de.wigeogis.pmedian.database.service;
 
 import com.google.common.collect.ImmutableTable;
+import de.wigeogis.pmedian.database.dto.SessionDto;
+import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.database.entity.TravelCost;
 import de.wigeogis.pmedian.database.repository.TravelCostRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -25,13 +30,13 @@ public class TravelCostService {
     this.repository = repository;
   }
 
-  @Bean
+
   private void preloadTravelCostMatrices() {
     log.info("Please wait, the travel cost matrix is being loaded ...");
 
     List<TravelCost> travelCosts = this.getAll();
-//        this.getByStartAndEndRegExp(
-//            "^DE-(8[0-9]{4}|9[0-8][0-9]{3})$", "^DE-(8[0-9]{4}|9[0-8][0-9]{3})$");
+    //        this.getByStartAndEndRegExp(
+    //            "^DE-(8[0-9]{4}|9[0-8][0-9]{3})$", "^DE-(8[0-9]{4}|9[0-8][0-9]{3})$");
 
     costMatrix =
         travelCosts.stream()
@@ -60,6 +65,20 @@ public class TravelCostService {
     List<TravelCost> target = new ArrayList<>();
     repository.findAll().iterator().forEachRemaining(target::add);
     return target;
+  }
+
+  public ImmutableTable<String, String, Double> getByRegionIdListAndTravelTime(SessionDto session) {
+
+    List<TravelCost> cost =
+        repository.findTravelCostsBySessionAndTravelTimeLessThan(
+            session.getId(), session.getMaxTravelTimeInMinutes());
+
+    return cost.stream()
+        .collect(
+            ImmutableTable.toImmutableTable(
+                TravelCost::getStartRegionId,
+                TravelCost::getEndRegionId,
+                TravelCost::getTravelTimeInMinutes));
   }
 
   public boolean existByStartIdAndEndId(String startRegionId, String endRegionId) {

@@ -1,7 +1,6 @@
 package de.wigeogis.pmedian.api;
 
 import de.wigeogis.pmedian.database.dto.AllocationDto;
-import de.wigeogis.pmedian.database.dto.LocationDto;
 import de.wigeogis.pmedian.database.dto.VectorTileLayerDto;
 import de.wigeogis.pmedian.database.dto.VectorTileLayerDto.BoundingBoxDto;
 import de.wigeogis.pmedian.database.service.AllocationService;
@@ -79,17 +78,16 @@ public class VectorTileController {
                 "case",
                 Arrays.asList("boolean", Arrays.asList("feature-state", "highlight"), false),
                 "#ff9900", // Highlight color
-                String.format("#%02x%02x%02x", 163, 163, 163) // Original color
+                "#CCCCCC"
                 ));
 
     layer.setPaint(
         Map.of(
-            "fill-color",
-            fillColorValue,
-            "fill-opacity",
-            0.5,
-            "fill-outline-color",
-            "hsl(0, 0%, 47%)"));
+            "fill-color", fillColorValue,
+            "fill-opacity", 0.4,
+            "fill-outline-color", "hsla(0, 0%, 0%, 0.7)"
+        )
+    );
 
     return layer;
   }

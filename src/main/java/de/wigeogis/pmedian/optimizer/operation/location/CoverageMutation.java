@@ -44,28 +44,10 @@ public class CoverageMutation implements EvolutionaryOperator<BasicGenome> {
   }
 
   private BasicGenome mutateGenome(List<BasicGenome> chromosome, BasicGenome genome, Random rng) {
-
-    List<String> reachableRegionCodes =
-        distanceMatrix.row(genome.getRegionId()).keySet().stream().toList();
-    // String nearestCandidate =
-    // reachableRegion.entrySet().stream().min(Map.Entry.comparingByValue()).get().getKey();
-    List<String> top10NearestCandidate =
-        distanceMatrix.row(genome.getRegionId()).entrySet().stream()
-            .sorted(Map.Entry.comparingByValue())
-            .limit(10)
-            .map(Map.Entry::getKey)
-            .toList();
-    int randomNumber = rng.nextInt(top10NearestCandidate.size());
-    String candidate = top10NearestCandidate.get(randomNumber);
-
-    List<String> newReachableRegionCodes =
-        distanceMatrix.row(genome.getRegionId()).keySet().stream().toList();
-
+    int randomNumber = rng.nextInt(demands.size());
+    String candidate = demands.get(randomNumber).getId();
     BasicGenome testGenome = new BasicGenome(candidate);
-    if (!chromosome.contains(testGenome)
-        && newReachableRegionCodes.size() >= reachableRegionCodes.size())
-      genome.setRegionId(candidate);
-
+    if (!chromosome.contains(testGenome)) genome.setRegionId(candidate);
     return genome;
   }
 

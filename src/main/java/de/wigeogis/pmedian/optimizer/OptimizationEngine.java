@@ -71,7 +71,12 @@ public class OptimizationEngine {
         FacilityCandidateUtil.findFacilityCandidates(
             regions, distanceMatrix, numberOfFacilities, session.getMaxTravelTimeInMinutes(), rng);
 
-    numberOfFacilities = Math.min(numberOfFacilities, initialSeed.size());
+//    List<RegionDto> initialSeed =
+//        FacilityCandidateUtil.findMinimumFacilityCandidates(
+//            regions, distanceMatrix, session.getMaxTravelTimeInMinutes());
+
+    if(initialSeed.size() > numberOfFacilities)
+      numberOfFacilities = initialSeed.size();
 
     log.info("Initial seed with size '" + numberOfFacilities + "' has been created...");
 
@@ -93,12 +98,14 @@ public class OptimizationEngine {
     EvolutionaryOperator<List<BasicGenome>> locationPipeline =
         new LocationOperationFactory(session.getId())
             .createEvolutionPipeline(regions, distanceMatrix);
-    CoverageEvaluator coverageEvaluator = new CoverageEvaluator(session.getId(), regions, distanceMatrix, notificationService);
+    CoverageEvaluator coverageEvaluator =
+        new CoverageEvaluator(session.getId(), regions, distanceMatrix, notificationService);
     GenerationalEvolutionEngine<List<BasicGenome>> locationEngine =
         new GenerationalEvolutionEngine<>(
             locationCandidateFactory, locationPipeline, coverageEvaluator, selection, rng);
     locationEngine.addEvolutionObserver(
-        new EvolutionLogger(session.getId(), allocationDtos, distanceMatrix, eventPublisher, notificationService));
+        new EvolutionLogger(
+            session.getId(), allocationDtos, distanceMatrix, eventPublisher, notificationService));
     locationEngine.setSingleThreaded(true);
 
     log.info("Running location engine...");
@@ -136,12 +143,14 @@ public class OptimizationEngine {
     EvolutionaryOperator<List<BasicGenome>> allocationPipeline =
         new AllocationOperationFactory(session.getId())
             .createEvolutionPipeline(regions, distanceMatrix);
-    TravelCostEvaluator travelCostEvaluator = new TravelCostEvaluator(session.getId(), regions, distanceMatrix, notificationService);
+    TravelCostEvaluator travelCostEvaluator =
+        new TravelCostEvaluator(session.getId(), regions, distanceMatrix, notificationService);
     GenerationalEvolutionEngine<List<BasicGenome>> allocationEngine =
         new GenerationalEvolutionEngine<>(
             allocationCandidateFactory, allocationPipeline, travelCostEvaluator, selection, rng);
     allocationEngine.addEvolutionObserver(
-        new EvolutionLogger(session.getId(), allocationDtos, distanceMatrix, eventPublisher, notificationService));
+        new EvolutionLogger(
+            session.getId(), allocationDtos, distanceMatrix, eventPublisher, notificationService));
     allocationEngine.setSingleThreaded(true);
 
     // Running allocation engine
@@ -160,8 +169,6 @@ public class OptimizationEngine {
             12, 7, allocationAbortSignal, new Stagnation(2000, false), elapsedTime);
     end = System.currentTimeMillis();
 
-    // Cleaning up database
-    log.info("Result tables are cleaned up ...");
 
     List<RegionDto> facilitiesCodes =
         resultAllocation.stream().map(BasicGenome::getRegionDto).toList();

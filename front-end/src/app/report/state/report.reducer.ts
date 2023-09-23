@@ -21,20 +21,21 @@ export const reportReducer = createReducer<ReportState>(
     return {...state, logs};
   }),
   on(reportActions.updateLocationFitness, (state, {fitness}) => {
+    const _fitness = state.location.fitness ? [...state.location.fitness, fitness] : [fitness];
     return {
       ...state,
       ...state.location,
-      fitness: fitness
+      fitness: _fitness
     };
   }),
   on(reportActions.updateAllocationFitness, (state, {fitness}) => {
+      const _fitness = state.allocation.fitness ? [...state.allocation.fitness, fitness] : [fitness];
       return {
         ...state,
         ...state.allocation,
-        fitness: fitness
+        fitness: _fitness
       };
-    }
-  ),
+    }),
   on(reportActions.updateAllocationTravelCostDistribution, (state, {travelCostDistribution}) => {
       return {
         ...state,
@@ -42,5 +43,5 @@ export const reportReducer = createReducer<ReportState>(
         travelCostDistribution: travelCostDistribution
       };
     }
-  )
+  ),
 );

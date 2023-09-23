@@ -15,7 +15,7 @@ import {
 import {CommonModule} from "@angular/common";
 import {FlexModule} from "@angular/flex-layout";
 import {MatCardModule} from "@angular/material/card";
-import {Observable, Subject} from "rxjs";
+import {Observable, Subject, takeUntil} from "rxjs";
 import {select, Store} from "@ngrx/store";
 import {AppState} from "../../core/state/app.state";
 import {MessageSubject} from "../../core/websocket/message";
@@ -42,68 +42,85 @@ export class ChartComponent implements OnInit, OnDestroy {
   progressDataStream$: Observable<any>;
 
   public yAxisExtent: number = undefined;
-  public data: any[];
+  public data: any[] = null;
+  public subjectValue: string;
+  public subjectProperty: string;
 
   constructor(private store: Store<AppState>) {
-    const data: any[] = [];
-    data.push({Label: '0', Value: 0});
-    this.data = data;
-    this.progressDataStream$ = this.store.pipe(select(state => state.result));
+      this.data = [{ Label: '0', Value: 0 }];
+      this.setSubjectValues();
+      this.progressDataStream$ = this.store.pipe(select(state => state.result[this.subjectValue][this.subjectProperty]));
   }
 
   ngOnInit(): void {
-    this.progressDataStream$.subscribe(data => {
-      if (data) {
-        switch (this.chartSubject) {
-          case MessageSubject.SESSION_LOCATION_FITNESS_DATA:
-            if (data.location) {
-              this.processFitnessData.bind(this)(data.location.fitness);
-            }
-            break;
-          case MessageSubject.SESSION_ALLOCATION_FITNESS_DATA:
-            if (data.allocation) {
-              this.processFitnessData.bind(this)(data.allocation.fitness);
-            }
-            break;
-          case MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION:
-            if (data.allocation) {
-              this.processTravelCostDistributionData.bind(this)(data.allocation.travelCostDistribution);
-            }
-            break;
-          default:
-            break;
-        }
-      }
-    });
+    this.progressDataStream$.pipe(takeUntil(this.destroy$)).subscribe(this.processData.bind(this));
   }
 
+  setSubjectValues(): void {
+    switch (this.chartSubject) {
+      case MessageSubject.SESSION_LOCATION_FITNESS_DATA:
+        this.subjectValue = 'location';
+        this.subjectProperty = 'fitness';
+        break;
+      case MessageSubject.SESSION_ALLOCATION_FITNESS_DATA:
+        this.subjectValue = 'allocation';
+        this.subjectProperty = 'fitness';
+        break;
+      default:
+        this.subjectValue = 'allocation';
+        this.subjectProperty = 'travelCostDistribution';
+        break;
+    }
+  }
 
-  processFitnessData(data: any[]) {
-    if (data == null || data.length === 0) return;
+  processData(data: any): void {
+    if (data == null) return;
 
-    if(this.yAxisExtent == null)
-      this.yAxisExtent = data[data.length - 1].value;
+    switch (this.chartSubject) {
+      case MessageSubject.SESSION_LOCATION_FITNESS_DATA:
+        console.log('processData', data.location);
+        this.processFitnessData(data.location.fitness);
+        break;
+      case MessageSubject.SESSION_ALLOCATION_FITNESS_DATA:
+        console.log('allocation.fitness', data.allocation);
+        this.processFitnessData(data.allocation.fitness);
+        break;
+      case MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION:
+        console.log('travelCostDistribution', data.allocation);
+        this.processTravelCostDistributionData(data.allocation.travelCostDistribution);
+        break;
+      default:
+        break;
+    }
+  }
 
-    const newItems = data[data.length - 1];
-    const newVal = {
-      Label: String(newItems.label),
-      Value: newItems.value
-    };
+  processFitnessData(data: any[]): void {
+    console.log('processFitnessData', data);
+    if (data && data.length > 0) {
+      this.updateFitnessData(data);
+    }
+  }
+
+  updateFitnessData(data: any[]): void {
+    console.log('updateFitnessData', data);
+    this.yAxisExtent = this.yAxisExtent || data[0].value;
+    const newVal = { Label: String(data[data.length-1].label), Value: data[data.length-1].value };
     this.data.push(newVal);
     this.chart.notifyInsertItem(this.data, this.data.length - 1, newVal);
     if (this.data.length > 20) {
-      const oldVal = this.data[0];
-      this.data.shift();
+      const oldVal = this.data.shift();
       this.chart.notifyRemoveItem(this.data, 0, oldVal);
     }
   }
 
-  processTravelCostDistributionData(data: any[]) {
-    if (data == null || data.length === 0) return;
-    this.data = data;
-    this.chart.bindData();
+  processTravelCostDistributionData(data: any[]): void {
+    if (data && data.length > 0) {
+      const newVal: any[] = data[data.length-1];
+      this.data = [];
+      this.data.push(newVal);
+      this.chart.bindData();
+    }
   }
-
 
   ngOnDestroy(): void {
     this.destroy$.next();

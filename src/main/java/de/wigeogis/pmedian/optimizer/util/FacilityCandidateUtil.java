@@ -82,8 +82,11 @@ public class FacilityCandidateUtil {
   }
 
   public static Set<RegionDto> getReachableZipcodes(
-      RegionDto center, Table<String, String, Double> travelTimeMatrix, Double maxTravelTime) {
-    return travelTimeMatrix.row(center.getId()).entrySet().stream()
+      RegionDto center,
+      Table<String, String, Double> travelTimeMatrix,
+      Double maxTravelTime) {
+
+	  return travelTimeMatrix.row(center.getId()).entrySet().stream()
         .filter(entry -> entry.getValue() <= maxTravelTime)
         .map(Map.Entry::getKey)
         .map(regionId -> new RegionDto().setId(regionId))
@@ -110,12 +113,13 @@ public class FacilityCandidateUtil {
 
       if (nearestFacility != null) {
         nearestFacilities.put(demand, nearestFacility);
-      } else if (distanceMatrix.row(demand.getId()).size() == 1
-          && distanceMatrix.contains(demand.getId(), demand.getId())) {
-        nearestFacilities.put(
-            new RegionDto().setId(demand.getId()),
-            new RegionDto().setId(demand.getId()));
       }
+//      else if (distanceMatrix.row(demand.getId()).size() == 1
+//          && distanceMatrix.contains(demand.getId(), demand.getId())) {
+//        nearestFacilities.put(
+//            new RegionDto().setId(demand.getId()),
+//            new RegionDto().setId(demand.getId()));
+//      }
     }
 
     return nearestFacilities;
@@ -132,7 +136,7 @@ public class FacilityCandidateUtil {
 
       for (RegionDto facility : facilities) {
         Double distance = distanceMatrix.get(demand.getRegionId(), facility.getId());
-        if (distance != null && distance < minDistance) {
+        if (distance != null && distance <= minDistance) {
           minDistance = distance;
           nearestFacility = facility;
         }
@@ -143,7 +147,7 @@ public class FacilityCandidateUtil {
         demand.setTravelCost(minDistance);
       } else if (distanceMatrix.row(demand.getRegionId()).size() == 1
           && distanceMatrix.contains(demand.getRegionId(), demand.getRegionId())) {
-        demand.setFacilityRegionId(demand.getRegionId());
+        demand.setFacilityRegionId("-1");
         demand.setTravelCost(0.0);
       }
     }
