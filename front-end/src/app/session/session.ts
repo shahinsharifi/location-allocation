@@ -1,4 +1,5 @@
 export enum SessionStatus {
+  INIT = 'INIT',
   PENDING = 'PENDING',
   STARTING = 'STARTING',
   RUNNING = 'RUNNING',
@@ -8,7 +9,7 @@ export enum SessionStatus {
 
 export interface Session {
   id?: string;
-  status?: SessionStatus; // Replace 'running' with 'status'
+  status?: SessionStatus | SessionStatus.INIT;
   createdAt?: string;
   numberOfFacilities?: number;
   maxTravelTimeInMinutes?: number;

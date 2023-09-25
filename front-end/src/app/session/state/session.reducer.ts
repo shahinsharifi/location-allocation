@@ -16,4 +16,14 @@ export const sessionReducer = createReducer<SessionState>(
   on(sessionActions.updateSession, (state, {activeSession}) => {
     return { ...state, activeSession };
   }),
+  on(sessionActions.deleteSession, (state, {activeSession}) => {
+    const sessions = state.sessions.filter(session => session.id !== activeSession.id);
+    return { ...state, sessions, activeSession: undefined };
+  }),
+  on(sessionActions.activateSession, (state, {activeSession}) => {
+    return { ...state, activeSession };
+  }),
+  on(sessionActions.resetSession, (state) => {
+    return { ...state, activeSession: undefined };
+  }),
 );

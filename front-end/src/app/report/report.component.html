@@ -3,8 +3,8 @@
   <!-- Chart 1 -->
   <div fxLayoutAlign="center center"  fxFlex="50">
     <div fxLayout="column" fxFill>
-      <mat-card fxFill>
-        <mat-card-content fxFill fxLayout="column">
+      <mat-card class="app-card" fxFill>
+        <mat-card-content class="app-card-content" fxFill fxLayout="column">
           <app-chart fxFill [chartTitle]="'Live Optimization Progress'"
                      [xAxisTitle]="'Generation'"
                      [yAxisTitle]="'Fitness Score'"
@@ -18,8 +18,8 @@
   <!-- Chart 2 -->
   <div fxLayoutAlign="center center"  fxFlex="50">
     <div fxLayout="column" fxFill>
-      <mat-card fxFill>
-        <mat-card-content fxFill fxLayout="column">
+      <mat-card class="app-card" fxFill>
+        <mat-card-content class="app-card-content" fxFill fxLayout="column">
           <app-chart fxFill
                      [chartTitle]="'Distribution of Travel-time'"
                      [xAxisTitle]="'Travel-time to Nearest Facility'"
@@ -32,5 +32,3 @@
   </div>
 
 </div>
-
-

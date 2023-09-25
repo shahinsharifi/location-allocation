@@ -1,4 +1,4 @@
-import {createActionGroup, props} from '@ngrx/store';
+import {createActionGroup, emptyProps, props} from '@ngrx/store';
 import {Session} from "../session";
 
 export const sessionActions = createActionGroup({
@@ -7,7 +7,8 @@ export const sessionActions = createActionGroup({
     'Create Session': props<{ activeSession: Session }>(),
     'Update Session': props<{ activeSession: Session }>(),
     'Delete Session': props<{ activeSession: Session }>(),
-    'Activate Session': props<{ activeSession: Session }>()
+    'Activate Session': props<{ activeSession: Session }>(),
+    'Reset Session': emptyProps(),
   },
 });
 

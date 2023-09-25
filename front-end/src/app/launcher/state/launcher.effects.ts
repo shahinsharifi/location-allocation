@@ -32,4 +32,3 @@ export class LauncherEffects {
   }, {dispatch: false});
 
 }
-

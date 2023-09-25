@@ -18,7 +18,6 @@ import {Observable, Subject} from "rxjs";
 import {select, Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
 import {launcherActions} from "./state/launcher.actions";
-import {mapActions} from "../map/state/map.actions";
 import {MatSliderModule} from "@angular/material/slider";
 import {RegionSelection} from "../map/region-selection";
 
@@ -35,6 +34,7 @@ import {RegionSelection} from "../map/region-selection";
 export class LauncherComponent implements OnInit, OnDestroy {
   @ViewChild('stepper') stepper: MatStepper;
   isChecked: boolean = false;
+  selectedIndex: number = 0;
   regionSelectionFormGroup: FormGroup;
   parametersFormGroup: FormGroup;
   runningTimeFormGroup: FormGroup;
@@ -66,7 +66,7 @@ export class LauncherComponent implements OnInit, OnDestroy {
     });
   }
 
-  private initializeForm(): void {
+  initializeForm(): void {
     this.regionSelectionFormGroup = this.formBuilder.group({
       wkt: [null, Validators.required]
     });
@@ -79,10 +79,26 @@ export class LauncherComponent implements OnInit, OnDestroy {
     });
   }
 
+  get activeStepFormGroup(): FormGroup {
+    if (this.stepper) {
+      switch(this.stepper.selectedIndex) {
+        case 0: return this.regionSelectionFormGroup;
+        case 1: return this.parametersFormGroup;
+        case 2: return this.runningTimeFormGroup;
+        default: return null;
+      }
+    }
+    return null;
+  }
+
 
   start() {
     if (!this.regionSelectionFormGroup.invalid && !this.parametersFormGroup.invalid) {
-      const session: Session = {...this.regionSelectionFormGroup.value, ...this.parametersFormGroup.value, ...this.runningTimeFormGroup.value};
+      const session: Session = {
+        ...this.regionSelectionFormGroup.value,
+        ...this.parametersFormGroup.value,
+        ...this.runningTimeFormGroup.value
+      };
       this.store.dispatch(launcherActions.startProcess(session));
     } else {
       console.log('Form is not valid')
@@ -108,13 +124,12 @@ export class LauncherComponent implements OnInit, OnDestroy {
   }
 
   clearSelection() {
-    this.store.dispatch(mapActions.clearSelection());
+    this.store.dispatch(launcherActions.clearSelection());
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
 
 }

@@ -1,17 +1,37 @@
-.app-chart{
-  padding-bottom: 10px;
-  igx-category-chart{
-    padding-bottom: 20px;
+.app-chart {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+
+  .legend-container {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  #legendTitle, .legend-title {
-    width: 100%;
-    margin: 0;
-    vertical-align: middle;
-    white-space: nowrap;
-    padding: 0 0 0.75rem 0.75rem;
+
+  .legend-title {
     font-size: 1.25rem;
     font-weight: 600;
     font-family: 'Titillium Web', Verdana, Tahoma, sans-serif;
     color: black;
+    margin-right: auto;
+  }
+
+  igx-legend {
+    margin-left: auto;
+  }
+
+  .chart-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  igx-category-chart {
+    width: 100%;
+    height: 100%;
   }
 }

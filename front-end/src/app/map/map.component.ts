@@ -9,12 +9,16 @@ import {Session, SessionStatus} from "../session/session";
 import {select, Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
 import {RegionSelection} from "./region-selection";
+import {MatCardModule} from "@angular/material/card";
+import {FlexModule} from "@angular/flex-layout";
 
 @Component({
   selector: 'app-map',
   imports: [
     NgxMapLibreGLModule,
     MatDialogModule,
+    MatCardModule,
+    FlexModule,
   ],
   standalone: true,
   templateUrl: './map.component.html',
@@ -44,7 +48,7 @@ export class MapComponent implements OnInit, OnDestroy {
         this.mapService.enableDrawing();
       } else {
         this.mapService.disableDrawing();
-        if (selection.wkt == null && selection.selectedRegions === 0) {
+        if (selection.wkt != null || selection.selectedRegions === 0) {
           this.mapService.clearSelection();
         }
       }
@@ -53,6 +57,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.sessionState$
     .pipe(takeUntil(this.destroy$))
     .subscribe(session => {
+      console.log('Here');
       if (session != null && session.id != null) {
         if (session.status === 'RUNNING' || session.status === 'COMPLETED' || session.status === 'INTERRUPTED') {
           this.mapService.updateLayerVisibility({
@@ -61,6 +66,8 @@ export class MapComponent implements OnInit, OnDestroy {
             allocation: true
           })
           this.mapService.loadResultLayer(session.id).then(() => console.log('Loading allocation layer'));
+        }else if(session.status === 'INIT'){
+          this.mapService.resetMap();
         }
       }
     });
@@ -69,7 +76,7 @@ export class MapComponent implements OnInit, OnDestroy {
   initializeMap(map: Map): void {
     console.log(SessionStatus.COMPLETED);
     // const session: Session = {
-    //   id: '30cf519b-f5f8-41d6-8b3d-21ea3f1d6ef0',
+    //   id: '15ddeffc-1a99-455c-a829-5c345736ea2c',
     //   status: SessionStatus.COMPLETED
     // };
     // this.mapService.initializeMap(map, session);

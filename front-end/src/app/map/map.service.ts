@@ -26,39 +26,48 @@ import {LayerVisibility} from "./layer-visibility";
 })
 export class MapService {
 
-
   private map: Map = null;
+  private layerVisibility: LayerVisibility;
   private draw: MapboxDraw = null;
   private mapUtils = new MapUtils();
 
-  constructor(private store: Store<AppState>, private commandService: CommandService) {
-  }
+  constructor(private store: Store<AppState>, private commandService: CommandService) {}
+
 
   public initializeMap(map: Map, session: Session | null): void {
     this.map = map;
     this.map.addControl(new NavigationControl());
     this.map.getCanvasContainer().style.cursor = '';
-    this.initializeDrawing();
-
-    if (session === null || session.id === null) {
-      this.loadBaseLayer();
-    } else if (
+    this.loadBaseLayer();
+    if (session != null && session.id != null && (
       session.status === SessionStatus.RUNNING ||
       session.status === SessionStatus.COMPLETED ||
       session.status === SessionStatus.INTERRUPTED
-    ) {
+    )) {
       this.loadResultLayer(session.id).then(() => console.log('Loaded result layer'));
+    }
+
+    if(this.layerVisibility){
+      this.updateLayerVisibility(this.layerVisibility);
     }
   }
 
-  private initializeDrawing(): void {
+  public enableDrawing(): void {
     if (this.map == null) return;
     this.draw = new MapboxDraw(this.getMapboxDrawOptions());
     this.map.addControl(this.draw as unknown as IControl);
     this.map.getCanvasContainer().style.cursor = 'crosshair';
     this.map.on('draw.create', this.selectFeatures.bind(this));
     this.map.on('draw.delete', this.clearSelection.bind(this));
-    this.map.on('draw.update', this.selectFeatures.bind(this));
+    this.draw.changeMode(MapboxDraw.constants.modes.DRAW_POLYGON);
+  }
+
+  public disableDrawing(): void {
+    if (this.map == null || this.draw == null) return;
+    this.map.removeControl(this.draw as unknown as IControl);
+    this.map.getCanvasContainer().style.cursor = '';
+    this.draw = null;
+    console.log('Drawing disabled');
   }
 
   private getMapboxDrawOptions(): object {
@@ -129,19 +138,9 @@ export class MapService {
     return locationColumns[layerName];
   };
 
-  public enableDrawing(): void {
-    if (this.map == null) return;
-    this.draw.changeMode(MapboxDraw.constants.modes.DRAW_POLYGON);
-    this.map.getCanvasContainer().style.cursor = 'crosshair';
-  }
 
-  public disableDrawing(): void {
-    if (this.map == null || this.draw == null) return;
-    this.map.getCanvasContainer().style.cursor = '';
-    this.draw.deleteAll();
-    this.draw = null;
 
-  }
+
 
   private loadBaseLayer(): void {
     this.map.boxZoom.disable();
@@ -154,6 +153,7 @@ export class MapService {
         'id': 'region-selection',
         'type': 'fill',
         'source': layer.source,
+        'visibility': false,
         'source-layer': layer['source-layer'],
         'paint': {
           'fill-outline-color': '#484896',
@@ -220,13 +220,14 @@ export class MapService {
     if (polygon.features.length > 0) {
       const boundingBox = bbox(polygon);
       const queryBox = proj4('EPSG:4326', 'EPSG:3857', boundingBox);
-      const candidateIntersectingFeatures = this.map.queryRenderedFeatures([[queryBox[0], queryBox[1]], [queryBox[2], queryBox[3]]], {
-        layers: ['region']
-      });
+      const candidateIntersectingFeatures = this.map.queryRenderedFeatures(
+        [[queryBox[0], queryBox[1]], [queryBox[2], queryBox[3]]], {
+          layers: ['region']
+        });
 
       const drawnPolygon = polygon.features[0];
-      const trulyIntersectingFeatures = candidateIntersectingFeatures.filter(feature =>
-        booleanIntersects(drawnPolygon, feature)
+      const trulyIntersectingFeatures = candidateIntersectingFeatures.filter(
+        feature => booleanIntersects(drawnPolygon, feature)
       );
 
       trulyIntersectingFeatures.forEach(feature => {
@@ -314,12 +315,10 @@ export class MapService {
   }
 
   handleClickOnLayers(e: any): void {
-
     const features = this.map.queryRenderedFeatures(e.point);
     const layers = features.map((feat) => {
       return feat.layer.id;
     });
-
 
     if (layers.includes('location')) {
       const coordinates = features[0].geometry['coordinates'].slice();
@@ -347,7 +346,7 @@ export class MapService {
         htmlContent += `<h6 style="margin: 0 0 10px 0; text-align: center;">${properties[column['name']]}</h6>`;
       } else {
         let value = properties[column['name']];
-        if(typeof value === 'number') {
+        if (typeof value === 'number') {
           value = value.toFixed(2);
         }
         htmlContent += `<p style="margin: 0 0 10px 0;"><strong>${column['title']}:</strong> ${value}</p>`;
@@ -364,6 +363,21 @@ export class MapService {
     this.map.getCanvas().style.cursor = cursorType;
   }
 
+  public getMap(): Map | null {
+    return this.map;
+  }
+
+  public resetMap(): void {
+    if (this.map) {
+      this.disableDrawing();
+      this.updateLayerVisibility({
+        region: true,
+        location: false,
+        allocation: false
+      });
+    }
+  }
+
   public destroyMap(): void {
     if (this.map) {
       this.map.remove();
@@ -374,8 +388,5 @@ export class MapService {
     }
   }
 
-  public getMap(): Map | null {
-    return this.map;
-  }
 }
 

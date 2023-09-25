@@ -1,16 +1,19 @@
 <mat-card class="launcher-container mat-elevation-z4">
-  <mat-card-content>
-    <mat-stepper fxLayout="column" fxFlex="100%"  linear #stepper orientation="horizontal"
-                 class="stepper custom-stepper">
+  <mat-card-content class="card-content">
+    <mat-stepper fxLayout="column" fxFill linear #stepper orientation="horizontal" class="stepper custom-stepper">
       <mat-step label="Step 1" [stepControl]="regionSelectionFormGroup">
         <form [formGroup]="regionSelectionFormGroup" fxLayout="column" class="launcher-input-form">
           <ng-template matStepLabel>Select Regions</ng-template>
 
           <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="10px" class="launcher-input-form">
             <div fxLayout="row" fxFill fxLayoutAlign="start center" class="button-group">
-              <div>
-                <mat-label> Number of Selected Features: {{ (mapSelectionState$ | async)?.selectedRegions || 0 }}</mat-label>
-              </div>
+              <mat-button-toggle #toggleBtn class="toggle-button"
+                                 [ngClass]="isChecked ? 'active' : null" [checked]="isChecked"
+                                 matTooltip="Select regions by drawing a polygon"
+                                 (click)="toggleSelection(toggleBtn.checked)">
+                <mat-icon [svgIcon]="'wgg_icons:convex_hull'">convex_hull</mat-icon>
+                Select
+              </mat-button-toggle>
 
               <!-- Updated button appearance -->
               <button mat-stroked-button matTooltip="Clear selected regions" (click)="clearSelection()">
@@ -18,11 +21,12 @@
                 Deselect
               </button>
 
-              <mat-button-toggle class="toggle-button" [checked]="isChecked" #toggleBtn (click)="toggleSelection(toggleBtn.checked)" matTooltip="Select regions by drawing a polygon">
-                <mat-icon [svgIcon]="'wgg_icons:convex_hull'">convex_hull</mat-icon>
-                Select
-              </mat-button-toggle>
+            </div>
+          </div>
 
+          <div fxLayout="row" fxFill class="button-group">
+            <div fxLayoutAlign="start center">
+              <mat-label> Number of Selected Features: {{ (mapSelectionState$ | async)?.selectedRegions || 0 }}</mat-label>
             </div>
           </div>
 
@@ -36,12 +40,11 @@
         </form>
       </mat-step>
 
-
       <mat-step label="Step 2" [stepControl]="parametersFormGroup">
         <form [formGroup]="parametersFormGroup" fxLayout="column" class="launcher-input-form">
           <ng-template matStepLabel>Specify Parameters</ng-template>
           <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
-            <mat-form-field class="location-number-field" appearance="outline" fxFlex="40">
+            <mat-form-field class="location-number-field" style="max-width: 100px;" fxFlex="40">
               <mat-label>Number of Facilities</mat-label>
               <input matInput formControlName="numberOfFacilities" type="number"
                      placeholder="Desired Number of Locations">
@@ -79,10 +82,10 @@
         <form [formGroup]="runningTimeFormGroup" fxLayout="column" class="launcher-input-form">
           <ng-template matStepLabel>Run</ng-template>
           <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
-            <mat-form-field class="location-number-field" appearance="outline" fxFlex="90">
-              <mat-label>Running Time</mat-label>
-              <input matInput formControlName="maxRunningTimeInMinutes" type="number" max="30"
-                     placeholder="Maximum Running Time">
+            <mat-form-field class="location-number-field" style="max-width: 100px;" fxFlex="50">
+              <mat-label>Execution Time-out</mat-label>
+              <input matInput formControlName="maxRunningTimeInMinutes" type="number" max="30" min="5"
+                     placeholder="Add a number between 5 and 30" >
             </mat-form-field>
           </div>
           <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
@@ -93,11 +96,11 @@
           </div>
         </form>
       </mat-step>
-
     </mat-stepper>
-
   </mat-card-content>
+
   <mat-divider></mat-divider>
+
   <mat-card-actions align="end">
     <button mat-stroked-button color="warn" (click)="reset()" matTooltip="Reset form">
       <mat-icon>refresh</mat-icon>

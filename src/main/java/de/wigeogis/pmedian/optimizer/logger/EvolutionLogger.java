@@ -171,7 +171,7 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
     List<Map<String, Object>> distribution = new ArrayList<>();
 
     // Define the intervals
-    int[] intervals = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
+    int[] intervals = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
 
     for (int i = 0; i < intervals.length; i++) {
       int lowerBound = (i == 0) ? 0 : intervals[i - 1];
