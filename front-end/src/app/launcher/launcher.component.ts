@@ -9,11 +9,11 @@ import {MatInputModule} from "@angular/material/input";
 import {MatStepper, MatStepperModule} from "@angular/material/stepper";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatExpansionModule} from "@angular/material/expansion";
-import {Session, SessionStatus} from "../session/session";
+import {Session} from "../session/session";
 import {MatIconModule} from "@angular/material/icon";
 import {FlexModule} from "@angular/flex-layout";
 import {MatTooltipModule} from "@angular/material/tooltip";
-import {MatButtonToggleModule} from "@angular/material/button-toggle";
+import {MatButtonToggle, MatButtonToggleModule} from "@angular/material/button-toggle";
 import {Observable, Subject} from "rxjs";
 import {select, Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
@@ -32,16 +32,17 @@ import {RegionSelection} from "../map/region-selection";
   styleUrls: ['./launcher.component.scss'],
 })
 export class LauncherComponent implements OnInit, OnDestroy {
+
   @ViewChild('stepper') stepper: MatStepper;
-  isChecked: boolean = false;
-  selectedIndex: number = 0;
+  @ViewChild('toggleBtn') toggleBtn: MatButtonToggle;
+
   regionSelectionFormGroup: FormGroup;
   parametersFormGroup: FormGroup;
   runningTimeFormGroup: FormGroup;
   destroy$ = new Subject<void>();
   sessionState$: Observable<Session>;
   mapSelectionState$: Observable<RegionSelection>;
-  protected readonly SessionStatus = SessionStatus;
+  regionSelection: RegionSelection={};
 
   constructor(
     private store: Store<AppState>,
@@ -53,7 +54,13 @@ export class LauncherComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initializeForm();
     this.mapSelectionState$.subscribe(selection => {
-      if (!selection || !selection.wkt) return;
+      if (!selection) return;
+      this.regionSelection = {
+        ...this.regionSelection,
+        active: selection.active,
+        wkt: selection.wkt,
+        selectedRegions: selection.selectedRegions
+      };
       this.regionSelectionFormGroup.setValue({wkt: selection.wkt});
     });
     this.sessionState$.subscribe(session => {
@@ -79,17 +86,6 @@ export class LauncherComponent implements OnInit, OnDestroy {
     });
   }
 
-  get activeStepFormGroup(): FormGroup {
-    if (this.stepper) {
-      switch(this.stepper.selectedIndex) {
-        case 0: return this.regionSelectionFormGroup;
-        case 1: return this.parametersFormGroup;
-        case 2: return this.runningTimeFormGroup;
-        default: return null;
-      }
-    }
-    return null;
-  }
 
 
   start() {
@@ -110,17 +106,21 @@ export class LauncherComponent implements OnInit, OnDestroy {
   }
 
   reset() {
+    this.store.dispatch(launcherActions.resetSession());
+
     this.stepper.reset();
+    this.toggleBtn.checked = false;
+    this.regionSelection = null;
     this.regionSelectionFormGroup.reset();
     this.parametersFormGroup.reset();
     this.runningTimeFormGroup.reset();
-    this.store.dispatch(launcherActions.resetSession());
   }
 
 
-  toggleSelection(isChecked: boolean): void {
-    this.isChecked = isChecked;
-    this.store.dispatch(launcherActions.toggleSelection({active: isChecked}));
+  toggleSelection(active: boolean): void {
+    if(!this.regionSelection) this.regionSelection = {};
+    this.regionSelection.active = active;
+    this.store.dispatch(launcherActions.toggleSelection({active: active}));
   }
 
   clearSelection() {

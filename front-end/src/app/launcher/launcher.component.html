@@ -8,14 +8,13 @@
           <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="10px" class="launcher-input-form">
             <div fxLayout="row" fxFill fxLayoutAlign="start center" class="button-group">
               <mat-button-toggle #toggleBtn class="toggle-button"
-                                 [ngClass]="isChecked ? 'active' : null" [checked]="isChecked"
+                                 [ngClass]="regionSelection?.active ? 'active' : ''"
                                  matTooltip="Select regions by drawing a polygon"
                                  (click)="toggleSelection(toggleBtn.checked)">
                 <mat-icon [svgIcon]="'wgg_icons:convex_hull'">convex_hull</mat-icon>
                 Select
               </mat-button-toggle>
 
-              <!-- Updated button appearance -->
               <button mat-stroked-button matTooltip="Clear selected regions" (click)="clearSelection()">
                 <mat-icon [svgIcon]="'wgg_icons:close'" class="close-icon"></mat-icon>
                 Deselect
@@ -107,7 +106,7 @@
       Reset
     </button>
     <button mat-stroked-button color="primary" matTooltip="Stop Calculation" (click)="stop()"
-            *ngIf="(sessionState$ | async)?.status === SessionStatus.RUNNING">
+            *ngIf="(sessionState$ | async)?.status === 'RUNNING'">
       <mat-icon>stop</mat-icon>
       Stop
     </button>

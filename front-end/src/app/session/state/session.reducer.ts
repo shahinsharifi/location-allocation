@@ -1,10 +1,11 @@
 import { createReducer, on } from '@ngrx/store';
 import { sessionActions } from './session.actions';
 import { SessionState } from './session.state';
+import {SessionStatus} from "../session";
 
 const initialState: SessionState = {
   activeSession: undefined,
-  sessions: undefined,
+  sessions: [],
 };
 
 export const sessionReducer = createReducer<SessionState>(
@@ -24,6 +25,12 @@ export const sessionReducer = createReducer<SessionState>(
     return { ...state, activeSession };
   }),
   on(sessionActions.resetSession, (state) => {
-    return { ...state, activeSession: undefined };
+    return {
+      ...state,
+      activeSession: {
+        ...initialState.activeSession,
+        status: SessionStatus.INIT
+      }
+    };
   }),
 );

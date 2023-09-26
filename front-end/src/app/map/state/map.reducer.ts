@@ -42,5 +42,14 @@ export const mapReducer = createReducer<MapState>(
       visibility: visibility
     }
   )),
+  on(mapActions.clearSelection, state => ({
+      ...state,
+      selection: {
+        ...state.selection,
+        wkt: null,
+        selectedRegions: 0
+      }
+    }
+  ))
 );
 

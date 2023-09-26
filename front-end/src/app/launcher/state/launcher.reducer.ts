@@ -6,11 +6,7 @@ import {launcherActions} from "./launcher.actions";
 const initialState: LauncherState = {
   sessionId: null,
   stepIndex: 0,
-  selection: {
-    active: false,
-    wkt: null,
-    selectedRegions: 0
-  },
+  selection: null,
   buttons: {
     previous: true,
     next: false,
@@ -25,20 +21,22 @@ const initialState: LauncherState = {
 export const launcherReducer = createReducer<LauncherState>(
   initialState,
 
-  on(launcherActions.changeStep, (state, { stepIndex }) => ({
+  on(launcherActions.changeStep, (state, {stepIndex}) => ({
     ...state,
     stepIndex
   })),
 
-  on(launcherActions.toggleSelection, (state, { active }) => ({
-    ...state,
-    selection: {
-      ...state.selection,
-      active
-    }
-  })),
+  on(launcherActions.toggleSelection, (state,{active}) => {
+    return {
+      ...state,
+      selection: {
+        ...state.selection,
+        active: active
+      }
+    };
+  }),
 
-  on(launcherActions.startProcess, (state, session ) => ({
+  on(launcherActions.startProcess, (state, session) => ({
     ...state,
     sessionId: session.id,
     buttons: {
@@ -68,18 +66,16 @@ export const launcherReducer = createReducer<LauncherState>(
     }
   })),
 
-  on(launcherActions.clearSelection, state => ({
-    ...state,
-    selection: {
-      active: false,
-      wkt: null,
-      selectedRegions: 0
-    },
-    buttons: {
-      ...state.buttons,
-      clear: false
-    }
-  })),
+  on(launcherActions.clearSelection, (state) => {
+    return {
+      ...state,
+      selection: {
+        ...state.selection,
+        wkt: null,
+        selectedRegions: 0
+      }
+    };
+  }),
 
-  on(launcherActions.resetSession, () => initialState)
+  on(launcherActions.resetSession, () => ({ ...initialState })),
 );

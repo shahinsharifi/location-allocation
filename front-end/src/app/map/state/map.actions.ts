@@ -8,7 +8,7 @@ export const mapActions = createActionGroup({
     'Enable Selection': emptyProps(),
     'Disable Selection': emptyProps(),
     'Regions Selected': props<RegionSelection>(),
-    'Clear Selection': emptyProps(),
+    'Clear Selection': props<RegionSelection>(),
     'Change Layer Visibility': props<LayerVisibility>(),
     'Reset Map': emptyProps()
   }
