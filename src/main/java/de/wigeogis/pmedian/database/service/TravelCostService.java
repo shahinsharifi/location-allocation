@@ -2,17 +2,12 @@ package de.wigeogis.pmedian.database.service;
 
 import com.google.common.collect.ImmutableTable;
 import de.wigeogis.pmedian.database.dto.SessionDto;
-import de.wigeogis.pmedian.database.entity.Session;
 import de.wigeogis.pmedian.database.entity.TravelCost;
 import de.wigeogis.pmedian.database.repository.TravelCostRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 @Log4j2

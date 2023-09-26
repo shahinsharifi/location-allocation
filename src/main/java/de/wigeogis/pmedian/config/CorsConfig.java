@@ -11,14 +11,9 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class CorsConfig {
 
-  private final AppProperties appProperties;
-
-  public CorsConfig(AppProperties appProperties) {
-    this.appProperties = appProperties;
-  }
 
   @Bean
-  CorsFilter corsFilter() {
+  CorsFilter corsFilter(AppProperties appProperties) {
     CorsConfiguration corsConfiguration = new CorsConfiguration();
     corsConfiguration.setAllowCredentials(true);
     corsConfiguration.setAllowedOrigins(Collections.singletonList(appProperties.getFrontend().getUrl()));

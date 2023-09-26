@@ -15,8 +15,6 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.math3.stat.Frequency;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.springframework.context.ApplicationEventPublisher;
 import org.uncommons.watchmaker.framework.PopulationData;
 import org.uncommons.watchmaker.framework.islands.IslandEvolutionObserver;

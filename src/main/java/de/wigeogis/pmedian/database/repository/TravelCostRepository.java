@@ -2,15 +2,10 @@ package de.wigeogis.pmedian.database.repository;
 
 import de.wigeogis.pmedian.database.entity.TravelCost;
 import java.util.List;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.transaction.annotation.Transactional;
-
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.repository.CrudRepository;
 import java.util.UUID;
-import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public interface TravelCostRepository extends CrudRepository<TravelCost, Integer> {
