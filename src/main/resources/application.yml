@@ -9,7 +9,7 @@ spring:
     jdbc:
       initialize-schema: always
     job:
-      enabled: true
+      enabled: false
   datasource:
     driverClassName: org.postgresql.Driver
     password: demo123

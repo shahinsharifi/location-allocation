@@ -15,7 +15,6 @@ import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import de.wigeogis.pmedian.websocket.NotificationService;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -42,16 +41,11 @@ public class OptimizationEngine {
   private final ApplicationEventPublisher eventPublisher;
   private final NotificationService notificationService;
 
-  private final ConcurrentHashMap<UUID, UserAbort> locationAbortSignalMap =
-      new ConcurrentHashMap<>();
-
-  private final ConcurrentHashMap<UUID, UserAbort> allocationAbortSignalMap =
-      new ConcurrentHashMap<>();
-
   public List<AllocationDto> evolve(
       SessionDto session,
       List<AllocationDto> allocationDtos,
-      ImmutableTable<String, String, Double> distanceMatrix) {
+      ImmutableTable<String, String, Double> distanceMatrix,
+      UserAbort abortSignal) {
 
     List<RegionDto> regions =
         allocationDtos.stream().map(AllocationDto::toRegionDto).collect(Collectors.toList());
@@ -111,19 +105,11 @@ public class OptimizationEngine {
     log.info("Running location engine...");
     long start = System.currentTimeMillis();
 
-    UserAbort locationAbortSignal;
-    if (locationAbortSignalMap.containsKey(session.getId())) {
-      locationAbortSignal = locationAbortSignalMap.get(session.getId());
-    } else {
-      locationAbortSignal = new UserAbort();
-      locationAbortSignalMap.put(session.getId(), locationAbortSignal);
-    }
-
     locationResult =
         locationEngine.evolve(
             12,
             7,
-            locationAbortSignal,
+            abortSignal,
             new TargetFitness(0, false),
             new Stagnation(2000, false),
             elapsedTime);
@@ -155,44 +141,16 @@ public class OptimizationEngine {
 
     // Running allocation engine
     start = System.currentTimeMillis();
-
-    UserAbort allocationAbortSignal;
-    if (allocationAbortSignalMap.containsKey(session.getId())) {
-      allocationAbortSignal = allocationAbortSignalMap.get(session.getId());
-    } else {
-      allocationAbortSignal = new UserAbort();
-      allocationAbortSignalMap.put(session.getId(), locationAbortSignal);
-    }
+    
 
     List<BasicGenome> resultAllocation =
         allocationEngine.evolve(
-            12, 7, allocationAbortSignal, new Stagnation(2000, false), elapsedTime);
+            12, 7, abortSignal, new Stagnation(2000, false), elapsedTime);
     end = System.currentTimeMillis();
 
 
     List<RegionDto> facilitiesCodes =
         resultAllocation.stream().map(BasicGenome::getRegionDto).toList();
-
-    //        Map<RegionDto, RegionDto> coveredDemands =
-    //            FacilityCandidateUtil.findNearestFacilities(regions, facilitiesCodes,
-    // distanceMatrix);
-    //        log.info(
-    //            resultAllocation.size()
-    //                + " demands points have been allocated by the "
-    //                + facilitiesCodes.size()
-    //                + " facilities ...");
-    //
-    //        List<AllocationDto> allocations =
-    //            coveredDemands.keySet().stream()
-    //                .map(
-    //                    demandDto ->
-    //                        new AllocationDto()
-    //                            .setSessionId(session.getId())
-    //                            .setRegionId(demandDto.getId())
-    //                            .setFacilityRegionId(coveredDemands.get(demandDto).getId())
-    //                            .setTravelCost(distanceMatrix.get(demandDto.getId(),
-    //     coveredDemands.get(demandDto).getId())))
-    //                .toList();
 
     List<AllocationDto> optimizedAllocations =
         FacilityCandidateUtil.findNearestFacilitiesForDemands(
@@ -206,15 +164,4 @@ public class OptimizationEngine {
     return optimizedAllocations;
   }
 
-  public void abortLocationEngine(UUID sessionId) {
-    if (locationAbortSignalMap.containsKey(sessionId)) {
-      locationAbortSignalMap.get(sessionId).abort();
-    }
-  }
-
-  public void abortAllocationEngine(UUID sessionId) {
-    if (allocationAbortSignalMap.containsKey(sessionId)) {
-      allocationAbortSignalMap.get(sessionId).abort();
-    }
-  }
 }

@@ -4,6 +4,8 @@ public enum SessionStatus {
   PENDING,
   STARTING,
   RUNNING,
-  INTERRUPTED,
+  ABORTING,
+  ABORTED,
+  FAILED,
   COMPLETED
 }

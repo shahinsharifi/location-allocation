@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+
   martin:
     image: ghcr.io/maplibre/martin:v0.8.7
     restart: unless-stopped
@@ -40,6 +41,19 @@ services:
     command: [ "postgres", "-c", "listen_addresses=*", "-c", "shared_buffers=2GB", "-c",
                "maintenance_work_mem=1024MB", "-c", "work_mem=500MB", "-c", "effective_cache_size=4GB",
                "-c", "autovacuum_vacuum_scale_factor=0.05", "-c", "autovacuum_analyze_scale_factor=0.02" ]
+
+#  spring-boot-app:
+#    image: docker.io/wigeogis/location-allocation:1.0
+#    depends_on:
+#      postgis:
+#        condition: service_healthy
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgis:5432/location_allocation
+#      - SPRING_DATASOURCE_USERNAME=postgres
+#      - SPRING_DATASOURCE_PASSWORD=demo123
+#      - SERVER_SERVLET_CONTEXT_PATH=/
 
 volumes:
   postgis_data:

@@ -9,19 +9,19 @@ server:
 spring:
     batch:
         jdbc:
-            initialize-schema: never # changed from 'always' in production
+            initialize-schema: always # changed from 'always' in production
         job:
             enabled: true
     datasource:
         driverClassName: org.postgresql.Driver
         password: demo123
-        url: jdbc:postgresql://pccuda.wigeo.lan:5432/location_allocation
+        url: jdbc:postgresql://localhost:5432/location_allocation
         username: postgres
     jpa:
         database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
-            ddl-auto: none  # changed from 'update' in production
-        open-in-view: false  # change to 'false' to disable Open Session in View in production
+            ddl-auto: update  # changed from 'update' in production
+        open-in-view: true  # change to 'false' to disable Open Session in View in production
         properties:
             hibernate:
                 format_sql: true
