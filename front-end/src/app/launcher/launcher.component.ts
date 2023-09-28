@@ -38,6 +38,7 @@ export class LauncherComponent implements OnInit, OnDestroy {
   @ViewChild('toggleBtn') toggleBtn: MatButtonToggle;
 
   sessionId: string = null;
+  activeSession: Session = null;
   regionSelectionFormGroup: FormGroup;
   parametersFormGroup: FormGroup;
   runningTimeFormGroup: FormGroup;
@@ -67,7 +68,7 @@ export class LauncherComponent implements OnInit, OnDestroy {
     });
     this.sessionState$.subscribe(session => {
       if (!session || !session.wkt) return;
-      this.sessionId = session.id;
+      this.activeSession = Object.assign({}, session);
       this.regionSelectionFormGroup.setValue({wkt: session.wkt});
       this.parametersFormGroup.setValue({
         numberOfFacilities: session.numberOfFacilities,

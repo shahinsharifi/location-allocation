@@ -8,6 +8,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {
+  AutoMarginsAndAngleUpdateMode,
   IgxCategoryChartComponent,
   IgxCategoryChartModule,
   IgxLegendModule
@@ -21,7 +22,6 @@ import {AppState} from "../../core/state/app.state";
 import {MessageSubject} from "../../core/websocket/message";
 import {Session} from "../../session/session";
 import {ChartData, ChartMetaData} from "./chart-data";
-
 
 
 @Component({
@@ -108,41 +108,52 @@ export class ChartComponent implements OnInit, OnDestroy {
   }
 
   updateFitnessData(metaData: ChartMetaData, data: any[]): void {
-    if(this.yAxisMaximumValue == null && metaData.yMax == null) {
+    if (this.yAxisMaximumValue == null && metaData.yMax == null) {
       this.yAxisMaximumValue = 100;
     } else {
-      this.chart.yAxisMaximumValue = metaData.yMax;
-      this.chart.xAxisExtent = metaData.xMax;
-      this.chart.xAxisInterval = 500;
-      this.chart.yAxisTitle = this.yAxisTitle;
-      this.chart.xAxisTitle = this.xAxisTitle;
+      // this.chart.yAxisMaximumValue = metaData.yMax;
+      this.chart.yAxisTitle = metaData.yAxisTitle;
+      this.chart.xAxisTitle = metaData.xAxisTitle;
+      this.yAxisMaximumValue = Math.abs(metaData.yMax * 1.1);
+      this.chart.yAxisMinimumValue = Math.abs(metaData.yMax * 0.95);
+      //    this.chart.shouldConsiderAutoRotationForInitialLabels = true;
+//      this.chart.isHorizontalZoomEnabled = true;
+      this.chart.shouldAutoExpandMarginForInitialLabels = true;
+      this.chart.xAxisEnhancedIntervalPreferMoreCategoryLabels = true;
+      this.chart.autoMarginAndAngleUpdateMode = AutoMarginsAndAngleUpdateMode.SizeChangingAndZoom;
       this.chart.notifyVisualPropertiesChanged();
     }
 
-    const newVal = data[data.length-1];
-    this.data.push(newVal);
-    this.chart.notifyInsertItem(this.data, this.data.length - 1, newVal);
-    // if (this.data.length > 10) {
-    //   const oldVal = this.data.shift();
-    //   this.chart.notifyRemoveItem(this.data, 0, oldVal);
+    // if (data != null && data.length == 1) {
+    //   this.chart.notifyClearItems(this.data);
     // }
+    const newVal = data[data.length - 1];
+    this.chart.notifyInsertItem(this.data, this.data.length - 1, newVal);
+    if (data.length == 1) {
+      const oldVal = this.data.shift();
+      this.chart.notifyRemoveItem(this.data, 0, oldVal);
+    }
+
   }
 
   processTravelCostDistributionData(metaData: ChartMetaData, data: any[]): void {
     if(this.yAxisMaximumValue == null || metaData.yMax == null) {
       this.yAxisMaximumValue = 1000;
     }else{
-      this.chart.yAxisMaximumValue = metaData.yMax;
-      this.chart.yAxisTitle = this.yAxisTitle;
-      this.chart.xAxisTitle = this.xAxisTitle;
+    //  this.chart.yAxisMaximumValue = metaData.yMax ;
+      this.chart.yAxisTitle = metaData.yAxisTitle;
+      this.chart.xAxisTitle = metaData.xAxisTitle;
       this.chart.notifyVisualPropertiesChanged();
     }
 
     if (data && data.length > 0) {
+
+      this.chart.notifyClearItems(this.data);
+
       const dataItem = data[data.length-1];
       for(let i = 0; i < dataItem.length; i++){
         const newItem = dataItem[i];
-        this.data.push(newItem);
+       // this.data.push(newItem);
         const oldItem = this.data.shift();
         this.chart.notifySetItem(this.data, i, oldItem, newItem);
       }

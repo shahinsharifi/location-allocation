@@ -5,8 +5,8 @@ export const launcherActions = createActionGroup({
   source: 'Launcher',
   events: {
     'Start Process': props<Session>(),
-    'Stop Process': props<String>(),
-    'Resume Process': props<String>(),
+    'Stop Process': props<Session>(),
+    'Resume Process': props<Session>(),
     'Change Step': props<{ stepIndex: number }>(),
     'Toggle Selection': props<{ active: boolean }>(),
     'Clear Selection': emptyProps(),

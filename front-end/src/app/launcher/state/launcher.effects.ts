@@ -22,14 +22,14 @@ export class LauncherEffects {
   stopProcess$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(launcherActions.stopProcess),
-      tap(sessionId => this.launcherService.stopProcess(sessionId))
+      tap(session => this.launcherService.stopProcess(session))
     )
   }, {dispatch: false});
 
   resumeProcess$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(launcherActions.resumeProcess),
-      tap(sessionId => this.launcherService.resumeProcess(sessionId))
+      tap(session => this.launcherService.resumeProcess(session))
     )
   }, {dispatch: false});
 
