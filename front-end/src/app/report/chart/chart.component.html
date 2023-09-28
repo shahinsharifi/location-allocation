@@ -11,22 +11,21 @@
     </div>
   </div>
   <div class="chart-container">
-    <igx-category-chart
-        #chart
-        [chartType]="chartType"
-        [dataSource]="data"
-        [legend]="legend"
-        [yAxisTitle]="yAxisTitle"
-        [xAxisTitle]="xAxisTitle"
-        [yAxisMaximumValue]="yAxisMaximumValue"
-        isTransitionInEnabled="true"
-        isVerticalZoomEnabled="false"
-        isHorizontalZoomEnabled="false"
-        markerBrushes="white"
-        [markerOutlines]="getChartColor()"
-        [brushes]="getChartColor()"
-        [outlines]="getChartColor()"
-        computedPlotAreaMarginMode="Series">
-    </igx-category-chart>
+      <igx-category-chart height="100%"
+                          #chart
+                          [dataSource]="data"
+                          [chartType]="chartType"
+                          xAxisEnhancedIntervalPreferMoreCategoryLabels="false"
+                          shouldAutoExpandMarginForInitialLabels="false"
+                          isTransitionInEnabled="true"
+                          isVerticalZoomEnabled="false"
+                          isHorizontalZoomEnabled="false"
+                          markerBrushes="white"
+                          [markerOutlines]="getChartColor()"
+                          [brushes]="getChartColor()"
+                          [outlines]="getChartColor()"
+                          computedPlotAreaMarginMode="Series">
+      </igx-category-chart>
+
   </div>
 </div>

@@ -25,22 +25,13 @@ export const reportReducer = createReducer<ReportState>(
 			const logs = state.logs ? [...state.logs, log] : [log];
 			return {...state, logs};
 		}),
-		on(reportActions.updateAllocationFitnessChart, (state, chartData) => {
-			const chart = state.locationFitnessChart;
-			const data = chart.data ? [...chart.data, chartData.data] : [chartData.data];
-			const metadata = chartData.metadata;
-			return {...state, locationFitnessChart: {...chart, data, metadata}};
+		on(reportActions.updateAllocationFitnessChart, (state, {metadata, data}) => {
+			return {...state, allocationFitnessChart: {metadata, data}};
 		}),
-		on(reportActions.updateAllocationFitnessChart, (state, chartData) => {
-			const chart = state.allocationFitnessChart;
-			const data = chart.data ? [...chart.data, chartData.data] : [chartData.data];
-			const metadata = chartData.metadata;
-			return {...state, allocationFitnessChart: {...chart, data, metadata}};
+		on(reportActions.updateLocationFitnessChart, (state, {metadata, data}) => {
+			return {...state, locationFitnessChart: {metadata, data}};
 		}),
-		on(reportActions.updateCostDistributionChart, (state, chartData) => {
-			const chart = state.costDistributionChart;
-			const data = chart.data ? [...chart.data, chartData.data] : [chartData.data];
-			const metadata = chartData.metadata;
-			return {...state, costDistributionChart: {...chart, data, metadata}};
+		on(reportActions.updateCostDistributionChart, (state, {metadata, data}) => {
+			return {...state, costDistributionChart: {metadata, data}};
 		})
 );

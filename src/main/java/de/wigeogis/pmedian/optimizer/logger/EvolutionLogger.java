@@ -53,7 +53,7 @@ public class EvolutionLogger implements IslandEvolutionObserver<List<BasicGenome
 
   public void populationUpdate(PopulationData<? extends List<BasicGenome>> data) {
 
-    double currentBestFitness = data.getMeanFitness();
+    double currentBestFitness = data.getBestCandidateFitness();
 
     double MIN_IMPROVEMENT = 1.0;
     if (lastBestFitness - currentBestFitness >= MIN_IMPROVEMENT) {
@@ -82,10 +82,11 @@ public class EvolutionLogger implements IslandEvolutionObserver<List<BasicGenome
 
     progress.put(data.getGenerationNumber(), data.getBestCandidateFitness());
 
-    if (data.getGenerationNumber() % 5 == 0) {
+    if (data.getGenerationNumber() % 20 == 0) {
       publishTravelCostDistribution(data.getBestCandidate());
       publishFitnessProgress(
-          data.getGenerationNumber(), data.getBestCandidateFitness(), optimizationPhase);
+          data.getGenerationNumber(), data.getBestCandidateFitness(), optimizationPhase
+      );
     }
     if (data.getGenerationNumber() % 50 == 0) {
       publishMutationRate(currentMutationRate);
@@ -157,11 +158,11 @@ public class EvolutionLogger implements IslandEvolutionObserver<List<BasicGenome
             10000,
             "Number of Iteration",
             0,
-            progress.get(0) * 1.5,
+            progress.get(0),
             "Fitness Score",
             "Fitness");
-    Map<String, Object> data = getFitnessData(generation, fitness);
-    notificationService.publishData(this.sessionId, subject, metadata, data);
+  //  Map<String, Object> data = getFitnessData(generation, fitness);
+    notificationService.publishData(this.sessionId, subject, metadata, getChartData(progress));
   }
 
   private void publishTravelCostDistribution(List<BasicGenome> bestCandidate) {
@@ -212,6 +213,12 @@ public class EvolutionLogger implements IslandEvolutionObserver<List<BasicGenome
     }
 
     return distribution;
+  }
+
+  private List<Map<String,Object>> getChartData(Map<Integer, Double> progress) {
+    return progress.keySet().stream()
+        .map(generation -> getChartData(generation, progress.get(generation)))
+        .toList();
   }
 
   private Map<String, Object> getChartData(Object x, Object y) {
