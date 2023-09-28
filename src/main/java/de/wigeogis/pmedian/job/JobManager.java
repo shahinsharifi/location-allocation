@@ -29,7 +29,7 @@ import org.uncommons.watchmaker.framework.termination.UserAbort;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class OptimizationJobManager {
+public class JobManager {
 
   private final SessionService sessionService;
   private final TravelCostService costService;

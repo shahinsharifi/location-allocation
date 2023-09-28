@@ -2,7 +2,7 @@ package de.wigeogis.pmedian.api;
 
 import de.wigeogis.pmedian.database.dto.SessionDto;
 import de.wigeogis.pmedian.database.service.SessionService;
-import de.wigeogis.pmedian.job.OptimizationJobManager;
+import de.wigeogis.pmedian.job.JobManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class LocationAllocationController {
 
   private final SessionService sessionService;
-  private final OptimizationJobManager optimizationJobManager;
+  private final JobManager optimizationJobManager;
 
   @RequestMapping(value = "/start", method = RequestMethod.POST)
   @ResponseBody

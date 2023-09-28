@@ -180,7 +180,7 @@ public class EvolutionLogger implements IslandEvolutionObserver<List<BasicGenome
             60,
             "Travel-time to Nearest Facility",
             0,
-            allocations.size(),
+            allocations.size() / 3,
             "Cumulative Number of Regions",
             "Region Count");
     List<Map<String, Object>> data = getTravelCostDistributionData(allocationsUpdated);

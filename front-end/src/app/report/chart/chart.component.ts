@@ -101,7 +101,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 				this.chart.yAxisTitle = metadata.yAxisTitle;
 				this.chart.xAxisTitle = metadata.xAxisTitle;
 				this.chart.markerAutomaticBehavior = MarkerAutomaticBehavior.CircleSmart;
-				this.chart.markerMaxCount = 20;
+				this.chart.markerMaxCount = 10;
 				this.chart.notifyVisualPropertiesChanged();
 				const initVal = {x: 0, y: metadata.yMax};
 				this.data.push(initVal);
@@ -126,9 +126,9 @@ export class ChartComponent implements OnInit, OnDestroy {
 		if (data == null) return;
 		const newVal = data[data.length - 1];
 		if (this.data.length == 1 && this.data[0].x == 0 && data.length == 1) {
-			const oldVal = this.data.shift();
 			this.data.push(newVal);
-			this.chart.notifySetItem(this.data, 0, oldVal, newVal);
+			const oldVal = this.data.shift();
+			this.chart.notifySetItem(this.data, this.data.length - 1, oldVal, newVal);
 		} else {
 			this.data.push(newVal);
 			this.chart.notifyInsertItem(this.data, this.data.length - 1, newVal);
