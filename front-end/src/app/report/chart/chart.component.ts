@@ -20,6 +20,8 @@ import {select, Store} from "@ngrx/store";
 import {AppState} from "../../core/state/app.state";
 import {MessageSubject} from "../../core/websocket/message";
 import {Session} from "../../session/session";
+import {ChartData, ChartMetaData} from "./chart-data";
+
 
 
 @Component({
@@ -51,9 +53,9 @@ export class ChartComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<AppState>) {
     this.sessionState$ = this.store.pipe(select(state => state.session.activeSession));
-    this.locationFitness$ = this.store.pipe(select(state => state.report.locationFitness));
-    this.allocationFitness$ = this.store.pipe(select(state => state.report.allocationFitness));
-    this.travelCostDistribution$ = this.store.pipe(select(state => state.report.travelCostDistribution));
+    this.locationFitness$ = this.store.pipe(select(state => state.report.locationFitnessChart));
+    this.allocationFitness$ = this.store.pipe(select(state => state.report.allocationFitnessChart));
+    this.travelCostDistribution$ = this.store.pipe(select(state => state.report.costDistributionChart));
   }
 
   ngOnInit(): void {
@@ -83,45 +85,59 @@ export class ChartComponent implements OnInit, OnDestroy {
   }
 
 
-  processData(data: any): void {
-    if (data == null) return;
+  processData(chartData: ChartData): void {
+    if (chartData == null) return;
     if(this.data == null) this.init();
     switch (this.chartSubject) {
       case MessageSubject.SESSION_LOCATION_FITNESS_DATA:
       case MessageSubject.SESSION_ALLOCATION_FITNESS_DATA:
-        this.processFitnessData(data);
+        this.processFitnessData(chartData.metadata, chartData.data);
         break;
       case MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION:
-        this.processTravelCostDistributionData(data);
+        this.processTravelCostDistributionData(chartData.metadata, chartData.data);
         break;
       default:
         break;
     }
   }
 
-  processFitnessData(data: any[]): void {
+  processFitnessData(metaData: ChartMetaData, data: any[]): void {
     if (data && data.length > 0) {
-      this.updateFitnessData(data);
+      this.updateFitnessData(metaData, data);
     }
   }
 
-  updateFitnessData(data: any[]): void {
-    if(this.yAxisMaximumValue == null) {
+  updateFitnessData(metaData: ChartMetaData, data: any[]): void {
+    if(this.yAxisMaximumValue == null && metaData.yMax == null) {
       this.yAxisMaximumValue = 100;
+    } else {
+      this.chart.yAxisMaximumValue = metaData.yMax;
+      this.chart.xAxisExtent = metaData.xMax;
+      this.chart.xAxisInterval = 500;
+      this.chart.yAxisTitle = this.yAxisTitle;
+      this.chart.xAxisTitle = this.xAxisTitle;
+      this.chart.notifyVisualPropertiesChanged();
     }
+
     const newVal = data[data.length-1];
     this.data.push(newVal);
     this.chart.notifyInsertItem(this.data, this.data.length - 1, newVal);
-    if (this.data.length > 10) {
-      const oldVal = this.data.shift();
-      this.chart.notifyRemoveItem(this.data, 0, oldVal);
-    }
+    // if (this.data.length > 10) {
+    //   const oldVal = this.data.shift();
+    //   this.chart.notifyRemoveItem(this.data, 0, oldVal);
+    // }
   }
 
-  processTravelCostDistributionData(data: any[]): void {
-    if(this.yAxisMaximumValue == null) {
+  processTravelCostDistributionData(metaData: ChartMetaData, data: any[]): void {
+    if(this.yAxisMaximumValue == null || metaData.yMax == null) {
       this.yAxisMaximumValue = 1000;
+    }else{
+      this.chart.yAxisMaximumValue = metaData.yMax;
+      this.chart.yAxisTitle = this.yAxisTitle;
+      this.chart.xAxisTitle = this.xAxisTitle;
+      this.chart.notifyVisualPropertiesChanged();
     }
+
     if (data && data.length > 0) {
       const dataItem = data[data.length-1];
       for(let i = 0; i < dataItem.length; i++){
@@ -130,21 +146,22 @@ export class ChartComponent implements OnInit, OnDestroy {
         const oldItem = this.data.shift();
         this.chart.notifySetItem(this.data, i, oldItem, newItem);
       }
+      this.chart.notifyVisualPropertiesChanged();
     }
   }
 
   init(): void {
     if (this.chartSubject === MessageSubject.SESSION_LOCATION_FITNESS_DATA ||
-      this.chartSubject === MessageSubject.SESSION_ALLOCATION_FITNESS_DATA) {
+        this.chartSubject === MessageSubject.SESSION_ALLOCATION_FITNESS_DATA) {
       this.chartType = 'Spline';
       this.yAxisMaximumValue = 100;
-      this.data = [{generation: 0, value: 0}];
+      this.data = [{x: 0, y: 0}];
     } else if (this.chartSubject === MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION) {
       this.data = [];
       this.chartType = 'Area';
       this.yAxisMaximumValue = 1000;
       for (let i = 0; i <= 60; i += 5) {
-        this.data.push({label: i.toString(), value: 0});
+        this.data.push({x: i, y: 0});
       }
     }
   }
@@ -153,6 +170,17 @@ export class ChartComponent implements OnInit, OnDestroy {
     this.init();
   }
 
+  getChartColor() {
+    switch (this.chartSubject) {
+      case MessageSubject.SESSION_LOCATION_FITNESS_DATA:
+      case MessageSubject.SESSION_ALLOCATION_FITNESS_DATA:
+        return 'rgba(140, 231, 217, 1)';
+      case MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION:
+        return 'rgba(110, 177, 255, 1)';
+      default:
+        return 'rgba(238, 88, 121, 1)';
+    }
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();

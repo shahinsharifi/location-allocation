@@ -15,5 +15,6 @@ export interface Message {
   type: MessageType | null
   subject: MessageSubject | null;
   message: string | null;
+  metadata: any;
   data: any;
 }

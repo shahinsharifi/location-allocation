@@ -20,15 +20,15 @@ export class LauncherService {
     });
   }
 
-  stopProcess(session: String) {
+  stopProcess(session: Session) {
     this.commandService.execute(
-      `stop`, 'POST', session
+      `abort`, 'POST', session
     ).subscribe((session) => {
-      this.store.dispatch({type: 'Create Session', payload: session});
+      this.store.dispatch(sessionActions.updateSession({activeSession: session}));
     });
   }
 
-  resumeProcess(session: String) {
+  resumeProcess(session: Session) {
     this.commandService.execute(
       `resume`, 'POST', session
     ).subscribe((session) => {

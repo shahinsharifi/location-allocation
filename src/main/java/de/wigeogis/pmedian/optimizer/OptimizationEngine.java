@@ -65,12 +65,7 @@ public class OptimizationEngine {
         FacilityCandidateUtil.findFacilityCandidates(
             regions, distanceMatrix, numberOfFacilities, session.getMaxTravelTimeInMinutes(), rng);
 
-//    List<RegionDto> initialSeed =
-//        FacilityCandidateUtil.findMinimumFacilityCandidates(
-//            regions, distanceMatrix, session.getMaxTravelTimeInMinutes());
-
-    if(initialSeed.size() > numberOfFacilities)
-      numberOfFacilities = initialSeed.size();
+    if (initialSeed.size() > numberOfFacilities) numberOfFacilities = initialSeed.size();
 
     log.info("Initial seed with size '" + numberOfFacilities + "' has been created...");
 
@@ -99,7 +94,12 @@ public class OptimizationEngine {
             locationCandidateFactory, locationPipeline, coverageEvaluator, selection, rng);
     locationEngine.addEvolutionObserver(
         new EvolutionLogger(
-            session.getId(), allocationDtos, distanceMatrix, eventPublisher, notificationService));
+            session.getId(),
+            allocationDtos,
+            distanceMatrix,
+            eventPublisher,
+            notificationService,
+            1));
     locationEngine.setSingleThreaded(true);
 
     log.info("Running location engine...");
@@ -136,18 +136,20 @@ public class OptimizationEngine {
             allocationCandidateFactory, allocationPipeline, travelCostEvaluator, selection, rng);
     allocationEngine.addEvolutionObserver(
         new EvolutionLogger(
-            session.getId(), allocationDtos, distanceMatrix, eventPublisher, notificationService));
+            session.getId(),
+            allocationDtos,
+            distanceMatrix,
+            eventPublisher,
+            notificationService,
+            2));
     allocationEngine.setSingleThreaded(true);
 
     // Running allocation engine
     start = System.currentTimeMillis();
-    
 
     List<BasicGenome> resultAllocation =
-        allocationEngine.evolve(
-            12, 7, abortSignal, new Stagnation(2000, false), elapsedTime);
+        allocationEngine.evolve(12, 7, abortSignal, new Stagnation(2000, false), elapsedTime);
     end = System.currentTimeMillis();
-
 
     List<RegionDto> facilitiesCodes =
         resultAllocation.stream().map(BasicGenome::getRegionDto).toList();
@@ -163,5 +165,4 @@ public class OptimizationEngine {
 
     return optimizedAllocations;
   }
-
 }

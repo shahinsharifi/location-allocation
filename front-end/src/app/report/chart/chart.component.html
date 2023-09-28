@@ -5,29 +5,29 @@
     </div>
     <div>
       <igx-legend
-        #legend
-        orientation="Horizontal">
+          #legend
+          orientation="Horizontal">
       </igx-legend>
     </div>
   </div>
   <div class="chart-container">
     <igx-category-chart
-      #chart
-      [chartType]="chartType"
-      [dataSource]="data"
-      [legend]="legend"
-      [yAxisTitle]="yAxisTitle"
-      [xAxisTitle]="xAxisTitle"
-      [yAxisMaximumValue]="yAxisMaximumValue"
-      [yAxisMinimumValue]="0"
-      isTransitionInEnabled="true"
-      isVerticalZoomEnabled="false"
-      isHorizontalZoomEnabled="false"
-      markerBrushes="white"
-      markerOutlines="rgba(140, 231, 217, 1) rgba(238, 88, 121, 1) rgba(115, 86, 86, 1)"
-      brushes="rgba(140, 231, 217, 1) rgba(238, 88, 121, 1) rgba(115, 86, 86, 1)"
-      outlines="rgba(140, 231, 217, 1) rgba(238, 88, 121, 1) rgba(115, 86, 86, 1)"
-      computedPlotAreaMarginMode="Series">
+        #chart
+        [chartType]="chartType"
+        [dataSource]="data"
+        [legend]="legend"
+        [yAxisTitle]="yAxisTitle"
+        [xAxisTitle]="xAxisTitle"
+        [yAxisMaximumValue]="yAxisMaximumValue"
+        [yAxisMinimumValue]="0"
+        isTransitionInEnabled="true"
+        isVerticalZoomEnabled="false"
+        isHorizontalZoomEnabled="false"
+        markerBrushes="white"
+        [markerOutlines]="getChartColor()"
+        [brushes]="getChartColor()"
+        [outlines]="getChartColor()"
+        computedPlotAreaMarginMode="Series">
     </igx-category-chart>
   </div>
 </div>

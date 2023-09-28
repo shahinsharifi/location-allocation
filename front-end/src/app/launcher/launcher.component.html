@@ -10,6 +10,7 @@
               <mat-button-toggle #toggleBtn class="toggle-button"
                                  [ngClass]="regionSelection?.active ? 'active' : ''"
                                  matTooltip="Select regions by drawing a polygon"
+                                 [disabled]="(sessionState$ | async)?.status === 'RUNNING'"
                                  (click)="toggleSelection(toggleBtn.checked)">
                 <mat-icon [svgIcon]="'wgg_icons:convex_hull'">convex_hull</mat-icon>
                 Select
@@ -111,7 +112,7 @@
       Stop
     </button>
     <button mat-stroked-button color="primary" (click)="start()" matTooltip="Start Calculation"
-            [disabled]="regionSelectionFormGroup.invalid || parametersFormGroup.invalid">
+            [disabled]="regionSelectionFormGroup.invalid || parametersFormGroup.invalid || (sessionState$ | async)?.status === 'RUNNING'">
       <mat-icon>play_circle_outline</mat-icon>
       Start
     </button>

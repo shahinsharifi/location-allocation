@@ -8,25 +8,25 @@ export const selectLogs = createSelector(
   (state: ReportState) => state.logs
 );
 
-export const selectLocationFitness = createSelector(
+export const selectLocationFitnessChart = createSelector(
   selectReportState,
-  (state: ReportState) => state.locationFitness
+  (state: ReportState) => state.locationFitnessChart
 );
 
-export const selectAllocationFitness = createSelector(
+export const selectAllocationFitnessChart = createSelector(
   selectReportState,
-  (state: ReportState) => state.allocationFitness
+  (state: ReportState) => state.allocationFitnessChart
 );
 
-export const selectTravelCostDistribution = createSelector(
+export const selectCostDistributionChart = createSelector(
   selectReportState,
-  (state: ReportState) => state.travelCostDistribution
+  (state: ReportState) => state.costDistributionChart
 );
 
 export const fromReportSelectors = {
   selectReportState,
   selectLogs,
-  selectLocationFitness,
-  selectAllocationFitness,
-  selectTravelCostDistribution
+  selectLocationFitnessChart,
+  selectAllocationFitnessChart,
+  selectCostDistributionChart
 }

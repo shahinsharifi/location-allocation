@@ -1,6 +1,8 @@
+import {ChartData} from "../chart/chart-data";
+
 export interface ReportState {
   logs?: Array<string> | undefined;
-  locationFitness?: Array<any> | undefined;
-  allocationFitness?: Array<any> | undefined;
-  travelCostDistribution?: Array<any> | undefined;
+  locationFitnessChart?: ChartData | undefined;
+  allocationFitnessChart?: ChartData | undefined;
+  costDistributionChart?: ChartData | undefined;
 }

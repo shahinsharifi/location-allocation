@@ -20,6 +20,7 @@ import {AppState} from "../core/state/app.state";
 import {launcherActions} from "./state/launcher.actions";
 import {MatSliderModule} from "@angular/material/slider";
 import {RegionSelection} from "../map/region-selection";
+import {LauncherService} from "./launcher.service";
 
 @Component({
   selector: 'app-launcher',
@@ -36,17 +37,18 @@ export class LauncherComponent implements OnInit, OnDestroy {
   @ViewChild('stepper') stepper: MatStepper;
   @ViewChild('toggleBtn') toggleBtn: MatButtonToggle;
 
+  sessionId: string = null;
   regionSelectionFormGroup: FormGroup;
   parametersFormGroup: FormGroup;
   runningTimeFormGroup: FormGroup;
   destroy$ = new Subject<void>();
   sessionState$: Observable<Session>;
   mapSelectionState$: Observable<RegionSelection>;
-  regionSelection: RegionSelection={};
+  regionSelection: RegionSelection = {};
 
   constructor(
     private store: Store<AppState>,
-    private formBuilder: FormBuilder) {
+    private formBuilder: FormBuilder, private launcherService: LauncherService) {
     this.sessionState$ = this.store.pipe(select(state => state.session.activeSession));
     this.mapSelectionState$ = this.store.pipe(select(state => state.map.selection));
   }
@@ -65,6 +67,7 @@ export class LauncherComponent implements OnInit, OnDestroy {
     });
     this.sessionState$.subscribe(session => {
       if (!session || !session.wkt) return;
+      this.sessionId = session.id;
       this.regionSelectionFormGroup.setValue({wkt: session.wkt});
       this.parametersFormGroup.setValue({
         numberOfFacilities: session.numberOfFacilities,
@@ -87,7 +90,6 @@ export class LauncherComponent implements OnInit, OnDestroy {
   }
 
 
-
   start() {
     if (!this.regionSelectionFormGroup.invalid && !this.parametersFormGroup.invalid) {
       const session: Session = {
@@ -102,23 +104,24 @@ export class LauncherComponent implements OnInit, OnDestroy {
   }
 
   stop() {
-
+    if(this.sessionId == null) return;
+    const session: Session = {id: this.sessionId};
+    this.launcherService.stopProcess(session);
   }
 
   reset() {
-    this.store.dispatch(launcherActions.resetSession());
-
     this.stepper.reset();
     this.toggleBtn.checked = false;
     this.regionSelection = null;
     this.regionSelectionFormGroup.reset();
     this.parametersFormGroup.reset();
     this.runningTimeFormGroup.reset();
+    this.store.dispatch(launcherActions.resetSession());
   }
 
 
   toggleSelection(active: boolean): void {
-    if(!this.regionSelection) this.regionSelection = {};
+    if (!this.regionSelection) this.regionSelection = {};
     this.regionSelection.active = active;
     this.store.dispatch(launcherActions.toggleSelection({active: active}));
   }

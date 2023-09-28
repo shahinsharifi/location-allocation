@@ -62,9 +62,12 @@ public class AllocationService {
         result.get("maxY", Double.class));
   }
 
-  public List<AllocationDto> insertAndFetchRegionsByWKTPolygon(UUID sessionId, String wktPolygon) {
+  public List<AllocationDto> insertAndFetchRegionsByWKTPolygon(UUID sessionId, String wktPolygon, Double maxTravelTime) {
+    if (maxTravelTime == null) {
+      maxTravelTime = 60.0;
+    }
     List<Allocation> allocations =
-        repository.insertAndFetchRegionsByWKTPolygon(sessionId, wktPolygon);
+        repository.insertAndFetchRegionsByWKTPolygon(sessionId, wktPolygon, maxTravelTime.intValue());
     return allocations.stream().map(this::entityToDto).collect(Collectors.toList());
   }
 

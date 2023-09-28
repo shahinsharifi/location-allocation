@@ -39,7 +39,7 @@ public class OptimizationJobManager {
   private final CircuitBreaker optimizationEngineCircuitBreaker;
   private final ThreadPoolBulkhead optimizationEngineBulkhead;
   private final NotificationService notificationService;
-  
+
   private final ConcurrentHashMap<UUID, UserAbort> abortSignalStorage = new ConcurrentHashMap<>();
 
   public SessionDto start(SessionDto session) throws Exception {
@@ -47,7 +47,7 @@ public class OptimizationJobManager {
         () -> {
           List<AllocationDto> allocations =
               allocationService.insertAndFetchRegionsByWKTPolygon(
-                  session.getId(), session.getWkt());
+                  session.getId(), session.getWkt(), session.getMaxTravelTimeInMinutes());
 
           this.updateSessionStatus(session.getId(), SessionStatus.RUNNING, true);
 
@@ -58,19 +58,20 @@ public class OptimizationJobManager {
 
           UserAbort abortSignal = new UserAbort();
           this.abortSignalStorage.put(session.getId(), abortSignal);
-          
-          allocations = optimizationEngine.evolve(session, allocations, distanceMatrix, abortSignal);
+
+          allocations =
+              optimizationEngine.evolve(session, allocations, distanceMatrix, abortSignal);
 
           allocationService.insertAll(allocations);
           locationService.insertAllFromAllocation(allocations);
 
           SessionDto sessionDto = sessionService.getById(session.getId());
-          if(sessionDto.getStatus() == SessionStatus.ABORTING) {
+          if (sessionDto.getStatus() == SessionStatus.ABORTING) {
             updateSessionStatus(sessionDto.getId(), SessionStatus.ABORTED, true);
-          }else if(sessionDto.getStatus() == SessionStatus.RUNNING) {
+          } else if (sessionDto.getStatus() == SessionStatus.RUNNING) {
             updateSessionStatus(sessionDto.getId(), SessionStatus.COMPLETED, true);
           }
-          
+
           return sessionDto;
         };
 
@@ -83,34 +84,34 @@ public class OptimizationJobManager {
     CompletableFuture.supplyAsync(decoratedSupplier)
         .exceptionally(
             throwable -> {
-              updateSessionStatus(session.getId(), SessionStatus.FAILED);
+              updateSessionStatus(session.getId(), SessionStatus.FAILED, true);
               log.error("Optimization failed: ", throwable);
               return null;
             });
 
-	  return updateSessionStatus(session.getId(), SessionStatus.STARTING);
+    return updateSessionStatus(session.getId(), SessionStatus.STARTING);
   }
 
   public SessionDto stop(SessionDto session) {
-    updateSessionStatus(session.getId(), SessionStatus.ABORTED);
-    if(this.abortSignalStorage.containsKey(session.getId())) {
+    updateSessionStatus(session.getId(), SessionStatus.ABORTED, true);
+    if (this.abortSignalStorage.containsKey(session.getId())) {
       this.abortSignalStorage.get(session.getId()).abort();
     }
     return session;
   }
 
   private SessionDto updateSessionStatus(UUID sessionId, SessionStatus status) {
-    sessionService.updateSessionStatus(sessionId, status);
     return updateSessionStatus(sessionId, status, null);
   }
 
   private SessionDto updateSessionStatus(UUID sessionId, SessionStatus status, Boolean publish) {
     SessionDto sessionDto = sessionService.updateSessionStatus(sessionId, status);
     if (publish != null && publish) {
+      log.info("Publishing session status update: " + status);
       notificationService.publishData(
           sessionId,
           MessageSubject.SESSION_STATUS,
-          "Session status changed to " + status,
+          null,
           Map.of("id", sessionId, "status", status));
     }
     return sessionDto;

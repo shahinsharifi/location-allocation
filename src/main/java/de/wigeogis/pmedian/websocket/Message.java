@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public record Message(
     UUID sessionId,
-    MessageType type,
     MessageSubject subject,
     String message,
+		Object metadata,
     Object data) {}

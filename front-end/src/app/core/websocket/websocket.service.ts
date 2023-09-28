@@ -65,13 +65,13 @@ export class WebsocketService extends RxStomp {
         this.store.dispatch(reportActions.updateLogs({log: message.message}));
         break;
       case MessageSubject.SESSION_LOCATION_FITNESS_DATA:
-        this.store.dispatch(reportActions.updateLocationFitness({locationFitness: message.data}));
+        this.store.dispatch(reportActions.updateLocationFitnessChart({metadata:message.metadata, data: message.data}));
         break;
       case MessageSubject.SESSION_ALLOCATION_FITNESS_DATA:
-        this.store.dispatch(reportActions.updateAllocationFitness({allocationFitness: message.data}));
+        this.store.dispatch(reportActions.updateAllocationFitnessChart({metadata:message.metadata, data: message.data}));
         break;
       case MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION:
-        this.store.dispatch(reportActions.updateAllocationTravelCostDistribution({travelCostDistribution: message.data}));
+        this.store.dispatch(reportActions.updateCostDistributionChart({metadata:message.metadata, data: message.data}));
         break;
       default:
         console.warn('Unhandled WebSocket message type:', message.subject);

@@ -43,9 +43,20 @@ public interface AllocationRepository extends JpaRepository<Allocation, UUID> {
               "    FROM region " +
               "    WHERE ST_Intersects(geom, ST_Transform(ST_GeomFromText(?2, 4326), 3857)) " +
               "    RETURNING * " +
-              ")" +
-              "SELECT * FROM inserted;",
+              "), " +
+              "reachable_regions AS (" +
+              "    SELECT end_region_id as region_id, count(start_region_id) as total_reachable_regions " +
+              "    FROM travel_cost " +
+              "    WHERE travel_time_in_minutes < ?3 " +
+              "    GROUP BY end_region_id " +
+              "    HAVING count(start_region_id) = 1 " +
+              ") " +
+              "SELECT i.* " +
+              "FROM inserted i " +
+              "LEFT JOIN reachable_regions rr ON i.region_id = rr.region_id " +
+              "WHERE rr.region_id IS NULL;",
       nativeQuery = true)
-  List<Allocation> insertAndFetchRegionsByWKTPolygon(UUID sessionId, String wktPolygon);
+  List<Allocation> insertAndFetchRegionsByWKTPolygon(UUID sessionId, String wktPolygon, Integer maxTravelTime);
+
 
 }

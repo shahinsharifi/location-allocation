@@ -20,52 +20,49 @@ import org.uncommons.watchmaker.framework.PopulationData;
 import org.uncommons.watchmaker.framework.islands.IslandEvolutionObserver;
 
 @Log4j2
-public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionObserver<T> {
+public class EvolutionLogger implements IslandEvolutionObserver<List<BasicGenome>> {
 
-  private final double MIN_MUTATION_RATE = 0.005;
-  private final double MAX_MUTATION_RATE = 0.1; // Adjust as needed
+  private int stagnationCounter = 0;
   private final double INIT_MUTATION_RATE = 0.005;
+  private double currentMutationRate = INIT_MUTATION_RATE;
+  private double lastBestFitness = Double.POSITIVE_INFINITY;
 
-  private final int STAGNATION_THRESHOLD =
-      100; // Number of generations with minimal decrease before adapting mutation rate
-  private final double MIN_IMPROVEMENT = 1.0; // Minimal decrease to reset stagnation counter
   private final UUID sessionId;
+  private final Integer optimizationPhase;
+  private final List<AllocationDto> allocations;
   private final ApplicationEventPublisher publisher;
   private final NotificationService notificationService;
-  private double lastBestFitness =
-      Double.POSITIVE_INFINITY; // For minimization, start with a very high value
-  private int stagnationCounter = 0;
-  private double currentMutationRate = INIT_MUTATION_RATE;
-
-  private final List<AllocationDto> allocationDtos;
   private final ImmutableTable<String, String, Double> costMatrix;
-
   private final Map<Integer, Double> progress = new HashMap<>();
   private final Map<String, Object> generationFitnessProgress = new HashMap<>();
 
   public EvolutionLogger(
       UUID sessionId,
-      List<AllocationDto> allocationDtos,
+      List<AllocationDto> allocations,
       ImmutableTable<String, String, Double> costMatrix,
       ApplicationEventPublisher publisher,
-      NotificationService notificationService) {
+      NotificationService notificationService,
+      Integer optimizationPhase) {
     this.sessionId = sessionId;
-    this.allocationDtos = allocationDtos;
+    this.allocations = allocations;
     this.costMatrix = costMatrix;
     this.publisher = publisher;
     this.notificationService = notificationService;
+    this.optimizationPhase = optimizationPhase;
   }
 
-  public void populationUpdate(PopulationData<? extends T> data) {
+  public void populationUpdate(PopulationData<? extends List<BasicGenome>> data) {
 
     double currentBestFitness = data.getMeanFitness();
 
+    double MIN_IMPROVEMENT = 1.0;
     if (lastBestFitness - currentBestFitness >= MIN_IMPROVEMENT) {
       stagnationCounter = 0;
     } else {
       stagnationCounter++; // Reset if there's sufficient decrease
     }
 
+    int STAGNATION_THRESHOLD = 100;
     if (currentMutationRate >= 0.09) {
       currentMutationRate -= 0.005;
       stagnationCounter = 0;
@@ -76,28 +73,23 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
     }
 
     // Ensure mutation rate is within bounds
+    double MIN_MUTATION_RATE = 0.005;
+    double MAX_MUTATION_RATE = 0.1;
     currentMutationRate =
         Math.max(MIN_MUTATION_RATE, Math.min(MAX_MUTATION_RATE, currentMutationRate));
 
     lastBestFitness = currentBestFitness;
 
     progress.put(data.getGenerationNumber(), data.getBestCandidateFitness());
-    // generationFitnessProgress.put(String.valueOf(data.getGenerationNumber()),
-    // data.getBestCandidateFitness());
-    List<BasicGenome> bestCandidate = (List<BasicGenome>) data.getBestCandidate();
-    int numberOfFacilities =
-        bestCandidate.stream().collect(Collectors.groupingBy(BasicGenome::getRegionId)).size();
 
-    if (data.getGenerationNumber() % 10 == 0) {
-      //publishLogs(data, numberOfFacilities, currentMutationRate);
-      publishProgress(data.getGenerationNumber(), data.getBestCandidateFitness());
-    }
-    if (data.getGenerationNumber() % 20 == 0) {
-      publishOverallStandardDeviation(bestCandidate);
+    if (data.getGenerationNumber() % 5 == 0) {
+      publishTravelCostDistribution(data.getBestCandidate());
+      publishFitnessProgress(
+          data.getGenerationNumber(), data.getBestCandidateFitness(), optimizationPhase);
     }
     if (data.getGenerationNumber() % 50 == 0) {
-      writeLogs(data, numberOfFacilities, currentMutationRate);
       publishMutationRate(currentMutationRate);
+      writeLogs(data);
     }
   }
 
@@ -106,12 +98,10 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
     publisher.publishEvent(event);
   }
 
-  public void islandPopulationUpdate(int islandIndex, PopulationData<? extends T> populationData) {
-    // Do nothing.
-  }
-
   private void writeLogs(
-      PopulationData<? extends T> data, int numberOfFacilities, double currentMutationRate) {
+      PopulationData<? extends List<BasicGenome>> data,
+      int numberOfFacilities,
+      double currentMutationRate) {
 
     String logMessage =
         ("Generation "
@@ -128,67 +118,131 @@ public class EvolutionLogger<T extends BasicGenome> implements IslandEvolutionOb
   }
 
   private void publishLogs(
-      PopulationData<? extends T> data, int numberOfFacilities, double currentMutationRate) {
-
-    String logMessage =
-        "Generation "
-            + data.getGenerationNumber()
-            + " [Mutation Rate: "
-            + String.format("%.3f", currentMutationRate)
-            + "]: "
-            + "("
-            + numberOfFacilities
-            + " facilities) -> "
-            + data.getBestCandidateFitness();
+      PopulationData<? extends List<BasicGenome>> data, Integer optimizationPhase) {
+    String logMessage = prepareLogMessage(data);
     notificationService.publishLog(sessionId, MessageSubject.SESSION_LOG, logMessage);
   }
 
-  private void publishProgress(int generation, double fitness) {
-    notificationService.publishData(
-        this.sessionId,
-        MessageSubject.SESSION_ALLOCATION_FITNESS_DATA,
-        Map.of("generation", generation, "value", fitness));
+  private void writeLogs(PopulationData<? extends List<BasicGenome>> data) {
+    String logMessage = prepareLogMessage(data);
+    log.info(logMessage);
   }
 
-  private void publishOverallStandardDeviation(List<BasicGenome> bestCandidate) {
+  private String prepareLogMessage(PopulationData<? extends List<BasicGenome>> data) {
+    int numberOfFacilities = calculateNumberOfFacilities(data.getBestCandidate());
+    return String.format(
+        "Generation %d [Mutation Rate: %.3f]: (%s facilities) -> %.2f",
+        data.getGenerationNumber(),
+        currentMutationRate,
+        numberOfFacilities,
+        data.getBestCandidateFitness());
+  }
+
+  private int calculateNumberOfFacilities(List<BasicGenome> bestCandidate) {
+    return bestCandidate.stream().collect(Collectors.groupingBy(BasicGenome::getRegionId)).size();
+  }
+
+  private void publishFitnessProgress(int generation, double fitness, Integer optimizationPhase) {
+
+    MessageSubject subject =
+        switch (optimizationPhase) {
+          case 1 -> MessageSubject.SESSION_LOCATION_FITNESS_DATA;
+          case 2 -> MessageSubject.SESSION_ALLOCATION_FITNESS_DATA;
+          default -> throw new IllegalStateException("Unexpected value: " + optimizationPhase);
+        };
+
+    Map<String, Object> metadata =
+        getChartMetadata(
+            0,
+            10000,
+            "Number of Iteration",
+            0,
+            progress.get(0) * 1.5,
+            "Fitness Score",
+            "Fitness");
+    Map<String, Object> data = getFitnessData(generation, fitness);
+    notificationService.publishData(this.sessionId, subject, metadata, data);
+  }
+
+  private void publishTravelCostDistribution(List<BasicGenome> bestCandidate) {
 
     List<RegionDto> facilitiesCodes =
         bestCandidate.stream().map(BasicGenome::getRegionDto).toList();
 
-    List<AllocationDto> allocations =
+    List<AllocationDto> allocationsUpdated =
         FacilityCandidateUtil.findNearestFacilitiesForDemands(
-            allocationDtos, facilitiesCodes, costMatrix);
+            allocations, facilitiesCodes, costMatrix);
 
-    List<Map<String,Object>> result = this.travelCostDistribution(allocations);
+    Map<String, Object> metadata =
+        getChartMetadata(
+            0,
+            60,
+            "Travel-time to Nearest Facility",
+            0,
+            allocations.size(),
+            "Cumulative Number of Regions",
+            "Region Count");
+    List<Map<String, Object>> data = getTravelCostDistributionData(allocationsUpdated);
 
     notificationService.publishData(
-        this.sessionId, MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION, result);
+        this.sessionId, MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION, metadata, data);
   }
 
-  private List<Map<String, Object>> travelCostDistribution(List<AllocationDto> allocations) {
-    List<Map<String, Object>> distribution = new ArrayList<>();
+  private Map<String, Object> getFitnessData(int generation, double fitness) {
+    return getChartData(generation, fitness);
+  }
 
-    // Define the intervals
+  private List<Map<String, Object>> getTravelCostDistributionData(List<AllocationDto> allocations) {
+
     int[] intervals = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
+
+    List<Map<String, Object>> distribution = new ArrayList<>();
 
     for (int i = 0; i < intervals.length; i++) {
       int lowerBound = (i == 0) ? 0 : intervals[i - 1];
       int upperBound = intervals[i];
 
-      long count = allocations.stream()
-          .filter(genome -> genome.getTravelCost() > lowerBound && genome.getTravelCost() <= upperBound)
-          .count();
-
-      Map<String, Object> map = new HashMap<>();
-      map.put("label", upperBound);
-      map.put("value", count);
-      distribution.add(map);
+      long count =
+          allocations.stream()
+              .filter(
+                  genome ->
+                      genome.getTravelCost() > lowerBound && genome.getTravelCost() <= upperBound)
+              .count();
+      distribution.add(getChartData(upperBound, count));
     }
 
     return distribution;
   }
 
+  private Map<String, Object> getChartData(Object x, Object y) {
+    return Map.of(
+        "x", x,
+        "y", y);
+  }
+
+  private Map<String, Object> getChartMetadata(
+      Object xMin,
+      Object xMax,
+      String xAxisTitle,
+      Object yMin,
+      Object yMax,
+      String yAxisTitle,
+      String yLabel) {
+    return Map.of(
+        "xMin", xMin,
+        "xMax", xMax,
+        "xAxisTitle", xAxisTitle,
+        "yMin", yMin,
+        "yMax", yMax,
+        "yAxisTitle", yAxisTitle,
+        "yLabel", yLabel);
+  }
+
   public Map<Integer, Double> getProgress() {
     return new TreeMap<>(progress);
   }
+
+  @Override
+  public void islandPopulationUpdate(
+      int i, PopulationData<? extends List<BasicGenome>> populationData) {}
 }
