@@ -70,6 +70,19 @@ public class CostEvaluatorUtils {
     return costMap.values().stream().mapToDouble(Double::doubleValue).sum();
   }
 
+  public List<Double> calculateCostMap(List<String> facilities) {
+    ConcurrentHashMap<String, Double> costMap = new ConcurrentHashMap<>();
+    for (String region : regions) {
+      final ConcurrentHashMap<String, Double> facilityToCost = sparseMatrix.get(region);
+      facilities.stream()
+          .filter(facilityToCost::containsKey)
+          .map(facility -> new AbstractMap.SimpleEntry<>(facility, facilityToCost.get(facility)))
+          .min(Map.Entry.comparingByValue())
+          .ifPresent(nearest -> costMap.put(region + "|" + nearest.getKey(), nearest.getValue()));
+    }
+    return costMap.values().stream().toList();
+  }
+
   public Integer calculateUncoveredAndAboveLimitRegions(List<String> facilities) {
     AtomicInteger uncoveredRegions = new AtomicInteger();
     AtomicInteger aboveMaxTravelTime = new AtomicInteger();

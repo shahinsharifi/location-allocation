@@ -32,8 +32,8 @@ export class MapService {
 
     if (session?.id && [
       SessionStatus.RUNNING,
-      SessionStatus.COMPLETED,
-      SessionStatus.INTERRUPTED
+      SessionStatus.ABORTED,
+      SessionStatus.COMPLETED
     ].includes(session.status)) {
       this.loadResultLayer(session.id).then(() => console.log('Loaded result layer'));
     }

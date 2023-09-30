@@ -63,7 +63,7 @@ export class MapComponent implements OnInit, OnDestroy {
     .subscribe(session => {
       if(!session) return;
       if (session.id) {
-        if (['RUNNING', 'COMPLETED', 'INTERRUPTED'].includes(session.status)) {
+        if (['RUNNING', 'ABORTED', 'COMPLETED'].includes(session.status)) {
           this.mapService.loadResultLayer(session.id).then(() => console.log('Loading allocation layer'));
           this.mapService.updateLayerVisibility({
             region: false,

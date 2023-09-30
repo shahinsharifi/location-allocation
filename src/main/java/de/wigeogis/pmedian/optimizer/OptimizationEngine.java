@@ -16,6 +16,7 @@ import de.wigeogis.pmedian.optimizer.util.CostEvaluatorUtils;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import de.wigeogis.pmedian.websocket.NotificationService;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -44,12 +45,14 @@ public class OptimizationEngine {
 
   public List<AllocationDto> evolve(
       SessionDto session,
-      List<AllocationDto> allocationDtos,
+      List<AllocationDto> allocationDTOs,
       ImmutableTable<String, String, Double> distanceMatrix,
       UserAbort abortSignal) {
 
+    Random rng = new XORShiftRNG();
+
     List<RegionDto> regions =
-        allocationDtos.stream().map(AllocationDto::toRegionDto).collect(Collectors.toList());
+        allocationDTOs.stream().map(AllocationDto::toRegionDto).collect(Collectors.toList());
 
     CostEvaluatorUtils costEvaluatorUtils =
         new CostEvaluatorUtils(
@@ -59,7 +62,7 @@ public class OptimizationEngine {
 
     ElapsedTime elapsedTime = new ElapsedTime(session.getMaxRunningTimeInMinutes() * 60000);
 
-    Random rng = new XORShiftRNG();
+    ConcurrentHashMap<Integer, Double> progress = new ConcurrentHashMap<>();
 
     int numberOfFacilities = 0;
     if (session.getNumberOfFacilities() != null) {
@@ -101,12 +104,7 @@ public class OptimizationEngine {
             locationCandidateFactory, locationPipeline, coverageEvaluator, selection, rng);
     locationEngine.addEvolutionObserver(
         new EvolutionLogger(
-            session.getId(),
-            allocationDtos,
-            distanceMatrix,
-            eventPublisher,
-            notificationService,
-            1));
+            session.getId(), costEvaluatorUtils, eventPublisher, notificationService, progress));
     locationEngine.setSingleThreaded(true);
 
     log.info("Running location engine...");
@@ -143,12 +141,7 @@ public class OptimizationEngine {
             allocationCandidateFactory, allocationPipeline, travelCostEvaluator, selection, rng);
     allocationEngine.addEvolutionObserver(
         new EvolutionLogger(
-            session.getId(),
-            allocationDtos,
-            distanceMatrix,
-            eventPublisher,
-            notificationService,
-            2));
+            session.getId(), costEvaluatorUtils, eventPublisher, notificationService, progress));
     allocationEngine.setSingleThreaded(true);
 
     // Running allocation engine
@@ -163,7 +156,7 @@ public class OptimizationEngine {
 
     List<AllocationDto> optimizedAllocations =
         FacilityCandidateUtil.findNearestFacilitiesForDemands(
-            allocationDtos, facilitiesCodes, distanceMatrix);
+            allocationDTOs, facilitiesCodes, distanceMatrix);
 
     log.info("Allocated demands are saved into the database ...");
 
