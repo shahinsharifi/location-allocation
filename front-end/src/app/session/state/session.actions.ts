@@ -8,6 +8,7 @@ export const sessionActions = createActionGroup({
     'Update Session': props<{ activeSession: Session }>(),
     'Delete Session': props<{ activeSession: Session }>(),
     'Activate Session': props<{ activeSession: Session }>(),
+    'Load Stored Sessions': props<{ sessions: Session[] }>(),
     'Reset Session': emptyProps(),
   },
 });

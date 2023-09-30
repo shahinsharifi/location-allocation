@@ -11,33 +11,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.LoggerFactory;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
+@Log4j2
 public class TravelCostEvaluator implements FitnessEvaluator<List<BasicGenome>> {
 
-  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(TravelCostEvaluator.class);
   private final List<RegionDto> demands;
   private final ImmutableTable<String, String, Double> dMatrix;
-  private  final ConcurrentHashMap<String, ConcurrentHashMap<String, Double>> sparseCostMatrix;
 
-  private final UUID sessionId;
-  private final NotificationService notificationService;
-  private final Map<String, Object> generationFitnessProgress;
-  private final Map<String, Object> overallStandardDeviationOfTravelTime;
+  private final CostEvaluatorUtils costEvaluatorUtils;
 
 
-  public TravelCostEvaluator(
-      UUID sessionId, List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix, NotificationService notificationService) {
+  public TravelCostEvaluator(List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix, Double maxTravelTime) {
     this.demands = demands;
     this.dMatrix = dMatrix;
-    this.sparseCostMatrix = CostEvaluatorUtils.convertToSparseMatrix(dMatrix);
-    this.notificationService = notificationService;
-
-    this.sessionId = sessionId;
-    this.generationFitnessProgress = new HashMap<>();
-    this.overallStandardDeviationOfTravelTime = new HashMap<>();
+    this.costEvaluatorUtils = new CostEvaluatorUtils(demands.stream().map(RegionDto::getId).toList(), dMatrix, maxTravelTime);
   }
 
   @Override
@@ -45,41 +36,23 @@ public class TravelCostEvaluator implements FitnessEvaluator<List<BasicGenome>> 
 
     double fitnessValue = 0;
     try {
-      List<RegionDto> facilities = chromosome.stream().map(BasicGenome::getRegionDto).toList();
-      Map<RegionDto, RegionDto> allocated = FacilityCandidateUtil.findNearestFacilities(demands, facilities, dMatrix);
+      List<String> facilities = chromosome.stream().map(BasicGenome::getRegionId).toList();
+      //Map<RegionDto, RegionDto> allocated = FacilityCandidateUtil.findNearestFacilities(demands, facilities, dMatrix);
 
       //evaluating fitness based on the absolute total travel cost
-      fitnessValue = calculateTotalCost(allocated);
+      //fitnessValue = calculateTotalCost(allocated);
 
       //evaluating fitness based on the standard deviation of the travel cost
-    //  fitnessValue = calculateStandardDeviation(allocated);
+      fitnessValue = this.costEvaluatorUtils.calculateStandardDeviation(facilities);
 
     } catch (Exception e) {
-      LOGGER.error("Error in TravelCostEvaluator: {}", e.getMessage());
+      log.error("Error in TravelCostEvaluator: {}", e.getMessage());
     }
     return fitnessValue;
   }
 
-  private Double calculateTotalCost(Map<RegionDto, RegionDto> allocated) {
-    return allocated.entrySet().stream()
-        .mapToDouble(
-            entry -> dMatrix.get(entry.getKey().getId(), entry.getValue().getId()))
-        .sum();
-  }
 
-  private Double calculateStandardDeviation(Map<RegionDto, RegionDto> allocated) {
-    DescriptiveStatistics ds = new DescriptiveStatistics();
-    allocated.forEach((key, value1) -> {
-      ConcurrentHashMap<String, Double> innerMap = sparseCostMatrix.get(key.getId());
-      if (innerMap != null) {
-        Double value = innerMap.get(value1.getId());
-        if (value != null) {
-          ds.addValue(value);
-        }
-      }
-    });
-    return ds.getStandardDeviation();
-  }
+
 
 
   @Override

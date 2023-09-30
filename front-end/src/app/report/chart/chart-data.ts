@@ -1,17 +1,18 @@
 
 export class ChartMetaData {
+	chartTitle?: string = '';
+	type?: string = 'Spline';
 	xMin?: number;
 	xMax?: number;
-	xAxisTitle?: string;
+	xAxisTitle?: string = '';
 	yMin?: number;
 	yMax?: number;
-	yAxisTitle?: string;
+	yAxisTitle?: string = '';
 	yLabel?: string;
 }
 
 export class ChartData {
-	type?: string;
-	metadata?: any | undefined;
+	metadata?: ChartMetaData | undefined;
 	data?: Array<any> | undefined;
 }
 

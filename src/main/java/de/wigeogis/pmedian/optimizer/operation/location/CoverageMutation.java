@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableTable;
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.logger.MutationRateEvent;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
+import de.wigeogis.pmedian.optimizer.util.CostEvaluatorUtils;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class CoverageMutation implements EvolutionaryOperator<BasicGenome> {
   private final UUID sessionId;
   private final List<RegionDto> demands;
   private final ImmutableTable<String, String, Double> distanceMatrix;
+  private final CostEvaluatorUtils costEvaluatorUtils;
   private Double mutationRate = 0.001;
   private NumberGenerator<Probability> mutationProbability =
       new AdjustableNumberGenerator<>(new Probability(mutationRate));
@@ -52,11 +54,16 @@ public class CoverageMutation implements EvolutionaryOperator<BasicGenome> {
   }
 
   private int checkCoverage(List<BasicGenome> chromosome) {
-    List<RegionDto> facilities = chromosome.stream().map(BasicGenome::getRegionDto).toList();
-    Map<RegionDto, RegionDto> allocated =
-        FacilityCandidateUtil.findNearestFacilities(demands, facilities, distanceMatrix);
-    return demands.size() - allocated.size();
+    List<String> facilities = chromosome.stream().map(BasicGenome::getRegionId).toList();
+    return this.costEvaluatorUtils.calculateUncoveredAndAboveLimitRegions(facilities);
   }
+
+//  private int checkCoverage(List<BasicGenome> chromosome) {
+//    List<RegionDto> facilities = chromosome.stream().map(BasicGenome::getRegionDto).toList();
+//    Map<RegionDto, RegionDto> allocated =
+//        FacilityCandidateUtil.findNearestFacilities(demands, facilities, distanceMatrix);
+//    return demands.size() - allocated.size();
+//  }
 
   private void setMutationProbability(double mutationRate) {
     this.mutationProbability = new AdjustableNumberGenerator<>(new Probability(mutationRate));

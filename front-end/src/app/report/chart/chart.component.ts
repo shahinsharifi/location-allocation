@@ -11,17 +11,12 @@ import {
 	IgxCategoryChartComponent,
 	IgxCategoryChartModule,
 	IgxLegendModule,
-	MarkerAutomaticBehavior
 } from 'igniteui-angular-charts';
 import {CommonModule} from "@angular/common";
 import {FlexModule} from "@angular/flex-layout";
 import {MatCardModule} from "@angular/material/card";
-import {MessageSubject} from "../../core/websocket/message";
-import {Observable, Subject, takeUntil} from "rxjs";
-import {Session} from "../../session/session";
-import {select, Store} from "@ngrx/store";
-import {AppState} from "../../core/state/app.state";
 import {ChartData} from "./chart-data";
+import {Observable, Subject, takeUntil} from "rxjs";
 
 
 @Component({
@@ -35,73 +30,33 @@ import {ChartData} from "./chart-data";
 })
 export class ChartComponent implements OnInit, OnDestroy {
 
+
 	@Input() chartTitle: string;
-	@Input() xAxisTitle: string;
-	@Input() yAxisTitle: string;
-	@Input() chartSubject: MessageSubject;
+	@Input() chartType: string;
+	@Input("chartData") chartData$: Observable<ChartData>;
 	@ViewChild('chart', {static: true}) chart: IgxCategoryChartComponent;
 
-	destroy$ = new Subject<void>();
-	sessionState$: Observable<Session>;
-	locationFitness$: Observable<any>;
-	allocationFitness$: Observable<any>;
-	travelCostDistribution$: Observable<any>;
-
 	public data: any[] = [];
-	public chartType: string = 'Spline';
 	private isFirstTime: boolean = true;
+	private destroy$ = new Subject<void>();
 
-	constructor(private store: Store<AppState>) {
-		this.sessionState$ = this.store.pipe(select(state => state.session.activeSession));
-		this.locationFitness$ = this.store.pipe(select(state => state.report.locationFitnessChart));
-		this.allocationFitness$ = this.store.pipe(select(state => state.report.allocationFitnessChart));
-		this.travelCostDistribution$ = this.store.pipe(select(state => state.report.costDistributionChart));
-	}
+	constructor() {}
 
-	ngOnInit(): void {
+	ngOnInit() {
+		this.generateInitData(this.chartType);
 
-		this.sessionState$
+		this.chartData$
 		.pipe(takeUntil(this.destroy$))
-		.subscribe(session => {
-			if (session == null || session.id == null) {
-				this.reset();
-			}
-		});
-
-		if (this.chartSubject === MessageSubject.SESSION_LOCATION_FITNESS_DATA) {
-			this.chartType = 'Spline';
-			this.locationFitness$
-			.pipe(takeUntil(this.destroy$))
-			.subscribe(this.processData.bind(this));
-		} else if (this.chartSubject === MessageSubject.SESSION_ALLOCATION_FITNESS_DATA) {
-			this.data = [{x: 0, y: 0}];
-			this.chartType = 'Spline';
-			this.allocationFitness$
-			.pipe(takeUntil(this.destroy$))
-			.subscribe(this.processData.bind(this));
-		} else if (this.chartSubject === MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION) {
-			this.data = [];
-			for (let i = 0; i <= 60; i += 5) {
-				this.data.push({x: i, y: 0});
-			}
-			this.chartType = 'Area';
-			this.travelCostDistribution$
-			.pipe(takeUntil(this.destroy$))
-			.subscribe(this.processData.bind(this));
-		}
+		.subscribe(this.processData.bind(this));
 	}
-
 
 	processData(chartData: ChartData): void {
 		if (chartData == null || chartData.data == null || chartData.data.length == 0) return;
-		if (this.chartSubject === MessageSubject.SESSION_LOCATION_FITNESS_DATA ||
-				this.chartSubject === MessageSubject.SESSION_ALLOCATION_FITNESS_DATA) {
+		if (this.chartType === 'Spline') {
 			if (this.isFirstTime) {
 				const metadata = chartData.metadata;
 				this.chart.yAxisTitle = metadata.yAxisTitle;
 				this.chart.xAxisTitle = metadata.xAxisTitle;
-				this.chart.markerAutomaticBehavior = MarkerAutomaticBehavior.CircleSmart;
-				this.chart.markerMaxCount = 10;
 				this.chart.notifyVisualPropertiesChanged();
 				const initVal = {x: 0, y: metadata.yMax};
 				this.data.push(initVal);
@@ -110,7 +65,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 				this.isFirstTime = false;
 			}
 			this.updateFitnessData(chartData.data);
-		} else if (this.chartSubject === MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION) {
+		} else if (this.chartType === 'Area') {
 			const metadata = chartData.metadata;
 			this.chart.yAxisTitle = metadata.yAxisTitle;
 			this.chart.xAxisTitle = metadata.xAxisTitle;
@@ -137,7 +92,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 
 
 	updateTravelCostDistributionData(data: any[]): void {
-		if(data == null) return;
+		if (data == null) return;
 		this.chart.notifyClearItems(this.data);
 		for (let i = 0; i < data.length; i++) {
 			const newItem = data[i];
@@ -148,18 +103,38 @@ export class ChartComponent implements OnInit, OnDestroy {
 	}
 
 
+	generateInitData(chartType: string): void {
+		this.chart.yAxisTitle = 'Y';
+		this.chart.xAxisTitle = 'X';
+		if (chartType === 'Spline') {
+			const data = [];
+			for (let i = 0; i <= 20; i += 2) {
+				data.push({x: i, y: 0});
+			}
+			this.data = data;
+		} else if (chartType === 'Area') {
+			const data = [];
+			for (let i = 0; i <= 60; i += 5) {
+				data.push({x: i, y: 0});
+			}
+			this.data = data;
+		}
+	}
+
+
 	reset(): void {
-		this.isFirstTime = true;
 		this.data = [];
-		this.chart.notifyClearItems(this.data);
+		for (let i = 0; i <= 60; i += 5) {
+			this.data.push({x: i, y: 0});
+		}
+		this.isFirstTime = true;
 	}
 
 	getChartColor() {
-		switch (this.chartSubject) {
-			case MessageSubject.SESSION_LOCATION_FITNESS_DATA:
-			case MessageSubject.SESSION_ALLOCATION_FITNESS_DATA:
+		switch (this.chartType) {
+			case 'Spline':
 				return 'rgba(140, 231, 217, 1)';
-			case MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION:
+			case 'Area':
 				return 'rgba(110, 177, 255, 1)';
 			default:
 				return 'rgba(238, 88, 121, 1)';

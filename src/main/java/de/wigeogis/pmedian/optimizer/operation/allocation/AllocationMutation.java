@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableTable;
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.logger.MutationRateEvent;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
+import de.wigeogis.pmedian.optimizer.util.CostEvaluatorUtils;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class AllocationMutation implements EvolutionaryOperator<BasicGenome> {
   private final UUID sessionId;
   private final List<RegionDto> demands;
   private final ImmutableTable<String, String, Double> dMatrix;
+  private final CostEvaluatorUtils costEvaluatorUtils;
   private Double mutationRate = 0.001;
   private NumberGenerator<Probability> mutationProbability =
       new AdjustableNumberGenerator<>(new Probability(mutationRate));
@@ -32,58 +34,51 @@ public class AllocationMutation implements EvolutionaryOperator<BasicGenome> {
   public List<BasicGenome> apply(List<BasicGenome> chromosome, Random random) {
     for (BasicGenome genome : chromosome) {
       if (mutationProbability.nextValue().nextEvent(random)) {
-        double beforeCost = calculateTotalCost(chromosome);
+        double uncoveredBefore = calculateCoverage(chromosome);
+        double beforeFitness = calculateStandardDeviation(chromosome);
         String beforeFid = genome.getRegionId();
-
         String afterFid = mutateGenome(chromosome, genome, random).getRegionId();
         genome.setRegionId(afterFid);
-        double afterCost = calculateTotalCost(chromosome);
-
-        if (afterCost > beforeCost) genome.setRegionId(beforeFid);
+        double uncoveredAfter = calculateCoverage(chromosome);
+        double afterFitness = calculateStandardDeviation(chromosome);
+        if (uncoveredAfter > uncoveredBefore || afterFitness > beforeFitness) genome.setRegionId(beforeFid);
       }
     }
-
     return chromosome;
   }
 
   private BasicGenome mutateGenome(List<BasicGenome> chromosome, BasicGenome genome, Random rng) {
-
-    List<String> reachableRegionCodes =
-        dMatrix.row(genome.getRegionId()).keySet().stream().toList();
-    //    int randomNumber = rng.nextInt(reachableRegion.size());
-    //    String candidate = reachableRegion.get(randomNumber);
-    //    BasicGenome testGenome = new BasicGenome(candidate);
-    //    if (!chromosome.contains(testGenome)) gene.setRegionId(candidate);
-
-    List<String> top10NearestCandidate =
-        dMatrix.row(genome.getRegionId()).entrySet().stream()
-            .sorted(Map.Entry.comparingByValue())
-            .limit(10)
-            .map(Map.Entry::getKey)
-            .toList();
-    int randomNumber = rng.nextInt(top10NearestCandidate.size());
-    String candidate = top10NearestCandidate.get(randomNumber);
-
-    List<String> newReachableRegionCodes =
-        dMatrix.row(genome.getRegionId()).keySet().stream().toList();
-
+    int randomNumber = rng.nextInt(demands.size());
+    String candidate = demands.get(randomNumber).getId();
     BasicGenome testGenome = new BasicGenome(candidate);
-    if (!chromosome.contains(testGenome)
-        && newReachableRegionCodes.size() >= reachableRegionCodes.size())
-      genome.setRegionId(candidate);
-
+    if (!chromosome.contains(testGenome)) genome.setRegionId(candidate);
     return genome;
   }
 
   private Double calculateTotalCost(List<BasicGenome> chromosome) {
-    List<RegionDto> facilities = chromosome.stream().map(BasicGenome::getRegionDto).toList();
-    Map<RegionDto, RegionDto> allocated =
-        FacilityCandidateUtil.findNearestFacilities(demands, facilities, this.dMatrix);
-    return allocated.entrySet().stream()
-        .mapToDouble(
-            entry -> dMatrix.get(entry.getKey().getId(), entry.getValue().getId()))
-        .sum();
+    List<String> facilities = chromosome.stream().map(BasicGenome::getRegionId).toList();
+    return this.costEvaluatorUtils.calculateTotalCost(facilities);
   }
+
+  private Double calculateStandardDeviation(List<BasicGenome> chromosome) {
+    List<String> facilities = chromosome.stream().map(BasicGenome::getRegionId).toList();
+    return this.costEvaluatorUtils.calculateStandardDeviation(facilities);
+  }
+
+  private int calculateCoverage(List<BasicGenome> chromosome) {
+    List<String> facilities = chromosome.stream().map(BasicGenome::getRegionId).toList();
+    return this.costEvaluatorUtils.calculateUncoveredAndAboveLimitRegions(facilities);
+  }
+
+  //  private Double calculateTotalCost(List<BasicGenome> chromosome) {
+  //    List<RegionDto> facilities = chromosome.stream().map(BasicGenome::getRegionDto).toList();
+  //    Map<RegionDto, RegionDto> allocated =
+  //        FacilityCandidateUtil.findNearestFacilities(demands, facilities, this.dMatrix);
+  //    return allocated.entrySet().stream()
+  //        .mapToDouble(
+  //            entry -> dMatrix.get(entry.getKey().getId(), entry.getValue().getId()))
+  //        .sum();
+  //  }
 
   private void setMutationProbability(double mutationRate) {
     this.mutationProbability = new AdjustableNumberGenerator<>(new Probability(mutationRate));

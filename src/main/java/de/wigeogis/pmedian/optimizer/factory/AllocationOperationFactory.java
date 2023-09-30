@@ -5,6 +5,7 @@ import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.operation.allocation.AllocationCrossOver;
 import de.wigeogis.pmedian.optimizer.operation.allocation.AllocationMutation;
+import de.wigeogis.pmedian.optimizer.util.CostEvaluatorUtils;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +23,9 @@ import org.uncommons.watchmaker.framework.operators.ListOperator;
 public class AllocationOperationFactory {
 
   private final UUID sessionId;
-  public EvolutionaryOperator<List<BasicGenome>> createEvolutionPipeline(List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix) {
+
+  public EvolutionaryOperator<List<BasicGenome>> createEvolutionPipeline(
+      List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix, CostEvaluatorUtils costEvaluatorUtils) {
 
     List<EvolutionaryOperator<List<BasicGenome>>> operators = new LinkedList<>();
 
@@ -32,9 +35,7 @@ public class AllocationOperationFactory {
             new ConstantGenerator<>(1), new AdjustableNumberGenerator<>(new Probability(0.9))));
 
     // Installing mutation operator
-    operators.add(
-        new ListOperator<>(
-            new AllocationMutation(sessionId, demands,dMatrix)));
+    operators.add(new ListOperator<>(new AllocationMutation(sessionId, demands, dMatrix, costEvaluatorUtils)));
 
     return new EvolutionPipeline<>(operators);
   }

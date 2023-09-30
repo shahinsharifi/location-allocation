@@ -209,7 +209,7 @@ export class MapService {
     let htmlContent = '<div style="padding: 10px; color: #333; background-color: #fff; border: 1px solid rgba(0,0,0,0.2); border-radius: 0;">';
     columnInfo.forEach((column: any) => {
       if (column['header'] == true) {
-        htmlContent += `<h6 style="margin: 0 0 10px 0; text-align: center;">${properties[column['name']]}</h6>`;
+        htmlContent += `<h3 style="margin: 0 0 10px 0; text-align: center;">${properties[column['name']]}</h3>`;
       } else {
         let value = properties[column['name']];
         if(typeof value === 'number') {

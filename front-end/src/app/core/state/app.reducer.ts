@@ -1,6 +1,5 @@
 import {ActionReducer, ActionReducerMap, MetaReducer} from '@ngrx/store';
 import {AppState} from "./app.state";
-import {localStorageSync} from "ngrx-store-localstorage";
 import {mapReducer} from "../../map/state/map.reducer";
 import {webSocketReducer} from "../websocket/state/websocket.reducer";
 import {launcherReducer} from "../../launcher/state/launcher.reducer";
@@ -18,7 +17,13 @@ export const appReducers: ActionReducerMap<AppState> = {
 };
 
 function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
-  return localStorageSync({keys: ['user'], rehydrate: true})(reducer);
+  return (state, action) => {
+    const nextState = reducer(state, action);
+    if (nextState.session.activeSession) {
+      localStorage.setItem(`appState_${nextState.session.activeSession.id}`, JSON.stringify(nextState));
+    }
+    return nextState;
+  };
 }
 export const metaReducers: Array<MetaReducer<any, any>> = [localStorageSyncReducer];
 

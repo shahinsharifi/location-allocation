@@ -21,6 +21,10 @@ import {MainComponent} from "./main/main.component";
 import {SessionComponent} from "./session/session.component";
 import {LauncherComponent} from "./launcher/launcher.component";
 import {ReportComponent} from "./report/report.component";
+import {sessionActions} from "./session/state/session.actions";
+import {Session} from "./session/session";
+import {AppState} from "./core/state/app.state";
+import {Store} from "@ngrx/store";
 
 
 @Component({
@@ -54,17 +58,25 @@ export class AppComponent implements OnInit, OnDestroy {
   @ViewChildren('exampleLink', {read: ElementRef})
   exampleLinks: QueryList<ElementRef>;
 
-  constructor() {
+  constructor(private store: Store<AppState>) {}
 
+  ngOnInit(): void {
+   // this.loadSessionsFromLocalStorage();
   }
 
-  ngOnDestroy(): void {
-    throw new Error('Method not implemented.');
+  loadSessionsFromLocalStorage(): void {
+    const keys = Object.keys(localStorage);
+    const sessionKeys = keys.filter(key => key.startsWith('appState_'));
+
+    const sessions: Session[] = sessionKeys.map(key => {
+      const appState: AppState = JSON.parse(localStorage.getItem(key));
+      return appState.session.activeSession; // Assuming activeSession has enough session info
+    });
+
+    this.store.dispatch(sessionActions.loadStoredSessions({ sessions }));
   }
 
-  ngOnInit() {
 
-  }
 
   ngAfterViewInit() {
     this.scrollInToActiveExampleLink();
@@ -78,17 +90,13 @@ export class AppComponent implements OnInit, OnDestroy {
     console.log('sidenav changed ...');
   }
 
-  search() {
-    // Quick and dirty
+
+
+  scrollInToActiveExampleLink() {
 
   }
 
-  clearSearch() {
-    this.searchTerm = '';
-
-  }
-
-  private scrollInToActiveExampleLink() {
-
+  ngOnDestroy(): void {
+    throw new Error('Method not implemented.');
   }
 }

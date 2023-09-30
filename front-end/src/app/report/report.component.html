@@ -5,10 +5,10 @@
     <div fxLayout="column" fxFill>
       <mat-card class="app-card" fxFill>
         <mat-card-content class="app-card-content" fxFill fxLayout="column">
-          <app-chart fxFill [chartTitle]="'Live Optimization Progress'"
-                     [xAxisTitle]="'Generation'"
-                     [yAxisTitle]="'Fitness Score'"
-                     [chartSubject]="MessageSubject.SESSION_ALLOCATION_FITNESS_DATA"
+          <app-chart fxFill
+                     [chartTitle]="'Live Optimization Progress'"
+                     [chartData]="allocationFitness$"
+                     [chartType]="'Spline'"
           ></app-chart>
         </mat-card-content>
       </mat-card>
@@ -22,9 +22,8 @@
         <mat-card-content class="app-card-content" fxFill fxLayout="column">
           <app-chart fxFill
                      [chartTitle]="'Distribution of Travel-time'"
-                     [xAxisTitle]="'Travel-time to Nearest Facility'"
-                     [yAxisTitle]="'Number of Demand Regions'"
-                     [chartSubject]="MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION"
+                     [chartData]="travelCostDistribution$"
+                     [chartType]="'Area'"
           ></app-chart>
         </mat-card-content>
       </mat-card>

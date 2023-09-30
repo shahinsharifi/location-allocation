@@ -1,3 +1,18 @@
-<div class="form-container">
-
-</div>
+<mat-nav-list>
+  <ng-container *ngFor="let session of sessionListState$ | async">
+    <mat-card class="session-card" (click)="loadSessionState(session)">
+      <mat-card-header>
+        <mat-card-title>Session: {{ session.id }}</mat-card-title>
+        <mat-card-subtitle>{{ formatDate(session.createdAt) | date }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Status: <span class="status-badge" [ngClass]="session.status">{{ session.status }}</span></p>
+        <p *ngIf="session.numberOfFacilities">Facilities: {{ session.numberOfFacilities }}</p>
+        <p *ngIf="session.maxTravelTimeInMinutes">Max Travel Time: {{ session.maxTravelTimeInMinutes }} mins</p>
+        <p *ngIf="session.maxRunningTimeInMinutes">Max Running Time: {{ session.maxRunningTimeInMinutes }} mins</p>
+        <!-- ... and so on for other properties -->
+      </mat-card-content>
+    </mat-card>
+    <mat-divider></mat-divider>
+  </ng-container>
+</mat-nav-list>

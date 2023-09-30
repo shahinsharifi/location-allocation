@@ -41,6 +41,7 @@ services:
     command: [ "postgres", "-c", "listen_addresses=*", "-c", "shared_buffers=2GB", "-c",
                "maintenance_work_mem=1024MB", "-c", "work_mem=500MB", "-c", "effective_cache_size=4GB",
                "-c", "autovacuum_vacuum_scale_factor=0.05", "-c", "autovacuum_analyze_scale_factor=0.02" ]
+    shm_size: '1g'
 
 #  spring-boot-app:
 #    image: docker.io/wigeogis/location-allocation:1.0

@@ -12,6 +12,7 @@ import de.wigeogis.pmedian.optimizer.factory.LocationOperationFactory;
 import de.wigeogis.pmedian.optimizer.factory.LocationPopulationFactory;
 import de.wigeogis.pmedian.optimizer.logger.EvolutionLogger;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
+import de.wigeogis.pmedian.optimizer.util.CostEvaluatorUtils;
 import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import de.wigeogis.pmedian.websocket.NotificationService;
 import java.util.*;
@@ -50,6 +51,12 @@ public class OptimizationEngine {
     List<RegionDto> regions =
         allocationDtos.stream().map(AllocationDto::toRegionDto).collect(Collectors.toList());
 
+    CostEvaluatorUtils costEvaluatorUtils =
+        new CostEvaluatorUtils(
+            regions.stream().map(RegionDto::getId).toList(),
+            distanceMatrix,
+            session.getMaxTravelTimeInMinutes());
+
     ElapsedTime elapsedTime = new ElapsedTime(session.getMaxRunningTimeInMinutes() * 60000);
 
     Random rng = new XORShiftRNG();
@@ -61,9 +68,7 @@ public class OptimizationEngine {
 
     log.info("Initializing demand regions ...");
 
-    List<RegionDto> initialSeed =
-        FacilityCandidateUtil.findFacilityCandidates(
-            regions, distanceMatrix, numberOfFacilities, session.getMaxTravelTimeInMinutes(), rng);
+    List<RegionDto> initialSeed = costEvaluatorUtils.findFacilityCandidates(numberOfFacilities);
 
     if (initialSeed.size() > numberOfFacilities) numberOfFacilities = initialSeed.size();
 
@@ -73,9 +78,11 @@ public class OptimizationEngine {
     SelectionStrategy<Object> selection =
         new TournamentSelection(new AdjustableNumberGenerator<>(new Probability(0.9d)));
 
-    // first check if the initial seed has 100% coverage, if not, run the location engine
     int uncoveredRegions =
-        FacilityCandidateUtil.calculateUncoveredDemands(regions, initialSeed, distanceMatrix);
+        costEvaluatorUtils.calculateUncoveredAndAboveLimitRegions(
+            initialSeed.stream().map(RegionDto::getId).toList());
+    //    int uncoveredRegions =
+    //        FacilityCandidateUtil.calculateUncoveredDemands(regions, initialSeed, distanceMatrix);
     log.info("Uncovered regions: " + uncoveredRegions);
 
     List<BasicGenome> locationResult = null;
@@ -86,9 +93,9 @@ public class OptimizationEngine {
 
     EvolutionaryOperator<List<BasicGenome>> locationPipeline =
         new LocationOperationFactory(session.getId())
-            .createEvolutionPipeline(regions, distanceMatrix);
+            .createEvolutionPipeline(regions, distanceMatrix, costEvaluatorUtils);
     CoverageEvaluator coverageEvaluator =
-        new CoverageEvaluator(session.getId(), regions, distanceMatrix, notificationService);
+        new CoverageEvaluator(regions, distanceMatrix, session.getMaxTravelTimeInMinutes());
     GenerationalEvolutionEngine<List<BasicGenome>> locationEngine =
         new GenerationalEvolutionEngine<>(
             locationCandidateFactory, locationPipeline, coverageEvaluator, selection, rng);
@@ -128,9 +135,9 @@ public class OptimizationEngine {
 
     EvolutionaryOperator<List<BasicGenome>> allocationPipeline =
         new AllocationOperationFactory(session.getId())
-            .createEvolutionPipeline(regions, distanceMatrix);
+            .createEvolutionPipeline(regions, distanceMatrix, costEvaluatorUtils);
     TravelCostEvaluator travelCostEvaluator =
-        new TravelCostEvaluator(session.getId(), regions, distanceMatrix, notificationService);
+        new TravelCostEvaluator(regions, distanceMatrix, session.getMaxTravelTimeInMinutes());
     GenerationalEvolutionEngine<List<BasicGenome>> allocationEngine =
         new GenerationalEvolutionEngine<>(
             allocationCandidateFactory, allocationPipeline, travelCostEvaluator, selection, rng);

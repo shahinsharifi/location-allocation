@@ -105,9 +105,8 @@ export class LauncherComponent implements OnInit, OnDestroy {
   }
 
   stop() {
-    if(this.sessionId == null) return;
-    const session: Session = {id: this.sessionId};
-    this.launcherService.stopProcess(session);
+    if(!this.activeSession || !this.activeSession.id) return;
+    this.launcherService.stopProcess(this.activeSession);
   }
 
   reset() {

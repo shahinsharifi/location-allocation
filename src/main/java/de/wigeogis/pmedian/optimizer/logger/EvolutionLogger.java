@@ -80,9 +80,10 @@ public class EvolutionLogger implements IslandEvolutionObserver<List<BasicGenome
 
     lastBestFitness = currentBestFitness;
 
-    progress.put(data.getGenerationNumber(), data.getBestCandidateFitness());
 
-    if (data.getGenerationNumber() % 20 == 0) {
+
+    if (data.getGenerationNumber() % 100 == 0) {
+      progress.put(data.getGenerationNumber(), data.getBestCandidateFitness());
       publishTravelCostDistribution(data.getBestCandidate());
       publishFitnessProgress(
           data.getGenerationNumber(), data.getBestCandidateFitness(), optimizationPhase

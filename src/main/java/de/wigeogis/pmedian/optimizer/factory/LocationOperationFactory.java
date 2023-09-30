@@ -5,6 +5,7 @@ import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.operation.allocation.AllocationCrossOver;
 import de.wigeogis.pmedian.optimizer.operation.location.CoverageMutation;
+import de.wigeogis.pmedian.optimizer.util.CostEvaluatorUtils;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +25,7 @@ public class LocationOperationFactory {
   private final UUID sessionId;
 
   public EvolutionaryOperator<List<BasicGenome>> createEvolutionPipeline(
-      List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix) {
+      List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix, CostEvaluatorUtils costEvaluatorUtils) {
 
     List<EvolutionaryOperator<List<BasicGenome>>> operators = new LinkedList<>();
 
@@ -33,7 +34,7 @@ public class LocationOperationFactory {
         new AllocationCrossOver<>(
             new ConstantGenerator<>(1), new AdjustableNumberGenerator<>(new Probability(0.9))));
 
-    operators.add(new ListOperator<>(new CoverageMutation(sessionId, demands, dMatrix)));
+    operators.add(new ListOperator<>(new CoverageMutation(sessionId, demands, dMatrix, costEvaluatorUtils)));
 
     return new EvolutionPipeline<>(operators);
   }
