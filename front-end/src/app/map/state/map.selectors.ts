@@ -10,7 +10,7 @@ export const selectMapSelection = createSelector(
 
 export const selectActiveSelection = createSelector(
   selectMapSelection,
-  (selection) => selection.active
+  (selection) => selection.activeDrawing
 );
 
 export const selectRegionSelection = createSelector(

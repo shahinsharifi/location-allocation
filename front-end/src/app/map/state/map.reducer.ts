@@ -4,7 +4,7 @@ import {createReducer, on} from "@ngrx/store";
 
 export const initialState: MapState = {
   selection: {
-    active: false,
+    activeDrawing: false,
     wkt: null,
     selectedRegions: 0
   },
@@ -21,20 +21,25 @@ export const mapReducer = createReducer<MapState>(
     ...state,
     selection: {
       ...state.selection,
-      active: true
+      activeDrawing: true
     }
   })),
   on(mapActions.disableSelection, state => ({
       ...state,
       selection: {
         ...state.selection,
-        active: false
+        activeDrawing: false
       }
     }
   )),
   on(mapActions.regionsSelected, (state, selection) => ({
       ...state,
-      selection: selection
+      selection: {
+        ...state.selection,
+        activeDrawing: true,
+        wkt: selection.wkt,
+        selectedRegions: selection.selectedRegions
+      }
     }
   )),
   on(mapActions.changeLayerVisibility, (state, visibility) => ({

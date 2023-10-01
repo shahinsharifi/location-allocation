@@ -16,7 +16,7 @@ export class SelectionService {
 
   private map: Map = null;
   private regionSelection: RegionSelection = {
-    active: false,
+    activeDrawing: false,
     wkt: null,
     selectedRegions: 0
   };

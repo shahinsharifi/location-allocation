@@ -8,7 +8,7 @@ export const launcherActions = createActionGroup({
     'Stop Process': props<Session>(),
     'Resume Process': props<Session>(),
     'Change Step': props<{ stepIndex: number }>(),
-    'Toggle Selection': props<{ active: boolean }>(),
+    'Activate Drawing': props<{ activeDrawing: boolean }>(),
     'Clear Selection': emptyProps(),
     'Reset Session': emptyProps()
   },

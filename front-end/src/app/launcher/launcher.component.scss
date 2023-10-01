@@ -46,15 +46,19 @@
 
       .mat-horizontal-content-container {
         overflow: hidden !important;
-        padding: 10px !important;
-        min-height: 120px !important;
+        padding: 5px !important;
+        min-height: 125px !important;
         padding-left: 15px !important;
       }
 
+      .small-button {
+        height: 32px;
+      }
+
     }
+
+
   }
-
-
 
   .feature-number {
     font-size: 1.2em;
@@ -72,9 +76,6 @@
       font-weight: normal;
     }
 
-    .close-icon {
-      color: red;
-    }
   }
 
   .example-form-field {

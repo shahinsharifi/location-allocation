@@ -64,13 +64,10 @@ export class WebsocketService extends RxStomp {
       case MessageSubject.SESSION_LOG:
         this.store.dispatch(reportActions.updateLogs({log: message.message}));
         break;
-      case MessageSubject.SESSION_LOCATION_FITNESS_DATA:
-        this.store.dispatch(reportActions.updateLocationFitnessChart({metadata:message.metadata, data: message.data}));
-        break;
-      case MessageSubject.SESSION_ALLOCATION_FITNESS_DATA:
+      case MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_TOTAL_PROGRESS:
         this.store.dispatch(reportActions.updateAllocationFitnessChart({metadata:message.metadata, data: message.data}));
         break;
-      case MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION:
+      case MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION_PROGRESS:
         this.store.dispatch(reportActions.updateCostDistributionChart({metadata:message.metadata, data: message.data}));
         break;
       default:

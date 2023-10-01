@@ -1,5 +1,5 @@
 export interface RegionSelection {
-  active?: boolean| false;
+  activeDrawing?: boolean| false;
   wkt?: string | null;
   selectedRegions?: number | 0;
 }

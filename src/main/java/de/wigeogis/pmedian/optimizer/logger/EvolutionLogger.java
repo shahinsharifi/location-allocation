@@ -9,6 +9,7 @@ import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import de.wigeogis.pmedian.websocket.MessageSubject;
 import de.wigeogis.pmedian.websocket.NotificationService;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.uncommons.watchmaker.framework.EvolutionObserver;
@@ -129,13 +131,13 @@ public class EvolutionLogger implements EvolutionObserver<List<BasicGenome>> {
             10000,
             "Iteration",
             0,
-            progress.get(0),
+            progress.get(0) + (progress.get(0) * 0.01),
             "Total Travel Cost Per Iteration",
             "Travel Time (minutes)");
 
-     notificationService.publishData(
+    notificationService.publishData(
         this.sessionId,
-        MessageSubject.SESSION_ALLOCATION_FITNESS_DATA,
+        MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_TOTAL_PROGRESS,
         metadata,
         getChartData(sampleProgress));
   }
@@ -155,26 +157,31 @@ public class EvolutionLogger implements EvolutionObserver<List<BasicGenome>> {
     List<Map<String, Object>> data = getTravelCostDistributionData(costList);
 
     notificationService.publishData(
-        this.sessionId, MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION, metadata, data);
+        this.sessionId,
+        MessageSubject.SESSION_ALLOCATION_TRAVEL_COST_DISTRIBUTION_PROGRESS,
+        metadata,
+        data);
   }
 
   private Map<Integer, Double> getSampleMap(Map<Integer, Double> progress) {
-    int counter = 0;
-    Map<Integer, Double> sampleMap = new LinkedHashMap<>();
-    if (progress.isEmpty()) {
-      return sampleMap;
+    if (progress == null || progress.isEmpty()) {
+      return Collections.emptyMap();
     }
-    int interval = progress.size() / 10;
-    for (Map.Entry<Integer, Double> entry : progress.entrySet()) {
-      if (counter % interval == 0) {
-        sampleMap.put(entry.getKey(), entry.getValue());
-      }
-      counter++;
-      if (sampleMap.size() == 10) {
-        break;
-      }
-    }
-    return sampleMap;
+
+    int size = progress.size();
+    int interval = size > 10 ? size / 10 : 1;
+
+    List<Map.Entry<Integer, Double>> entryList = new ArrayList<>(progress.entrySet());
+    return IntStream.range(0, size)
+        .filter(i -> i % interval == 0)
+        .boxed()
+        .limit(10)
+        .collect(
+            Collectors.toMap(
+                i -> entryList.get(i).getKey(),
+                i -> entryList.get(i).getValue(),
+                (a, b) -> a,
+                LinkedHashMap::new));
   }
 
   private List<Map<String, Object>> getTravelCostDistributionData(List<Double> travelCosts) {

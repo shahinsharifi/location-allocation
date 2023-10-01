@@ -6,7 +6,11 @@ import {launcherActions} from "./launcher.actions";
 const initialState: LauncherState = {
   sessionId: null,
   stepIndex: 0,
-  selection: null,
+  selection: {
+    activeDrawing: false,
+    wkt: null,
+    selectedRegions: 0
+  },
   buttons: {
     previous: true,
     next: false,
@@ -26,12 +30,12 @@ export const launcherReducer = createReducer<LauncherState>(
     stepIndex
   })),
 
-  on(launcherActions.toggleSelection, (state,{active}) => {
+  on(launcherActions.activateDrawing, (state,{activeDrawing}) => {
     return {
       ...state,
       selection: {
         ...state.selection,
-        active: active
+        activeDrawing: activeDrawing
       }
     };
   }),

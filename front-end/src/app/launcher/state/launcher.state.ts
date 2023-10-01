@@ -1,14 +1,11 @@
 import {SessionStatus} from "../../session/session";
+import {RegionSelection} from "../../map/region-selection";
 
 export interface LauncherState {
   sessionId?: string;
   stepIndex: number;
   status?: SessionStatus;
-  selection?: {
-    active: boolean;
-    wkt: string;
-    selectedRegions: number;
-  };
+  selection?: RegionSelection;
   numberOfFacilities?: number;
   maxTravelTimeInMinutes?: number;
   maxRunningTimeInMinutes?: number;

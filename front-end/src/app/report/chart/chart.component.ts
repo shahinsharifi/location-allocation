@@ -37,7 +37,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 	@ViewChild('chart', {static: true}) chart: IgxCategoryChartComponent;
 
 	public data: any[] = [];
-	private isFirstTime: boolean = true;
+	//private isFirstTime: boolean = true;
 	private destroy$ = new Subject<void>();
 
 	constructor() {}
@@ -52,42 +52,32 @@ export class ChartComponent implements OnInit, OnDestroy {
 
 	processData(chartData: ChartData): void {
 		if (chartData == null || chartData.data == null || chartData.data.length == 0) return;
+		const metadata = chartData.metadata;
+		this.chart.yAxisTitle = metadata.yAxisTitle;
+		this.chart.xAxisTitle = metadata.xAxisTitle;
 		if (this.chartType === 'Spline') {
-			if (this.isFirstTime) {
-				const metadata = chartData.metadata;
-				this.chart.yAxisTitle = metadata.yAxisTitle;
-				this.chart.xAxisTitle = metadata.xAxisTitle;
-				this.chart.notifyVisualPropertiesChanged();
-				const initVal = {x: 0, y: metadata.yMax};
-				this.data.push(initVal);
-				const oldVal = this.data.shift();
-				this.chart.notifySetItem(this.data, 0, oldVal, initVal);
-				this.isFirstTime = false;
-			}
+			this.chart.markerMaxCount = 15;
 			this.updateFitnessData(chartData.data);
 		} else if (this.chartType === 'Area') {
-			const metadata = chartData.metadata;
-			this.chart.yAxisTitle = metadata.yAxisTitle;
-			this.chart.xAxisTitle = metadata.xAxisTitle;
 			this.chart.yAxisMaximumValue = metadata.yMax;
-			this.chart.xAxisInterval = 1;
-			this.chart.notifyVisualPropertiesChanged();
+			this.chart.yAxisMinimumValue = metadata.yMin;
 			this.updateTravelCostDistributionData(chartData.data);
 		}
+		this.chart.notifyVisualPropertiesChanged();
 	}
 
 
 	updateFitnessData(data: any[]): void {
 		if (data == null) return;
-		const newVal = data[data.length - 1];
-		if (this.data.length == 1 && this.data[0].x == 0 && data.length == 1) {
-			this.data.push(newVal);
+		if(this.data.length == 1 && this.data[0].x == 0 && this.data[0].y == 0) {
+			const initVal = {x: 0, y: data[0].y};
+			this.data.push(initVal);
 			const oldVal = this.data.shift();
-			this.chart.notifySetItem(this.data, this.data.length - 1, oldVal, newVal);
-		} else {
-			this.data.push(newVal);
-			this.chart.notifyInsertItem(this.data, this.data.length - 1, newVal);
+			this.chart.notifySetItem(this.data, 0, oldVal, initVal);
 		}
+		const newVal = data[data.length - 1];
+		this.data.push(newVal);
+		this.chart.notifyInsertItem(this.data, this.data.length - 1, newVal);
 	}
 
 
@@ -107,11 +97,8 @@ export class ChartComponent implements OnInit, OnDestroy {
 		this.chart.yAxisTitle = 'Y';
 		this.chart.xAxisTitle = 'X';
 		if (chartType === 'Spline') {
-			const data = [];
-			for (let i = 0; i <= 20; i += 2) {
-				data.push({x: i, y: 0});
-			}
-			this.data = data;
+			this.data = [];
+			this.data.push({x: 0, y: 0});
 		} else if (chartType === 'Area') {
 			const data = [];
 			for (let i = 0; i <= 60; i += 5) {
@@ -119,15 +106,20 @@ export class ChartComponent implements OnInit, OnDestroy {
 			}
 			this.data = data;
 		}
+//		this.isFirstTime = true;
 	}
 
 
 	reset(): void {
 		this.data = [];
-		for (let i = 0; i <= 60; i += 5) {
-			this.data.push({x: i, y: 0});
+		if (this.chartType === 'Spline') {
+			this.data.push({x: 0, y: 0});
+		}else {
+			for (let i = 0; i <= 60; i += 5) {
+				this.data.push({x: i, y: 0});
+			}
 		}
-		this.isFirstTime = true;
+	//	this.isFirstTime = true;
 	}
 
 	getChartColor() {

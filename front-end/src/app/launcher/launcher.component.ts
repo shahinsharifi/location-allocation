@@ -4,7 +4,14 @@ import {MatCardModule} from "@angular/material/card";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
 import {MatListModule} from "@angular/material/list";
 import {MatButtonModule} from "@angular/material/button";
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators
+} from "@angular/forms";
 import {MatInputModule} from "@angular/material/input";
 import {MatStepper, MatStepperModule} from "@angular/material/stepper";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -21,14 +28,15 @@ import {launcherActions} from "./state/launcher.actions";
 import {MatSliderModule} from "@angular/material/slider";
 import {RegionSelection} from "../map/region-selection";
 import {LauncherService} from "./launcher.service";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 @Component({
   selector: 'app-launcher',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatListModule, MatButtonModule,
-    MatButtonModule, MatStepperModule, FormsModule, ReactiveFormsModule, MatFormFieldModule,
-    MatInputModule, MatExpansionModule, MatIconModule, FlexModule, MatTooltipModule,
-    MatButtonToggleModule, MatSliderModule],
+	imports: [CommonModule, MatCardModule, MatProgressBarModule, MatListModule, MatButtonModule,
+		MatButtonModule, MatStepperModule, FormsModule, ReactiveFormsModule, MatFormFieldModule,
+		MatInputModule, MatExpansionModule, MatIconModule, FlexModule, MatTooltipModule,
+		MatButtonToggleModule, MatSliderModule, MatSlideToggleModule],
   templateUrl: './launcher.component.html',
   styleUrls: ['./launcher.component.scss'],
 })
@@ -45,7 +53,6 @@ export class LauncherComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   sessionState$: Observable<Session>;
   mapSelectionState$: Observable<RegionSelection>;
-  regionSelection: RegionSelection = {};
 
   constructor(
     private store: Store<AppState>,
@@ -56,30 +63,18 @@ export class LauncherComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initializeForm();
+
     this.mapSelectionState$.subscribe(selection => {
       if (!selection) return;
-      this.regionSelection = {
-        ...this.regionSelection,
-        active: selection.active,
-        wkt: selection.wkt,
-        selectedRegions: selection.selectedRegions
-      };
-      this.regionSelectionFormGroup.setValue({wkt: selection.wkt});
-    });
-    this.sessionState$.subscribe(session => {
-      if (!session || !session.wkt) return;
-      this.activeSession = Object.assign({}, session);
-      this.regionSelectionFormGroup.setValue({wkt: session.wkt});
-      this.parametersFormGroup.setValue({
-        numberOfFacilities: session.numberOfFacilities,
-        maxTravelTimeInMinutes: session.maxTravelTimeInMinutes
-      });
+      this.regionSelectionFormGroup.setValue(selection);
     });
   }
 
   initializeForm(): void {
     this.regionSelectionFormGroup = this.formBuilder.group({
-      wkt: [null, Validators.required]
+      activeDrawing: new FormControl(false),
+      wkt: new FormControl(null, Validators.required),
+      selectedRegions: new FormControl(0)
     });
     this.parametersFormGroup = this.formBuilder.group({
       numberOfFacilities: [30, Validators.required],
@@ -111,8 +106,6 @@ export class LauncherComponent implements OnInit, OnDestroy {
 
   reset() {
     this.stepper.reset();
-    this.toggleBtn.checked = false;
-    this.regionSelection = null;
     this.regionSelectionFormGroup.reset();
     this.parametersFormGroup.reset();
     this.runningTimeFormGroup.reset();
@@ -120,10 +113,8 @@ export class LauncherComponent implements OnInit, OnDestroy {
   }
 
 
-  toggleSelection(active: boolean): void {
-    if (!this.regionSelection) this.regionSelection = {};
-    this.regionSelection.active = active;
-    this.store.dispatch(launcherActions.toggleSelection({active: active}));
+  toggleSelection(activeDrawing: boolean): void {
+    this.store.dispatch(launcherActions.activateDrawing({activeDrawing: activeDrawing}));
   }
 
   clearSelection() {

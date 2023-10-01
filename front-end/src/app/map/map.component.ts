@@ -49,7 +49,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.launcherDrawingState$
     .pipe(takeUntil(this.destroy$))
     .subscribe(selection => {
-      if (selection && selection.active) {
+      if (selection && selection.activeDrawing) {
         this.mapService.enableDrawing(selection);
       } else {
         this.mapService.disableDrawing();

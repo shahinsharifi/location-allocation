@@ -145,12 +145,15 @@ export class DrawingService {
       }, {highlight: true});
     });
 
+    console.log(this.regionSelection);
     const spatialQuery = <Array<number[]>>polygon.geometry['coordinates'][0];
     this.regionSelection = {
       ...this.regionSelection,
       wkt: this.mapUtils.createWktFromPolygon(spatialQuery),
       selectedRegions: trulyIntersectingFeatures.length
     };
+
+    console.log(this.regionSelection);
 
     this.store.dispatch(
       mapActions.regionsSelected(
@@ -171,8 +174,7 @@ export class DrawingService {
   public clearSelection(): void {
     this.clearAllDrawings();
     this.selectionService.clearSelection();
-    console.log(this.regionSelection);
-    if(this.regionSelection && this.regionSelection.active) {
+    if(this.regionSelection && this.regionSelection.activeDrawing) {
       setTimeout(() => {
         this.disableDrawing();
         this.enableDrawing();
