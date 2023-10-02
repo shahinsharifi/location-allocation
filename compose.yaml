@@ -21,7 +21,7 @@ services:
     build:
       context: .
       dockerfile: /database/Dockerfile
-    image: location-allocation/postgis15:1.0
+    image: wigeogis/location-allocation/postgis15:1.0
     container_name: postgis
     ports:
       - "5434:5432"
@@ -43,18 +43,18 @@ services:
                "-c", "autovacuum_vacuum_scale_factor=0.05", "-c", "autovacuum_analyze_scale_factor=0.02" ]
     shm_size: '1g'
 
-#  spring-boot-app:
-#    image: docker.io/wigeogis/location-allocation:1.0
-#    depends_on:
-#      postgis:
-#        condition: service_healthy
-#    ports:
-#      - "8080:8080"
-#    environment:
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgis:5432/location_allocation
-#      - SPRING_DATASOURCE_USERNAME=postgres
-#      - SPRING_DATASOURCE_PASSWORD=demo123
-#      - SERVER_SERVLET_CONTEXT_PATH=/
+  spring-boot-app:
+    image: location-allocation:1.0
+    depends_on:
+      postgis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgis:5432/location_allocation
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=demo123
+      - SERVER_SERVLET_CONTEXT_PATH=/
 
 volumes:
   postgis_data:

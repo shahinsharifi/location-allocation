@@ -21,7 +21,7 @@ import {MatIconModule} from "@angular/material/icon";
 import {FlexModule} from "@angular/flex-layout";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatButtonToggle, MatButtonToggleModule} from "@angular/material/button-toggle";
-import {Observable, Subject} from "rxjs";
+import {Observable, Subject, takeUntil} from "rxjs";
 import {select, Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
 import {launcherActions} from "./state/launcher.actions";
@@ -62,15 +62,16 @@ export class LauncherComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.initializeForm();
-
-    this.mapSelectionState$.subscribe(selection => {
+    this.initForms();
+    this.mapSelectionState$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(selection => {
       if (!selection) return;
-      this.regionSelectionFormGroup.setValue(selection);
+      this.regionSelectionFormGroup.patchValue(selection);
     });
   }
 
-  initializeForm(): void {
+  initForms(): void {
     this.regionSelectionFormGroup = this.formBuilder.group({
       activeDrawing: new FormControl(false),
       wkt: new FormControl(null, Validators.required),
@@ -105,10 +106,8 @@ export class LauncherComponent implements OnInit, OnDestroy {
   }
 
   reset() {
+    this.initForms();
     this.stepper.reset();
-    this.regionSelectionFormGroup.reset();
-    this.parametersFormGroup.reset();
-    this.runningTimeFormGroup.reset();
     this.store.dispatch(launcherActions.resetSession());
   }
 

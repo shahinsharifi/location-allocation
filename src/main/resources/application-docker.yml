@@ -1,0 +1,41 @@
+app:
+  frontend:
+    url: http://10.1.2.81:8080
+  mapping:
+    url: http://10.1.2.81:3000
+    style: style-base.json
+
+spring:
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+  datasource:
+    driverClassName: org.postgresql.Driver
+    password: demo123
+    url: jdbc:postgresql://postgis:5432/location_allocation
+    username: postgres
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    open-in-view: true
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+
+resilience:
+  thread-pool:
+    core-size: 8
+    max-size: 10
+    queue-capacity: 20
+
+logging:
+  level:
+    root: WARN
+    org:
+      springframework: INFO
+      hibernate:
+        type: TRACE

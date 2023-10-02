@@ -28,7 +28,9 @@ export class MapService {
     this.drawingService.setMap(map);
     this.map.addControl(new NavigationControl());
     this.map.getCanvasContainer().style.cursor = '';
-    this.loadBaseLayer();
+
+    //removing existing layers
+    this.removeLayers(['region', 'allocation', 'location']);
 
     if (session?.id && [
       SessionStatus.RUNNING,
@@ -36,6 +38,8 @@ export class MapService {
       SessionStatus.COMPLETED
     ].includes(session.status)) {
       this.loadResultLayer(session.id).then(() => console.log('Loaded result layer'));
+    }else{
+      this.loadBaseLayer();
     }
 
     if (this.layerVisibility) {
@@ -83,14 +87,6 @@ export class MapService {
       this.commandService.execute(
         `tiles/allocation/${sessionId}`, 'GET', null
       ).subscribe((layer: VectorTileLayer) => {
-        if (this.map.getLayer("allocation")) {
-          this.map.removeLayer('allocation');
-          this.map.removeSource('allocation');
-        }
-        if (this.map.getLayer("location")) {
-          this.map.removeLayer('location');
-          this.map.removeSource('location');
-        }
         if (layer instanceof Array) {
           const locationLayer: VectorTileLayer = layer[0] as VectorTileLayer;
           locationLayer.metadata = {
@@ -151,12 +147,10 @@ export class MapService {
   }
 
   handleClickOnLayers(e: any): void {
-
     const features = this.map.queryRenderedFeatures(e.point);
     const layers = features.map((feat) => {
       return feat.layer.id;
     });
-
 
     if (layers.includes('location')) {
       const coordinates = features[0].geometry['coordinates'].slice();
@@ -253,6 +247,27 @@ export class MapService {
     }
   }
 
+  removeLayers(layers: string[]): void {
+    layers.forEach(layer => {
+      if (this.map!.getLayer(layer)) {
+        this.map!.removeLayer(layer);
+        this.map!.removeSource(layer);
+      }
+    });
+  }
+
+  moveLayerBefore(layerName: string, beforeLayerName: string): void {
+    if (this.map!.getLayer(layerName)) {
+      this.map!.moveLayer(layerName, beforeLayerName);
+    }
+  }
+
+  moveLayerAfter(layerName: string, afterLayerName: string): void {
+    if (this.map!.getLayer(layerName)) {
+      this.map!.moveLayer(layerName, afterLayerName);
+    }
+  }
+
   public clearSelection(): void {
     if (this.map) {
       this.drawingService.clearSelection();
@@ -262,12 +277,8 @@ export class MapService {
   public resetMap(): void {
     if (this.map) {
       this.clearSelection();
-      this.updateLayerVisibility({
-        region: true,
-        location: false,
-        allocation: false
-      });
-      this.zoomToLayer('region');
+      this.removeLayers(['region', 'allocation', 'location']);
+      this.loadBaseLayer();
     }
   }
 

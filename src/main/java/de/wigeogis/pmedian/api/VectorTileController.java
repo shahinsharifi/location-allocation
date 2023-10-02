@@ -1,5 +1,6 @@
 package de.wigeogis.pmedian.api;
 
+import de.wigeogis.pmedian.config.AppProperties;
 import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.VectorTileLayerDto;
 import de.wigeogis.pmedian.database.dto.VectorTileLayerDto.BoundingBoxDto;
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class VectorTileController {
 
   private final RegionService regionService;
-  private final LocationService locationService;
+  private final AppProperties appProperties;
   private final AllocationService allocationService;
 
   @GetMapping("/tiles/base")
@@ -54,7 +55,13 @@ public class VectorTileController {
     VectorTileLayerDto layer = new VectorTileLayerDto();
 
     Map<String, String> source =
-        Map.of("type", "vector", "url", "http://localhost:3000/region", "promoteId", "id");
+        Map.of(
+            "type",
+            "vector",
+            "url",
+            appProperties.getMapping().getUrl() + "/region",
+            "promoteId",
+            "id");
 
     Map<String, String> fields =
         Map.of(
@@ -78,16 +85,16 @@ public class VectorTileController {
                 "case",
                 Arrays.asList("boolean", Arrays.asList("feature-state", "highlight"), false),
                 "#ff9900", // Highlight color
-                "#CCCCCC"
-                ));
+                "#CCCCCC"));
 
     layer.setPaint(
         Map.of(
-            "fill-color", fillColorValue,
-            "fill-opacity", 0.4,
-            "fill-outline-color", "hsla(0, 0%, 0%, 0.7)"
-        )
-    );
+            "fill-color",
+            fillColorValue,
+            "fill-opacity",
+            0.4,
+            "fill-outline-color",
+            "hsla(0, 0%, 0%, 0.7)"));
 
     return layer;
   }
@@ -101,7 +108,9 @@ public class VectorTileController {
             "type",
             "vector",
             "url",
-            "http://localhost:3000/fn_allocation_zxy_query?session_id=" + sessionId);
+            appProperties.getMapping().getUrl()
+                + "/fn_allocation_zxy_query?session_id="
+                + sessionId);
 
     Map<String, String> fields =
         Map.of(
@@ -137,7 +146,9 @@ public class VectorTileController {
             "type",
             "vector",
             "url",
-            "http://localhost:3000/fn_location_zxy_query?session_id=" + sessionId.toString());
+            appProperties.getMapping().getUrl()
+                + "/fn_location_zxy_query?session_id="
+                + sessionId.toString());
 
     Map<String, String> fields =
         Map.of(

@@ -30,6 +30,7 @@ public class AppProperties {
     @Getter
     @Setter
     public static class Mapping {
+        private String url;
         private String style;
     }
 }

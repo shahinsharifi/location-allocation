@@ -4,4 +4,5 @@ export const environment = {
   context: "api/v1",
   wsURL: "ws://localhost:8080",
   wsPath: "ws",
+  mappingURL: "http://localhost:8080",
 };

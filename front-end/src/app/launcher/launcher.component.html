@@ -25,7 +25,7 @@
             </div>
             <button mat-stroked-button matTooltip="Clear selected regions"
                     (click)="clearSelection()" class="small-button"
-                    *ngIf="regionSelectionFormGroup.controls['wkt'].valid">
+                    *ngIf="(mapSelectionState$ | async)?.selectedRegions > 0 || false">
               <mat-icon [svgIcon]="'wgg_icons:trash'"></mat-icon>
               Clear
             </button>

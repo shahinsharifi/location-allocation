@@ -205,146 +205,297 @@
 
   </dependencies>
 
+  <profiles>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.hibernate.orm.tooling</groupId>
-        <artifactId>hibernate-enhance-maven-plugin</artifactId>
-        <version>${hibernate.version}</version>
-        <executions>
-          <execution>
-            <id>enhance</id>
-            <goals>
-              <goal>enhance</goal>
-            </goals>
+    <profile>
+      <id>dev</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <finalName>location-allocation</finalName>
+        <plugins>
+          <plugin>
+            <groupId>org.hibernate.orm.tooling</groupId>
+            <artifactId>hibernate-enhance-maven-plugin</artifactId>
+            <version>${hibernate.version}</version>
+            <executions>
+              <execution>
+                <id>enhance</id>
+                <goals>
+                  <goal>enhance</goal>
+                </goals>
+                <configuration>
+                  <enableLazyInitialization>false</enableLazyInitialization>
+                  <enableDirtyTracking>true</enableDirtyTracking>
+                  <enableAssociationManagement>true</enableAssociationManagement>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>prod</id>
+      <build>
+        <finalName>location-allocation</finalName>
+        <plugins>
+          <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>3.1.0</version>
             <configuration>
-              <enableLazyInitialization>false</enableLazyInitialization>
-              <enableDirtyTracking>true</enableDirtyTracking>
-              <enableAssociationManagement>true</enableAssociationManagement>
+              <filesets>
+                <fileset>
+                  <directory>dist</directory>
+                </fileset>
+              </filesets>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.graalvm.buildtools</groupId>
-        <artifactId>native-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+          </plugin>
+          <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <version>${fmp.version}</version>
+            <configuration>
+              <workingDirectory>front-end</workingDirectory>
+            </configuration>
+            <executions>
 
+              <!-- Install node and npm -->
+              <execution>
+                <id>Install Node and NPM</id>
+                <goals>
+                  <goal>install-node-and-npm</goal>
+                </goals>
+                <configuration>
+                  <nodeVersion>${node.version}</nodeVersion>
+                </configuration>
+              </execution>
 
+              <!-- clean install -->
+              <execution>
+                <id>npm install</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <configuration>
+                  <arguments>install --legacy-peer-deps</arguments>
+                </configuration>
+              </execution>
 
-  <!--  <build>-->
-<!--    <plugins>-->
-<!--      &lt;!&ndash; clean the dist directory used by Angular &ndash;&gt;-->
-<!--      <plugin>-->
-<!--        <artifactId>maven-clean-plugin</artifactId>-->
-<!--        <version>3.1.0</version>-->
-<!--        <configuration>-->
-<!--          <filesets>-->
-<!--            <fileset>-->
-<!--              <directory>dist</directory>-->
-<!--            </fileset>-->
-<!--          </filesets>-->
-<!--        </configuration>-->
-<!--      </plugin>-->
-<!--      <plugin>-->
-<!--        <groupId>com.github.eirslett</groupId>-->
-<!--        <artifactId>frontend-maven-plugin</artifactId>-->
-<!--        <version>${fmp.version}</version>-->
-<!--        <configuration>-->
-<!--          <workingDirectory>front-end</workingDirectory>-->
-<!--        </configuration>-->
-<!--        <executions>-->
+              <!-- build app -->
+              <execution>
+                <id>build angular prod</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <configuration>
+                  <arguments>run build:prod</arguments>
+                </configuration>
+              </execution>
 
-<!--          &lt;!&ndash; Install node and npm &ndash;&gt;-->
-<!--          <execution>-->
-<!--            <id>Install Node and NPM</id>-->
-<!--            <goals>-->
-<!--              <goal>install-node-and-npm</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <nodeVersion>${node.version}</nodeVersion>-->
-<!--            </configuration>-->
-<!--          </execution>-->
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>copy-resources</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>front-end/dist/location-allocation</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.hibernate.orm.tooling</groupId>
+            <artifactId>hibernate-enhance-maven-plugin</artifactId>
+            <version>${hibernate.version}</version>
+            <executions>
+              <execution>
+                <id>enhance</id>
+                <goals>
+                  <goal>enhance</goal>
+                </goals>
+                <configuration>
+                  <enableLazyInitialization>true</enableLazyInitialization>
+                  <enableDirtyTracking>true</enableDirtyTracking>
+                  <enableAssociationManagement>true</enableAssociationManagement>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 
-<!--          &lt;!&ndash; clean install &ndash;&gt;-->
-<!--          <execution>-->
-<!--            <id>npm install</id>-->
-<!--            <goals>-->
-<!--              <goal>npm</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <arguments>install &#45;&#45;legacy-peer-deps</arguments>-->
-<!--            </configuration>-->
-<!--          </execution>-->
+    <profile>
+      <id>docker</id>
+      <build>
+        <finalName>location-allocation</finalName>
+        <plugins>
+          <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>dist</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <version>${fmp.version}</version>
+            <configuration>
+              <workingDirectory>front-end</workingDirectory>
+            </configuration>
+            <executions>
 
-<!--          &lt;!&ndash; build app &ndash;&gt;-->
-<!--          <execution>-->
-<!--            <id>build angular prod</id>-->
-<!--            <goals>-->
-<!--              <goal>npm</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <arguments>run build:prod</arguments>-->
-<!--            </configuration>-->
-<!--          </execution>-->
+              <!-- Install node and npm -->
+              <execution>
+                <id>Install Node and NPM</id>
+                <goals>
+                  <goal>install-node-and-npm</goal>
+                </goals>
+                <configuration>
+                  <nodeVersion>${node.version}</nodeVersion>
+                </configuration>
+              </execution>
 
-<!--        </executions>-->
-<!--      </plugin>-->
-<!--      <plugin>-->
-<!--        <artifactId>maven-resources-plugin</artifactId>-->
-<!--        <version>3.2.0</version>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>copy-resources</id>-->
-<!--            <phase>validate</phase>-->
-<!--            <goals>-->
-<!--              <goal>copy-resources</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>-->
-<!--              <resources>-->
-<!--                <resource>-->
-<!--                  <directory>front-end/dist/location-allocation</directory>-->
-<!--                </resource>-->
-<!--              </resources>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
-<!--      <plugin>-->
-<!--        <groupId>org.hibernate.orm.tooling</groupId>-->
-<!--        <artifactId>hibernate-enhance-maven-plugin</artifactId>-->
-<!--        <version>${hibernate.version}</version>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>enhance</id>-->
-<!--            <goals>-->
-<!--              <goal>enhance</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <enableLazyInitialization>true</enableLazyInitialization>-->
-<!--              <enableDirtyTracking>true</enableDirtyTracking>-->
-<!--              <enableAssociationManagement>true</enableAssociationManagement>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
-<!--      <plugin>-->
-<!--        <groupId>org.graalvm.buildtools</groupId>-->
-<!--        <artifactId>native-maven-plugin</artifactId>-->
-<!--      </plugin>-->
-<!--      <plugin>-->
-<!--        <groupId>org.springframework.boot</groupId>-->
-<!--        <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--      </plugin>-->
-<!--    </plugins>-->
-<!--  </build>-->
+              <!-- clean install -->
+              <execution>
+                <id>npm install</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <configuration>
+                  <arguments>install --legacy-peer-deps</arguments>
+                </configuration>
+              </execution>
+
+              <!-- build app -->
+              <execution>
+                <id>build angular prod</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <configuration>
+                  <arguments>run build:prod</arguments>
+                </configuration>
+              </execution>
+
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>copy-resources</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>front-end/dist/location-allocation</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.hibernate.orm.tooling</groupId>
+            <artifactId>hibernate-enhance-maven-plugin</artifactId>
+            <version>${hibernate.version}</version>
+            <executions>
+              <execution>
+                <id>enhance</id>
+                <goals>
+                  <goal>enhance</goal>
+                </goals>
+                <configuration>
+                  <enableLazyInitialization>true</enableLazyInitialization>
+                  <enableDirtyTracking>true</enableDirtyTracking>
+                  <enableAssociationManagement>true</enableAssociationManagement>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+              <!-- Build image during package phase -->
+              <execution>
+                <id>local-docker-build</id>
+                <goals>
+                  <goal>build-image</goal>
+                </goals>
+                <phase>package</phase>
+                <configuration>
+                  <image>
+                    <name>location-allocation:${project.version}</name>
+                  </image>
+                </configuration>
+              </execution>
+              <!-- Push image during deploy phase -->
+              <execution>
+                <id>remote-docker-push</id>
+                <goals>
+                  <goal>build-image</goal>
+                </goals>
+                <phase>deploy</phase>
+                <configuration>
+                  <image>
+                    <name>10.1.2.81:8080/location-allocation:${project.version}</name>
+                  </image>
+                  <publish>true</publish>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+  </profiles>
 
 </project>
