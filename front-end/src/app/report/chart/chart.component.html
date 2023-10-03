@@ -15,18 +15,17 @@
                         #chart
                         [dataSource]="data"
                         [chartType]="chartType"
-                        [legend]="legend"
+                        [markerTypes]="'None'"
+                        toolTipType="Default"
                         xAxisEnhancedIntervalPreferMoreCategoryLabels="false"
                         shouldAutoExpandMarginForInitialLabels="false"
-                        isTransitionInEnabled="true"
-                        isVerticalZoomEnabled="false"
-                        isHorizontalZoomEnabled="false"
-                        markerBrushes="white"
+                        [crosshairsDisplayMode]="chartType === 'Area' ? null : 'None'"
+                        [markerBrushes]="chartType === 'Area' ? 'white' : 'None'"
                         [markerOutlines]="getChartColor()"
                         [brushes]="getChartColor()"
-                        [outlines]="getChartColor()"
-                        computedPlotAreaMarginMode="Series">
+                        [outlines]="getChartColor()">
     </igx-category-chart>
 
   </div>
 </div>
+

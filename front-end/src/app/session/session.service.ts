@@ -16,16 +16,16 @@ export class SessionService {
   startSession(session: Session) {
     this.commandService.execute(
       `start`, 'POST', session
-    ).subscribe((session) => {
-      this.store.dispatch(sessionActions.startSession(session));
+    ).subscribe((newSession) => {
+      this.store.dispatch(sessionActions.createSession({activeSession: newSession}));
     });
   }
 
   stopSession(session: Session) {
     this.commandService.execute(
       `abort`, 'POST', session
-    ).subscribe((session) => {
-      this.store.dispatch(sessionActions.stopSession(session));
+    ).subscribe((newSession) => {
+      this.store.dispatch(sessionActions.updateSessionSTATUS({status: newSession.status}));
     });
   }
 

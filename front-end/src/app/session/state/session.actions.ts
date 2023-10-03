@@ -4,8 +4,7 @@ import {Session, SessionStatus} from "../session";
 export const sessionActions = createActionGroup({
   source: 'Session',
   events: {
-    'Start Session': props<Session>(),
-    'Stop Session': props<Session>(),
+    'Create Session': props<{ activeSession: Session }>(),
     'Update Session STATUS': props<{ status: SessionStatus }>(),
     'Delete Session': props<{ id: string }>(),
     'Activate Session': props<{ id: string }>(),

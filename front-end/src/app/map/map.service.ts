@@ -13,7 +13,7 @@ import {DrawingService} from "./service/drawing.service";
 export class MapService {
 
   private map: Map | null = null;
-  private layerVisibility?: LayerVisibility; // Used a '?' to mark it as optional
+
 
   constructor(
     private commandService: CommandService,
@@ -37,10 +37,10 @@ export class MapService {
     } else {
       this.loadBaseLayer();
     }
-
-    if (this.layerVisibility) {
-      this.updateLayerVisibility(this.layerVisibility);
-    }
+    //
+    // if (this.layerVisibility) {
+    //   this.updateLayerVisibility(this.layerVisibility);
+    // }
   }
 
   loadBaseLayer(): void {
@@ -52,8 +52,12 @@ export class MapService {
       layerObject.metadata = {
         'bounds': layer.bounds
       };
-      this.removeLayers(['region', 'allocation', 'location']);
-      this.map!.addLayer(layerObject);
+      this.removeLayers(['allocation', 'location']);
+      if(!this.map.getLayer('region')) {
+        this.map!.addLayer(layerObject);
+      }else{
+        this.updateLayerVisibility({'region': true});
+      }
       this.map!.fitBounds(layer.bounds as LngLatBoundsLike, {padding: 20});
     });
   }

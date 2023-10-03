@@ -63,7 +63,6 @@ export class MapComponent implements OnInit, OnDestroy {
     this.sessionState$
     .pipe(takeUntil(this.destroy$))
     .subscribe(session => {
-      console.log(session);
       if(session == null) this.mapService.resetMap();
       else if (session.id && session.status) {
         if (['RUNNING', 'ABORTED', 'COMPLETED'].includes(session.status)) {

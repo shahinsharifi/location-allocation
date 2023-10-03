@@ -1,6 +1,7 @@
 import {createReducer, on} from '@ngrx/store';
 import {LauncherState} from "./launcher.state";
 import {launcherActions} from "./launcher.actions";
+import {SessionStatus} from "../../session/session";
 
 
 const initialState: LauncherState = {
@@ -49,28 +50,20 @@ export const launcherReducer = createReducer<LauncherState>(
       stop: true
     }
   })),
-
   on(launcherActions.stopProcess, (state, session) => ({
     ...state,
-    activeSession: session,
+    activeSession: {
+      ...state.activeSession,
+      id: session.id,
+      status: SessionStatus.ABORT
+    },
     buttons: {
       ...state.buttons,
+      start: true,
       stop: false,
-      resume: true,
-      clear: true
     }
   })),
 
-  on(launcherActions.resumeProcess, (state, session) => ({
-    ...state,
-    activeSession: session,
-    buttons: {
-      ...state.buttons,
-      resume: false,
-      stop: true,
-      clear: false
-    }
-  })),
 
   on(launcherActions.clearSelection, (state) => {
     return {
@@ -83,5 +76,10 @@ export const launcherReducer = createReducer<LauncherState>(
     };
   }),
 
-  on(launcherActions.resetSession, () => ({ ...initialState })),
+  on(launcherActions.resetSession, () => ({
+    ...initialState,
+    activeSession: {
+      status: SessionStatus.RESET
+    }
+  })),
 );

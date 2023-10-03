@@ -86,14 +86,14 @@ public class EvolutionLogger implements EvolutionObserver<List<BasicGenome>> {
     progress.put(generation, costList.stream().mapToDouble(Double::doubleValue).sum());
 
     if (data.getGenerationNumber() % 10 == 0) {
-      if (generation >= 10) {
-        Map<Integer, Double> sampleProgress = getSampleMap(progress);
-        publishFitnessProgress(sampleProgress);
-      }
       publishTravelCostDistribution(costList);
     }
 
-    if (data.getGenerationNumber() % 50 == 0) {
+    if (data.getGenerationNumber() % 20 == 0) {
+
+      Map<Integer, Double> sampleProgress = getSampleMap(progress);
+      publishFitnessProgress(sampleProgress);
+
       publishMutationRate(currentMutationRate);
       writeLogs(data);
     }
@@ -169,13 +169,13 @@ public class EvolutionLogger implements EvolutionObserver<List<BasicGenome>> {
     }
 
     int size = progress.size();
-    int interval = size > 10 ? size / 10 : 1;
+    int interval = size > 100 ? 100 : 10;
 
     List<Map.Entry<Integer, Double>> entryList = new ArrayList<>(progress.entrySet());
     return IntStream.range(0, size)
         .filter(i -> i % interval == 0)
         .boxed()
-        .limit(10)
+        .limit(20)
         .collect(
             Collectors.toMap(
                 i -> entryList.get(i).getKey(),

@@ -96,21 +96,20 @@ export class LauncherComponent implements OnInit, OnDestroy {
 
   start() {
     if (!this.regionSelectionFormGroup.invalid && !this.parametersFormGroup.invalid) {
-      this.activeSession = {
-        ...this.regionSelectionFormGroup.value,
-        ...this.parametersFormGroup.value,
-        ...this.runningTimeFormGroup.value,
-        status: SessionStatus.START
+      const session: Session = {
+        wkt: this.regionSelectionFormGroup.value.wkt,
+        numberOfFacilities: this.parametersFormGroup.value.numberOfFacilities,
+        maxTravelTimeInMinutes: this.parametersFormGroup.value.maxTravelTimeInMinutes,
+        maxRunningTimeInMinutes: this.runningTimeFormGroup.value.maxRunningTimeInMinutes,
+        status: SessionStatus.START,
       };
-      this.activeSession.status = SessionStatus.START;
-      this.store.dispatch(launcherActions.startProcess(this.activeSession));
+      this.store.dispatch(launcherActions.startProcess(session));
     } else {
       console.log('Form is not valid')
     }
   }
 
   stop() {
-    this.activeSession.status = SessionStatus.ABORT;
     this.launcherService.stopSession(this.activeSession);
   }
 

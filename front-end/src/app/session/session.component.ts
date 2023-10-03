@@ -11,6 +11,7 @@ import {sessionActions} from "./state/session.actions";
 import {Session, SessionStatus} from "./session";
 import {MatListModule} from "@angular/material/list";
 import {MatCardModule} from "@angular/material/card";
+import {SessionService} from "./session.service";
 
 @Component({
   selector: 'app-panel',
@@ -25,7 +26,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   launcherState$: Observable<Session>;
   sessionListState$: Observable<Session[]>;
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<AppState>, private sessionService: SessionService) {
     this.launcherState$ = this.store.pipe(select(state => state.launcher.activeSession));
     this.sessionListState$ = this.store.pipe(select(state => state.session.sessions));
   }
@@ -36,9 +37,19 @@ export class SessionComponent implements OnInit, OnDestroy {
     .subscribe(session => {
       if (session == null) return;
       if (session.status === SessionStatus.START) {
-        this.store.dispatch(sessionActions.startSession(session));
+        const input: Session ={
+          wkt: session.wkt,
+          numberOfFacilities: session.numberOfFacilities,
+          maxTravelTimeInMinutes: session.maxTravelTimeInMinutes,
+          maxRunningTimeInMinutes: session.maxRunningTimeInMinutes
+        };
+        this.sessionService.startSession(input);
       } else if (session.status === SessionStatus.ABORT) {
-        this.store.dispatch(sessionActions.stopSession(session));
+        const input: Session = {
+          id: session.id,
+          status: session.status
+        };
+        this.sessionService.stopSession(input);
       }else if (session.status === SessionStatus.RESET) {
         this.store.dispatch(sessionActions.resetActiveSession());
       }

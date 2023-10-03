@@ -3,18 +3,15 @@ import {sessionActions} from './session.actions';
 import {SessionState} from './session.state';
 
 const initialState: SessionState = {
-	activeSession: undefined,
+	activeSession: null,
 	sessions: [],
 };
 
 export const sessionReducer = createReducer<SessionState>(
 		initialState,
-		on(sessionActions.startSession, (state, activeSession) => {
+		on(sessionActions.createSession, (state, {activeSession}) => {
 			const sessions = state.sessions ? [...state.sessions, activeSession] : [activeSession];
-			return {...state, sessions, activeSession};
-		}),
-		on(sessionActions.stopSession, (state, activeSession) => {
-			return {...state, activeSession};
+			return {...state, activeSession: activeSession, sessions: sessions};
 		}),
     on(sessionActions.updateSessionSTATUS, (state, {status}) => {
       const activeSession = {...state.activeSession, status};
@@ -29,7 +26,7 @@ export const sessionReducer = createReducer<SessionState>(
       return {...state, activeSession};
     }),
     on(sessionActions.resetActiveSession, (state) => {
-      return {...state, activeSession: undefined};
+      return {...state, activeSession: null};
     }),
 
 );

@@ -5,9 +5,8 @@
     <div fxLayout="column" fxFill>
       <mat-card class="app-card" fxFill>
         <mat-card-content class="app-card-content" fxFill fxLayout="column">
-          <app-chart fxFill
+          <app-chart #chart1 fxFill
                      [chartTitle]="'Live Optimization Progress'"
-                     [chartData]="allocationFitness$"
                      [chartType]="'Spline'"
           ></app-chart>
         </mat-card-content>
@@ -20,9 +19,8 @@
     <div fxLayout="column" fxFill>
       <mat-card class="app-card" fxFill>
         <mat-card-content class="app-card-content" fxFill fxLayout="column">
-          <app-chart fxFill
+          <app-chart #chart2 fxFill
                      [chartTitle]="'Distribution of Travel-time'"
-                     [chartData]="travelCostDistribution$"
                      [chartType]="'Area'"
           ></app-chart>
         </mat-card-content>
