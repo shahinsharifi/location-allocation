@@ -4,19 +4,12 @@ import {MatCardModule} from "@angular/material/card";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
 import {MatListModule} from "@angular/material/list";
 import {MatButtonModule} from "@angular/material/button";
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators
-} from "@angular/forms";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MatInputModule} from "@angular/material/input";
 import {MatStepper, MatStepperModule} from "@angular/material/stepper";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatExpansionModule} from "@angular/material/expansion";
-import {Session} from "../session/session";
+import {Session, SessionStatus} from "../session/session";
 import {MatIconModule} from "@angular/material/icon";
 import {FlexModule} from "@angular/flex-layout";
 import {MatTooltipModule} from "@angular/material/tooltip";
@@ -33,10 +26,10 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 @Component({
   selector: 'app-launcher',
   standalone: true,
-	imports: [CommonModule, MatCardModule, MatProgressBarModule, MatListModule, MatButtonModule,
-		MatButtonModule, MatStepperModule, FormsModule, ReactiveFormsModule, MatFormFieldModule,
-		MatInputModule, MatExpansionModule, MatIconModule, FlexModule, MatTooltipModule,
-		MatButtonToggleModule, MatSliderModule, MatSlideToggleModule],
+  imports: [CommonModule, MatCardModule, MatProgressBarModule, MatListModule, MatButtonModule,
+    MatButtonModule, MatStepperModule, FormsModule, ReactiveFormsModule, MatFormFieldModule,
+    MatInputModule, MatExpansionModule, MatIconModule, FlexModule, MatTooltipModule,
+    MatButtonToggleModule, MatSliderModule, MatSlideToggleModule],
   templateUrl: './launcher.component.html',
   styleUrls: ['./launcher.component.scss'],
 })
@@ -67,15 +60,29 @@ export class LauncherComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.destroy$))
     .subscribe(selection => {
       if (!selection) return;
-      this.regionSelectionFormGroup.patchValue(selection);
+      this.regionSelectionFormGroup.patchValue({
+        wkt: selection.wkt,
+        selectedRegions: selection.selectedRegions
+      });
     });
+
+    this.sessionState$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(session => {
+        if (session && session.id) this.initSession(session);
+      }
+    );
+  }
+
+  initSession(session: Session) {
+    this.activeSession = session;
   }
 
   initForms(): void {
     this.regionSelectionFormGroup = this.formBuilder.group({
-      activeDrawing: new FormControl(false),
-      wkt: new FormControl(null, Validators.required),
-      selectedRegions: new FormControl(0)
+      activeDrawing: [],
+      wkt: [null, Validators.required],
+      selectedRegions: []
     });
     this.parametersFormGroup = this.formBuilder.group({
       numberOfFacilities: [30, Validators.required],
@@ -89,24 +96,25 @@ export class LauncherComponent implements OnInit, OnDestroy {
 
   start() {
     if (!this.regionSelectionFormGroup.invalid && !this.parametersFormGroup.invalid) {
-      const session: Session = {
+      this.activeSession = {
         ...this.regionSelectionFormGroup.value,
         ...this.parametersFormGroup.value,
-        ...this.runningTimeFormGroup.value
+        ...this.runningTimeFormGroup.value,
+        status: SessionStatus.START
       };
-      this.store.dispatch(launcherActions.startProcess(session));
+      this.activeSession.status = SessionStatus.START;
+      this.store.dispatch(launcherActions.startProcess(this.activeSession));
     } else {
       console.log('Form is not valid')
     }
   }
 
   stop() {
-    if(!this.activeSession || !this.activeSession.id) return;
-    this.launcherService.stopProcess(this.activeSession);
+    this.activeSession.status = SessionStatus.ABORT;
+    this.launcherService.stopSession(this.activeSession);
   }
 
   reset() {
-    this.initForms();
     this.stepper.reset();
     this.store.dispatch(launcherActions.resetSession());
   }

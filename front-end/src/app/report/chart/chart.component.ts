@@ -1,16 +1,16 @@
 import {
-	ChangeDetectionStrategy,
-	Component,
-	Input,
-	OnDestroy,
-	OnInit,
-	ViewChild,
-	ViewEncapsulation
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewEncapsulation
 } from '@angular/core';
 import {
-	IgxCategoryChartComponent,
-	IgxCategoryChartModule,
-	IgxLegendModule,
+  IgxCategoryChartComponent,
+  IgxCategoryChartModule,
+  IgxLegendModule,
 } from 'igniteui-angular-charts';
 import {CommonModule} from "@angular/common";
 import {FlexModule} from "@angular/flex-layout";
@@ -45,9 +45,15 @@ export class ChartComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.generateInitData(this.chartType);
 
-		this.chartData$
-		.pipe(takeUntil(this.destroy$))
-		.subscribe(this.processData.bind(this));
+    this.chartData$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((chartData: ChartData) => {
+      if(chartData == null || chartData.data == null || chartData.data.length == 0) {
+        this.reset();
+      } else {
+        this.processData(chartData);
+      }
+    });
 	}
 
 	processData(chartData: ChartData): void {
@@ -70,26 +76,28 @@ export class ChartComponent implements OnInit, OnDestroy {
 	updateFitnessData(data: any[]): void {
 		if (data == null) return;
 		if(this.data.length == 1 && this.data[0].x == 0 && this.data[0].y == 0) {
-			const initVal = {x: 0, y: data[0].y};
-			this.data.push(initVal);
-			const oldVal = this.data.shift();
-			this.chart.notifySetItem(this.data, 0, oldVal, initVal);
+      this.data[0] = {x: 0, y: data[0].y};
+      //	this.data.push(initVal);
+		//	const oldVal = this.data.shift();
+		//	this.chart.notifySetItem(this.data, 0, oldVal, initVal);
 		}
 		const newVal = data[data.length - 1];
 		this.data.push(newVal);
-		this.chart.notifyInsertItem(this.data, this.data.length - 1, newVal);
+	  this.chart.bindData();
+    //	this.chart.notifyInsertItem(this.data, this.data.length - 1, newVal);
 	}
 
 
 	updateTravelCostDistributionData(data: any[]): void {
 		if (data == null) return;
-		this.chart.notifyClearItems(this.data);
+	//	this.chart.notifyClearItems(this.data);
 		for (let i = 0; i < data.length; i++) {
-			const newItem = data[i];
-			const oldItem = this.data.shift();
-			this.chart.notifySetItem(this.data, i, oldItem, newItem);
+	//		const newItem = data[i];
+			const oldItem = this.data[i];
+      const newItem = {x: oldItem.x, y: data[i].y};
+      this.chart.notifySetItem(this.data, i, oldItem, newItem);
 		}
-		this.chart.notifyVisualPropertiesChanged();
+//		this.chart.notifyVisualPropertiesChanged();
 	}
 
 
@@ -112,6 +120,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 
 	reset(): void {
 		this.data = [];
+    this.chart.notifyClearItems(this.data);
 		if (this.chartType === 'Spline') {
 			this.data.push({x: 0, y: 0});
 		}else {

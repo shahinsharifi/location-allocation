@@ -77,10 +77,12 @@ export class SelectionService {
     }
     if (!this.regionSelection.wkt && this.regionSelection.selectedRegions == 0) return;
 
-    this.map.removeFeatureState({
-      source: 'region',
-      sourceLayer: 'region'
-    });
+    if (this.map!.getLayer('region')) {
+      this.map.removeFeatureState({
+        source: 'region',
+        sourceLayer: 'region'
+      });
+    }
     this.regionSelection = {
       ...this.regionSelection,
       wkt: null,

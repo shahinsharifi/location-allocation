@@ -1,38 +1,20 @@
-import { Injectable } from '@angular/core';
-import {CommandService} from "../core/http/command.service";
+import {Injectable} from '@angular/core';
 import {Session} from "../session/session";
 import {Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
-import {sessionActions} from "../session/state/session.actions";
+import {launcherActions} from "./state/launcher.actions";
 
 @Injectable({
   providedIn: 'root'
 })
 export class LauncherService {
-
-  constructor(private commandService: CommandService, private store: Store<AppState>) { }
-
-  startProcess(session: Session) {
-    this.commandService.execute(
-      `start`, 'POST', session
-    ).subscribe((session) => {
-      this.store.dispatch(sessionActions.createSession({activeSession: session}));
-    });
+  constructor(private store: Store<AppState>) { }
+  startSession(session: Session) {
+    this.store.dispatch(launcherActions.startProcess(session));
   }
 
-  stopProcess(session: Session) {
-    this.commandService.execute(
-      `abort`, 'POST', session
-    ).subscribe((session) => {
-      this.store.dispatch(sessionActions.updateSession({activeSession: session}));
-    });
+  stopSession(session: Session) {
+    this.store.dispatch(launcherActions.stopProcess(session));
   }
 
-  resumeProcess(session: Session) {
-    this.commandService.execute(
-      `resume`, 'POST', session
-    ).subscribe((session) => {
-      this.store.dispatch({type: 'Create Session', payload: session});
-    });
-  }
 }

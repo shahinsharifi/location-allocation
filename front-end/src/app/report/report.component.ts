@@ -2,7 +2,6 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatButtonModule} from "@angular/material/button";
 import {MatDividerModule} from "@angular/material/divider";
-import {ConsoleComponent} from "./console/console.component";
 import {FlexModule} from "@angular/flex-layout";
 import {LauncherComponent} from "../launcher/launcher.component";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -24,7 +23,7 @@ import {AppState} from "../core/state/app.state";
 @Component({
 	selector: 'app-report',
 	standalone: true,
-	imports: [CommonModule, MatButtonModule, MatDividerModule, ConsoleComponent, FlexModule,
+	imports: [CommonModule, MatButtonModule, MatDividerModule, FlexModule,
 		LauncherComponent, FormsModule, MatButtonToggleModule, MatCardModule, MatFormFieldModule,
 		MatIconModule, MatInputModule, MatSliderModule, MatStepperModule, MatTooltipModule,
 		ReactiveFormsModule, ChartComponent],
@@ -59,12 +58,7 @@ export class ReportComponent implements OnInit, OnDestroy {
 		);
 	}
 
-	ngOnInit(): void {
-	}
-
-
-	reset(): void {
-	}
+	ngOnInit(): void {}
 
 	ngOnDestroy(): void {
 		this.destroy$.next();

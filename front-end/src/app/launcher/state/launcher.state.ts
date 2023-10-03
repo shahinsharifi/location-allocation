@@ -1,8 +1,8 @@
-import {SessionStatus} from "../../session/session";
+import {Session, SessionStatus} from "../../session/session";
 import {RegionSelection} from "../../map/region-selection";
 
 export interface LauncherState {
-  sessionId?: string;
+  activeSession?: Session;
   stepIndex: number;
   status?: SessionStatus;
   selection?: RegionSelection;

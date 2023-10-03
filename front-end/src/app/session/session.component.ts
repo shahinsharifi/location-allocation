@@ -8,7 +8,7 @@ import {select, Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
 import {Observable, Subject, takeUntil} from "rxjs";
 import {sessionActions} from "./state/session.actions";
-import {Session} from "./session";
+import {Session, SessionStatus} from "./session";
 import {MatListModule} from "@angular/material/list";
 import {MatCardModule} from "@angular/material/card";
 
@@ -22,22 +22,25 @@ import {MatCardModule} from "@angular/material/card";
 export class SessionComponent implements OnInit, OnDestroy {
 
   destroy$ = new Subject<void>();
-  launcherState$: Observable<string>;
+  launcherState$: Observable<Session>;
   sessionListState$: Observable<Session[]>;
 
   constructor(private store: Store<AppState>) {
-    this.launcherState$ = this.store.pipe(select(state => state.launcher.sessionId));
+    this.launcherState$ = this.store.pipe(select(state => state.launcher.activeSession));
     this.sessionListState$ = this.store.pipe(select(state => state.session.sessions));
   }
 
   ngOnInit(): void {
     this.launcherState$
     .pipe(takeUntil(this.destroy$))
-    .subscribe(sessionId => {
-      if (sessionId != null) {
-        this.store.dispatch({type: 'Create Session', payload: sessionId});
-      } else {
-        this.store.dispatch(sessionActions.resetSession());
+    .subscribe(session => {
+      if (session == null) return;
+      if (session.status === SessionStatus.START) {
+        this.store.dispatch(sessionActions.startSession(session));
+      } else if (session.status === SessionStatus.ABORT) {
+        this.store.dispatch(sessionActions.stopSession(session));
+      }else if (session.status === SessionStatus.RESET) {
+        this.store.dispatch(sessionActions.resetActiveSession());
       }
     });
   }
@@ -46,14 +49,8 @@ export class SessionComponent implements OnInit, OnDestroy {
     // Check and load the entire app state related to this session
     const storedState: AppState = JSON.parse(localStorage.getItem(`appState_${session.id}`));
     if (storedState) {
-      this.store.dispatch(sessionActions.activateSession({activeSession: storedState.session.activeSession}));
+      this.store.dispatch(sessionActions.activateSession({id: session.id}));
     }
-
-    // Set this session as active
-    this.store.dispatch(sessionActions.activateSession({activeSession: session}));
-
-    // Load related component states based on this session's id
-    this.loadRelatedComponentStates(session.id);
   }
 
   loadRelatedComponentStates(sessionId: string): void {
@@ -61,9 +58,12 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   formatDate(date: string) {
-    const parts = date.split(' ')[0].split('-');
-    const time = date.split(' ')[1];
-    return `${parts[2]}-${parts[1]}-${parts[0]}T${time}`;
+    if (date) {
+      const parts = date.split(' ')[0].split('-');
+      const time = date.split(' ')[1];
+      return `${parts[2]}-${parts[1]}-${parts[0]}T${time}`;
+    }
+    return null;
   }
 
   ngOnDestroy(): void {

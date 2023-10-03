@@ -4,8 +4,8 @@ import {launcherActions} from "./launcher.actions";
 
 
 const initialState: LauncherState = {
-  sessionId: null,
   stepIndex: 0,
+  activeSession: null,
   selection: {
     activeDrawing: false,
     wkt: null,
@@ -42,7 +42,7 @@ export const launcherReducer = createReducer<LauncherState>(
 
   on(launcherActions.startProcess, (state, session) => ({
     ...state,
-    sessionId: session.id,
+    activeSession: session,
     buttons: {
       ...state.buttons,
       start: false,
@@ -50,8 +50,9 @@ export const launcherReducer = createReducer<LauncherState>(
     }
   })),
 
-  on(launcherActions.stopProcess, state => ({
+  on(launcherActions.stopProcess, (state, session) => ({
     ...state,
+    activeSession: session,
     buttons: {
       ...state.buttons,
       stop: false,
@@ -60,8 +61,9 @@ export const launcherReducer = createReducer<LauncherState>(
     }
   })),
 
-  on(launcherActions.resumeProcess, state => ({
+  on(launcherActions.resumeProcess, (state, session) => ({
     ...state,
+    activeSession: session,
     buttons: {
       ...state.buttons,
       resume: false,

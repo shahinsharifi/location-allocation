@@ -1,9 +1,6 @@
 import {Injectable} from "@angular/core";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
-import {
-  IControl,
-  Map
-} from 'maplibre-gl';
+import {IControl, Map} from 'maplibre-gl';
 import {Store} from "@ngrx/store";
 import {AppState} from "../../core/state/app.state";
 import {RegionSelection} from "../region-selection";
@@ -33,9 +30,12 @@ export class DrawingService {
     this.selectionService.setMap(map);
   }
 
-  enableDrawing(regionSelection?: RegionSelection): void {
+  enableDrawing(): void {
     if (!this.map) return;
-    this.regionSelection = regionSelection;
+    if(this.regionSelection ==  null)
+      this.regionSelection = {activeDrawing: true, selectedRegions: 0, wkt: null};
+    else
+      this.regionSelection.activeDrawing = true;
     if (this.draw == null) {
       this.draw = new MapboxDraw(this.getMapboxDrawOptions());
       this.map.addControl(this.draw as unknown as IControl);
@@ -47,6 +47,7 @@ export class DrawingService {
 
   disableDrawing(): void {
     if (this.map == null || this.draw == null) return;
+    if(this.regionSelection) this.regionSelection.activeDrawing = false;
     this.map.removeControl(this.draw as unknown as IControl);
     this.map.getCanvasContainer().style.cursor = '';
     this.draw = null;

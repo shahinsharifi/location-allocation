@@ -7,7 +7,6 @@ import {sessionReducer} from "../../session/state/session.reducer";
 import {reportReducer} from "../../report/state/report.reducer";
 
 
-
 export const appReducers: ActionReducerMap<AppState> = {
   websocket: webSocketReducer,
   launcher: launcherReducer,

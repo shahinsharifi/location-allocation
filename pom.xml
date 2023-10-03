@@ -216,6 +216,85 @@
         <finalName>location-allocation</finalName>
         <plugins>
           <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>dist</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <version>${fmp.version}</version>
+            <configuration>
+              <workingDirectory>front-end</workingDirectory>
+            </configuration>
+            <executions>
+
+              <!-- Install node and npm -->
+              <execution>
+                <id>Install Node and NPM</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>install-node-and-npm</goal>
+                </goals>
+                <configuration>
+                  <nodeVersion>${node.version}</nodeVersion>
+                </configuration>
+              </execution>
+
+              <!-- clean install -->
+              <execution>
+                <id>npm install</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <configuration>
+                  <arguments>install --legacy-peer-deps</arguments>
+                </configuration>
+              </execution>
+
+              <!-- build app -->
+              <execution>
+                <id>build angular</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <configuration>
+                  <arguments>run build</arguments>
+                </configuration>
+              </execution>
+
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>copy-resources</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>front-end/dist/location-allocation</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
             <groupId>org.hibernate.orm.tooling</groupId>
             <artifactId>hibernate-enhance-maven-plugin</artifactId>
             <version>${hibernate.version}</version>
@@ -240,6 +319,20 @@
           <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>local-docker-build</id>
+                <goals>
+                  <goal>build-image</goal>
+                </goals>
+                <phase>package</phase>
+                <configuration>
+                  <image>
+                    <name>location-allocation:${project.version}</name>
+                  </image>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -463,7 +556,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
             <executions>
-              <!-- Build image during package phase -->
               <execution>
                 <id>local-docker-build</id>
                 <goals>
@@ -474,9 +566,9 @@
                   <image>
                     <name>location-allocation:${project.version}</name>
                   </image>
+                  <publish>true</publish>
                 </configuration>
               </execution>
-              <!-- Push image during deploy phase -->
               <execution>
                 <id>remote-docker-push</id>
                 <goals>
@@ -485,7 +577,7 @@
                 <phase>deploy</phase>
                 <configuration>
                   <image>
-                    <name>10.1.2.81:8080/location-allocation:${project.version}</name>
+                    <name>10.1.2.81:5000/location-allocation:${project.version}</name>
                   </image>
                   <publish>true</publish>
                 </configuration>

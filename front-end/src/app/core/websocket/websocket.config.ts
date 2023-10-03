@@ -1,4 +1,4 @@
-import { RxStompConfig } from '@stomp/rx-stomp';
+import {RxStompConfig} from '@stomp/rx-stomp';
 import {environment} from "../../../environments/environment";
 
 export const websocketConfig: RxStompConfig = {

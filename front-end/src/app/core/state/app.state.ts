@@ -5,7 +5,6 @@ import {MapState} from "../../map/state/map.state";
 import {ReportState} from "../../report/state/report.state";
 
 
-
 export interface AppState {
   websocket: WebSocketState;
   session: SessionState;

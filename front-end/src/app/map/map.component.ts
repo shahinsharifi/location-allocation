@@ -40,19 +40,21 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscribeToLauncherStateChanges();
+    this.subscribeToSelectionStateChanges();
     this.subscribeToSessionStateChanges();
   }
 
-  private subscribeToLauncherStateChanges(): void {
+  private subscribeToSelectionStateChanges(): void {
 
     this.launcherDrawingState$
     .pipe(takeUntil(this.destroy$))
     .subscribe(selection => {
-      if (selection && selection.activeDrawing) {
-        this.mapService.enableDrawing(selection);
-      } else {
-        this.mapService.disableDrawing();
+      if(!selection) return;
+      if (selection.activeDrawing != null) {
+        this.mapService.toggleDrawing(selection.activeDrawing);
+      }
+      if(selection.wkt == null || selection.wkt == '') {
+        this.mapService.clearSelection();
       }
     });
   }
@@ -61,8 +63,9 @@ export class MapComponent implements OnInit, OnDestroy {
     this.sessionState$
     .pipe(takeUntil(this.destroy$))
     .subscribe(session => {
-      if(!session) return;
-      if (session.id) {
+      console.log(session);
+      if(session == null) this.mapService.resetMap();
+      else if (session.id && session.status) {
         if (['RUNNING', 'ABORTED', 'COMPLETED'].includes(session.status)) {
           this.mapService.loadResultLayer(session.id).then(() => console.log('Loading allocation layer'));
           this.mapService.updateLayerVisibility({
@@ -82,7 +85,7 @@ export class MapComponent implements OnInit, OnDestroy {
     //   status: SessionStatus.COMPLETED
     // };
     // this.mapService.initializeMap(map, session);
-    this.mapService.initializeMap(map, null);
+    this.mapService.initializeMap(map);
   }
 
   ngOnDestroy() {

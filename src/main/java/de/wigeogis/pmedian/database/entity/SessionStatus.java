@@ -7,5 +7,9 @@ public enum SessionStatus {
   ABORTING,
   ABORTED,
   FAILED,
-  COMPLETED
+  COMPLETED,
+  INIT,
+  START,
+  ABORT,
+  RESET
 }

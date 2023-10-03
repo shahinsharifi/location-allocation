@@ -48,6 +48,7 @@ export class WebsocketService extends RxStomp {
       if (this.subscriptionRef) {
         this.subscriptionRef.unsubscribe();
       }
+      this.sendResetMessage();
     }
   }
 
@@ -59,7 +60,7 @@ export class WebsocketService extends RxStomp {
   handleMessage(message: Message) {
     switch (message.subject) {
       case MessageSubject.SESSION_STATUS:
-        this.store.dispatch(sessionActions.updateSession({activeSession: message.data as Session}));
+        this.store.dispatch(sessionActions.updateSessionSTATUS({status: message.data.status}));
         break;
       case MessageSubject.SESSION_LOG:
         this.store.dispatch(reportActions.updateLogs({log: message.message}));
@@ -73,5 +74,10 @@ export class WebsocketService extends RxStomp {
       default:
         console.warn('Unhandled WebSocket message type:', message.subject);
     }
+  }
+
+  sendResetMessage() {
+    this.store.dispatch(reportActions.updateAllocationFitnessChart(null));
+    this.store.dispatch(reportActions.updateCostDistributionChart(null));
   }
 }

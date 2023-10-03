@@ -5,7 +5,6 @@ import {Session, SessionStatus} from "../session/session";
 import {VectorTileLayer} from "./vector-tile-layer";
 import {LayerVisibility} from "./layer-visibility";
 import {DrawingService} from "./service/drawing.service";
-import {RegionSelection} from "./region-selection";
 
 
 @Injectable({
@@ -23,14 +22,11 @@ export class MapService {
   }
 
 
-  public initializeMap(map: Map, session: Session | null): void {
+  public initializeMap(map: Map, session?: Session): void {
     this.map = map;
     this.drawingService.setMap(map);
     this.map.addControl(new NavigationControl());
     this.map.getCanvasContainer().style.cursor = '';
-
-    //removing existing layers
-    this.removeLayers(['region', 'allocation', 'location']);
 
     if (session?.id && [
       SessionStatus.RUNNING,
@@ -38,7 +34,7 @@ export class MapService {
       SessionStatus.COMPLETED
     ].includes(session.status)) {
       this.loadResultLayer(session.id).then(() => console.log('Loaded result layer'));
-    }else{
+    } else {
       this.loadBaseLayer();
     }
 
@@ -47,10 +43,8 @@ export class MapService {
     }
   }
 
-
   loadBaseLayer(): void {
     if (!this.map) return;
-
     this.map.boxZoom.disable();
     this.commandService.execute(`tiles/base`, 'GET', null)
     .subscribe((layer: VectorTileLayer) => {
@@ -58,6 +52,7 @@ export class MapService {
       layerObject.metadata = {
         'bounds': layer.bounds
       };
+      this.removeLayers(['region', 'allocation', 'location']);
       this.map!.addLayer(layerObject);
       this.map!.fitBounds(layer.bounds as LngLatBoundsLike, {padding: 20});
     });
@@ -65,6 +60,7 @@ export class MapService {
 
   public async loadResultLayer(sessionId?: string): Promise<void> {
     if (!this.map || !sessionId) return;
+
     const loadImageAndAdd = (): Promise<void> => {
       return new Promise((resolve, reject) => {
         if (this.map.hasImage('facility')) {
@@ -87,6 +83,8 @@ export class MapService {
       this.commandService.execute(
         `tiles/allocation/${sessionId}`, 'GET', null
       ).subscribe((layer: VectorTileLayer) => {
+
+        this.removeLayers(['region', 'allocation', 'location']);
         if (layer instanceof Array) {
           const locationLayer: VectorTileLayer = layer[0] as VectorTileLayer;
           locationLayer.metadata = {
@@ -117,13 +115,15 @@ export class MapService {
   }
 
 
-  public enableDrawing(regionSelection?: RegionSelection): void {
-    this.drawingService.enableDrawing(regionSelection);
+  public toggleDrawing(activeDrawing: boolean): void {
+    if (!this.map) return;
+    if (activeDrawing) {
+      this.drawingService.enableDrawing();
+    } else {
+      this.drawingService.disableDrawing();
+    }
   }
 
-  public disableDrawing(): void {
-    this.drawingService.disableDrawing();
-  }
 
   public updateLayerVisibility(visibility: LayerVisibility): void {
     if (this.map == null) return;
@@ -206,7 +206,7 @@ export class MapService {
         htmlContent += `<h3 style="margin: 0 0 10px 0; text-align: center;">${properties[column['name']]}</h3>`;
       } else {
         let value = properties[column['name']];
-        if(typeof value === 'number') {
+        if (typeof value === 'number') {
           value = value.toFixed(2);
         }
         htmlContent += `<p style="margin: 0 0 10px 0;"><strong>${column['title']}:</strong> ${value}</p>`;

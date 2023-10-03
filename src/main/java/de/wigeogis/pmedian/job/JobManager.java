@@ -93,7 +93,7 @@ public class JobManager {
   }
 
   public SessionDto stop(SessionDto session) {
-    updateSessionStatus(session.getId(), SessionStatus.ABORTING);
+    session = updateSessionStatus(session.getId(), SessionStatus.ABORTING);
     if (this.abortSignalStorage.containsKey(session.getId())) {
       this.abortSignalStorage.get(session.getId()).abort();
     }
