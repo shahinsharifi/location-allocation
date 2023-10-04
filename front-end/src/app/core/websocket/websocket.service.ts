@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {RxStomp, RxStompState} from "@stomp/rx-stomp";
-import {Store} from "@ngrx/store";
+import {select, Store} from "@ngrx/store";
 import {websocketConfig} from "./websocket.config";
 import {AppState} from "../state/app.state";
 import {websocketActions} from "./state/websocket.actions";
@@ -9,7 +9,6 @@ import {Session} from "../../session/session";
 import {Message, MessageSubject} from "./message";
 import {distinctUntilChanged} from 'rxjs/operators';
 import {sessionActions} from "../../session/state/session.actions";
-import {fromSessionSelectors} from "../../session/state/session.selectors";
 import {reportActions} from "../../report/state/report.actions";
 
 @Injectable({
@@ -20,6 +19,7 @@ export class WebsocketService extends RxStomp {
   private topicEndpoint$: BehaviorSubject<string> = new BehaviorSubject(null);
   private sessionState$: Observable<Session>;
   private subscriptionRef: Subscription;
+  private activeSession: Session;
 
   constructor(private store: Store<AppState>) {
     super();
@@ -35,7 +35,7 @@ export class WebsocketService extends RxStomp {
   }
 
   private _setupSessionStateMonitoring() {
-    this.sessionState$ = this.store.select(state => fromSessionSelectors.selectActiveSession(state));
+    this.sessionState$ = this.store.pipe(select(state => state.session.activeSession));
     this.sessionState$.subscribe(this._manageSessionState.bind(this));
   }
 
@@ -48,20 +48,26 @@ export class WebsocketService extends RxStomp {
   }
 
   private _manageSessionState(session: Session) {
-    if (session == null) {
+    console.log('Session state changed:', session);
+    if (!session || !session.id) {
       this._resetConnectionForNewSession(); // new method called
-    } else {
+    } else if(session && session.id && (this.activeSession || this.activeSession?.id != session.id)){
       this._configureConnectionForSession(session); // new method called
     }
   }
 
   private _configureConnectionForSession(session: Session) {
+    console.log('activeSession: ' + this.activeSession?.id + ' New session: ' + session.id);
     if (session && session.id) {
-      this.topicEndpoint$.next('/topic/' + session.id);
-      this.subscriptionRef = this.watch(this.topicEndpoint$.getValue()).subscribe(this.receiveMessage.bind(this));
+      if(!this.activeSession || this.activeSession.id != session.id) {
+        this.topicEndpoint$.next('/topic/' + session.id);
+        this.subscriptionRef = this.watch(this.topicEndpoint$.getValue()).subscribe(this.receiveMessage.bind(this));
 
-      if (!this.connected()) {
-        this.activate();
+        if (!this.connected()) {
+          this.activate();
+        }
+
+        this.activeSession = session;
       }
     }
   }

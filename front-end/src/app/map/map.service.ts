@@ -13,7 +13,7 @@ import {DrawingService} from "./service/drawing.service";
 export class MapService {
 
   private map: Map | null = null;
-
+  private layerVisibility?: LayerVisibility;
 
   constructor(
     private commandService: CommandService,
@@ -22,29 +22,30 @@ export class MapService {
   }
 
 
-  public initializeMap(map: Map, session?: Session): void {
+  public initializeMap(map: Map, session: Session | null): void {
     this.map = map;
     this.drawingService.setMap(map);
     this.map.addControl(new NavigationControl());
     this.map.getCanvasContainer().style.cursor = '';
+    this.loadBaseLayer();
 
     if (session?.id && [
       SessionStatus.RUNNING,
-      SessionStatus.ABORTED,
-      SessionStatus.COMPLETED
+      SessionStatus.COMPLETED,
+      SessionStatus.ABORTED
     ].includes(session.status)) {
       this.loadResultLayer(session.id).then(() => console.log('Loaded result layer'));
-    } else {
-      this.loadBaseLayer();
     }
-    //
-    // if (this.layerVisibility) {
-    //   this.updateLayerVisibility(this.layerVisibility);
-    // }
+
+    if (this.layerVisibility) {
+      this.updateLayerVisibility(this.layerVisibility);
+    }
   }
+
 
   loadBaseLayer(): void {
     if (!this.map) return;
+
     this.map.boxZoom.disable();
     this.commandService.execute(`tiles/base`, 'GET', null)
     .subscribe((layer: VectorTileLayer) => {
@@ -52,77 +53,72 @@ export class MapService {
       layerObject.metadata = {
         'bounds': layer.bounds
       };
-      this.removeLayers(['allocation', 'location']);
-      if(!this.map.getLayer('region')) {
-        this.map!.addLayer(layerObject);
-      }else{
-        this.updateLayerVisibility({'region': true});
-      }
+      this.map!.addLayer(layerObject);
       this.map!.fitBounds(layer.bounds as LngLatBoundsLike, {padding: 20});
     });
   }
 
   public async loadResultLayer(sessionId?: string): Promise<void> {
     if (!this.map || !sessionId) return;
-
-    if(this.map.getLayer('location') && this.map.getLayer('allocation')) {
-      this.map.redraw();
-    }else {
-      const loadImageAndAdd = (): Promise<void> => {
-        return new Promise((resolve, reject) => {
-          if (this.map.hasImage('facility')) {
-            resolve();
+    const loadImageAndAdd = (): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        if (this.map.hasImage('facility')) {
+          resolve();
+          return;
+        }
+        this.map.loadImage('/assets/icons/facility.png', (error, image) => {
+          if (error) {
+            reject(error);
             return;
           }
-          this.map.loadImage('/assets/icons/facility.png', (error, image) => {
-            if (error) {
-              reject(error);
-              return;
-            }
-            if (!this.map.hasImage('facility')) {
-              this.map.addImage('facility', image);
-            }
-            resolve();
-          });
+          this.map.addImage('facility', image);
+          resolve();
         });
-      };
+      });
+    };
 
-      try {
-        await loadImageAndAdd();
-        this.commandService.execute(
-          `tiles/allocation/${sessionId}`, 'GET', null
-        ).subscribe((layer: VectorTileLayer) => {
+    try {
+      await loadImageAndAdd();
+      this.commandService.execute(
+        `tiles/allocation/${sessionId}`, 'GET', null
+      ).subscribe((layer: VectorTileLayer) => {
+        if (this.map.getLayer("allocation")) {
+          this.map.removeLayer('allocation');
+          this.map.removeSource('allocation');
+        }
+        if (this.map.getLayer("location")) {
+          this.map.removeLayer('location');
+          this.map.removeSource('location');
+        }
+        if (layer instanceof Array) {
+          const locationLayer: VectorTileLayer = layer[0] as VectorTileLayer;
+          locationLayer.metadata = {
+            'bounds': layer[0].bounds
+          };
+          this.map!.addLayer(locationLayer);
 
-          this.removeLayers(['region', 'allocation', 'location']);
-          if (layer instanceof Array) {
-            const locationLayer: VectorTileLayer = layer[0] as VectorTileLayer;
-            locationLayer.metadata = {
-              'bounds': layer[0].bounds
-            };
-            this.map!.addLayer(locationLayer);
+          const allocationLayer: VectorTileLayer = layer[1] as VectorTileLayer;
+          locationLayer.metadata = {
+            'bounds': layer[0].bounds
+          };
+          this.map!.addLayer(allocationLayer);
 
-            const allocationLayer: VectorTileLayer = layer[1] as VectorTileLayer;
-            locationLayer.metadata = {
-              'bounds': layer[0].bounds
-            };
-            this.map!.addLayer(allocationLayer);
-
-            this.map.fitBounds(locationLayer.bounds as LngLatBoundsLike, {padding: 20});
-          } else {
-            const locationLayer: VectorTileLayer = layer[0] as VectorTileLayer;
-            locationLayer.metadata = {
-              'bounds': layer[0].bounds
-            };
-            this.map!.addLayer(locationLayer);
-            this.map.fitBounds(locationLayer.bounds as LngLatBoundsLike, {padding: 20});
-          }
-          this.enablePopupOnClick();
-        });
-      } catch (error) {
-        console.error('Error while loading or adding image:', error);
-      }
+          this.map.fitBounds(locationLayer.bounds as LngLatBoundsLike, {padding: 20});
+        } else {
+          const locationLayer: VectorTileLayer = layer[0] as VectorTileLayer;
+          locationLayer.metadata = {
+            'bounds': layer[0].bounds
+          };
+          this.map!.addLayer(locationLayer);
+          this.map.fitBounds(locationLayer.bounds as LngLatBoundsLike, {padding: 20});
+        }
+        this.enablePopupOnClick();
+      });
+    } catch (error) {
+      console.error('Error while loading or adding image:', error);
     }
   }
+
 
 
   public toggleDrawing(activeDrawing: boolean): void {
@@ -143,6 +139,15 @@ export class MapService {
         this.map.setLayoutProperty(layerName, 'visibility', visibilityValue);
       }
     });
+  }
+
+  isLayerVisible(layerName: string): boolean {
+    if (this.map == null) return false;
+    if (this.map.getLayer(layerName)) {
+      const visibility = this.map.getLayoutProperty(layerName, 'visibility');
+      return visibility === 'visible';
+    }
+    return false;
   }
 
   enablePopupOnClick(): void {

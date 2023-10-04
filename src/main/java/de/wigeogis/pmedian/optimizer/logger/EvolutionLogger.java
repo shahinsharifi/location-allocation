@@ -85,15 +85,17 @@ public class EvolutionLogger implements EvolutionObserver<List<BasicGenome>> {
     List<Double> costList = this.costEvaluatorUtils.calculateCostMap(facilities);
     progress.put(generation, costList.stream().mapToDouble(Double::doubleValue).sum());
 
-    if (data.getGenerationNumber() % 10 == 0) {
+    if (data.getGenerationNumber() % costEvaluatorUtils.getTravelCostDistributionUpdateInterval()
+        == 0) {
       publishTravelCostDistribution(costList);
     }
 
-    if (data.getGenerationNumber() % 20 == 0) {
-
+    if (data.getGenerationNumber() % costEvaluatorUtils.getFitnessProgressUpdateInterval() == 0) {
       Map<Integer, Double> sampleProgress = getSampleMap(progress);
       publishFitnessProgress(sampleProgress);
+    }
 
+    if (data.getGenerationNumber() % 50 == 0) {
       publishMutationRate(currentMutationRate);
       writeLogs(data);
     }
@@ -144,17 +146,25 @@ public class EvolutionLogger implements EvolutionObserver<List<BasicGenome>> {
 
   private void publishTravelCostDistribution(List<Double> costList) {
 
+    List<Map<String, Object>> data = getTravelCostDistributionData(costList);
+
+    // getting the maximum value of the y-axis from data
+    double maxValue =
+        data.stream()
+            .map(map -> map.get("y"))
+            .mapToDouble(value -> Double.parseDouble(value.toString()) + 200)
+            .max()
+            .orElse(1000);
+
     Map<String, Object> metadata =
         getChartMetadata(
             0,
             60,
             "Travel Time to Nearest Facility",
             0,
-            1000,
+            maxValue,
             "Number of Regions Per Travel Time",
             "Cumulative Number of Regions");
-
-    List<Map<String, Object>> data = getTravelCostDistributionData(costList);
 
     notificationService.publishData(
         this.sessionId,

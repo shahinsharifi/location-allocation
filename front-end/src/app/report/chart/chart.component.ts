@@ -57,7 +57,7 @@ export class ChartComponent implements OnInit, OnDestroy {
     if (this.chartType === 'Spline') {
       this.updateFitnessData(chartData.data);
     } else if (this.chartType === 'Area') {
-      this.chart.yAxisMaximumValue = 500;
+      this.chart.yAxisMaximumValue = metadata.yMax;
       this.chart.yAxisMinimumValue = metadata.yMin;
       this.updateTravelCostDistributionData(chartData.data);
     }

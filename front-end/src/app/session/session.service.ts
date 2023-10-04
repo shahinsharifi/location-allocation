@@ -24,8 +24,9 @@ export class SessionService {
   stopSession(session: Session) {
     this.commandService.execute(
       `abort`, 'POST', session
-    ).subscribe((newSession) => {
-      this.store.dispatch(sessionActions.updateSessionSTATUS({status: newSession.status}));
+    ).subscribe((newSession: Session) => {
+      console.log("Session status changed to: " + newSession.status);
+      //this.store.dispatch(sessionActions.updateSessionSTATUS({status: newSession.status}));
     });
   }
 

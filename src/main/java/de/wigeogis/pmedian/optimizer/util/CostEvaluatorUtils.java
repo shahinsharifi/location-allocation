@@ -5,6 +5,7 @@ import de.wigeogis.pmedian.database.dto.RegionDto;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.nd4j.common.primitives.Pair;
@@ -24,6 +25,11 @@ public class CostEvaluatorUtils {
 
   private static final Random random = new Random();
 
+  @Getter
+  private int fitnessProgressUpdateInterval = 20;
+  @Getter
+  private int travelCostDistributionUpdateInterval = 10;
+
   public CostEvaluatorUtils(
       List<String> regions,
       ImmutableTable<String, String, Double> costSparseMatrix,
@@ -31,6 +37,17 @@ public class CostEvaluatorUtils {
     this.maxTravelTime = maxTravelTime;
     this.regions = new ArrayList<>(regions);
     this.sparseMatrix = convertToSparseMatrix(costSparseMatrix);
+
+    if(regions.size() > 2500){
+      fitnessProgressUpdateInterval = 20;
+      travelCostDistributionUpdateInterval = 20;
+    } else if(regions.size() > 1000){
+      fitnessProgressUpdateInterval = 50;
+      travelCostDistributionUpdateInterval = 50;
+    } else {
+      fitnessProgressUpdateInterval = 100;
+      travelCostDistributionUpdateInterval = 100;
+    }
   }
 
   public Double calculateStandardDeviation(List<String> facilities) {
@@ -145,4 +162,5 @@ public class CostEvaluatorUtils {
     }
     return sparseMatrix;
   }
+
 }

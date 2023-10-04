@@ -67,7 +67,10 @@ public class JobManager {
 
           SessionDto sessionDto = sessionService.getById(session.getId());
           if (sessionDto.getStatus() == SessionStatus.ABORTING) {
-            updateSessionStatus(sessionDto.getId(), SessionStatus.ABORTED, true);
+            if (this.abortSignalStorage.containsKey(session.getId())) {
+              updateSessionStatus(sessionDto.getId(), SessionStatus.ABORTED, true);
+              this.abortSignalStorage.remove(session.getId());
+            }
           } else if (sessionDto.getStatus() == SessionStatus.RUNNING) {
             updateSessionStatus(sessionDto.getId(), SessionStatus.COMPLETED, true);
           }

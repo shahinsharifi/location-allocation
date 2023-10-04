@@ -63,17 +63,25 @@ export class MapComponent implements OnInit, OnDestroy {
     this.sessionState$
     .pipe(takeUntil(this.destroy$))
     .subscribe(session => {
-      if(session == null) this.mapService.resetMap();
-      else if (session.id && session.status) {
-        if (['RUNNING', 'ABORTED', 'COMPLETED'].includes(session.status)) {
-          this.mapService.loadResultLayer(session.id).then(() => console.log('Loading allocation layer'));
-        }
+      if(!session) {
+        this.mapService.resetMap();
+        return;
       }
+      if (session.id) {
+        if (['RUNNING', 'COMPLETED', 'ABORTED'].includes(session.status)) {
+            this.mapService.loadResultLayer(session.id).then(() => console.log('Loading allocation layer'));
+            this.mapService.updateLayerVisibility({
+              region: false,
+              location: true,
+              allocation: true
+            });
+          }
+        }
     });
   }
 
   initializeMap(map: Map): void {
-    this.mapService.initializeMap(map);
+    this.mapService.initializeMap(map, null);
   }
 
   ngOnDestroy() {
