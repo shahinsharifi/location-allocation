@@ -3,6 +3,8 @@ package de.wigeogis.pmedian.api;
 import de.wigeogis.pmedian.database.dto.SessionDto;
 import de.wigeogis.pmedian.database.service.SessionService;
 import de.wigeogis.pmedian.job.JobManager;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -43,5 +45,11 @@ public class LocationAllocationController {
   public ResponseEntity<?> resumeLocationAlgorithm(@RequestBody SessionDto sessionDto) {
 
     return ResponseEntity.ok().body(sessionDto);
+  }
+
+  @RequestMapping(value = "/get_sessions", method = RequestMethod.POST)
+  @ResponseBody
+  public ResponseEntity<?> getSessions(@RequestBody List<String> sessionKeys) {
+    return ResponseEntity.ok().body(sessionService.getAllById(sessionKeys));
   }
 }

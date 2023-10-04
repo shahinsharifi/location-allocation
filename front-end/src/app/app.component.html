@@ -11,9 +11,8 @@
       #sidenav
       mode="over"
       [opened]="sidenavIsOpen"
-      (openedChange)="onSidenavChange()"
-    >
-     <app-panel></app-panel>
+      (openedChange)="onSidenavChange()">
+      <app-session-panel (sessionSelected)="sidenav.toggle(false)"></app-session-panel>
     </mat-sidenav>
     <mat-sidenav-content>
       <section class="content">

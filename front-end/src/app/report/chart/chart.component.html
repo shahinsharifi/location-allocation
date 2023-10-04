@@ -15,7 +15,7 @@
                         #chart
                         [dataSource]="data"
                         [chartType]="chartType"
-                        [markerTypes]="'None'"
+                        [markerTypes]="(chartType === 'Area') ? 'Circle' : 'None'"
                         toolTipType="Default"
                         xAxisEnhancedIntervalPreferMoreCategoryLabels="false"
                         shouldAutoExpandMarginForInitialLabels="false"

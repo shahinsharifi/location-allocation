@@ -1,5 +1,6 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   Input,
   OnDestroy,
@@ -12,6 +13,7 @@ import {
   IgxCategoryChartComponent,
   IgxCategoryChartModule,
   IgxLegendModule,
+  MarkerType,
 } from 'igniteui-angular-charts';
 import {CommonModule} from "@angular/common";
 import {FlexModule} from "@angular/flex-layout";
@@ -36,12 +38,14 @@ export class ChartComponent implements OnInit, OnDestroy {
   @Input() chartType!: string;
 
   public data: any[] = [];
+  public markerType: MarkerType = MarkerType.None;
   private currentIndex: number = 0;
   private destroy$ = new Subject<void>();
 
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
+    if(this.chartType === 'Area') this.markerType = MarkerType.Unset;
     this.generateInitData(this.chartType);
   }
 
@@ -53,7 +57,7 @@ export class ChartComponent implements OnInit, OnDestroy {
     if (this.chartType === 'Spline') {
       this.updateFitnessData(chartData.data);
     } else if (this.chartType === 'Area') {
-      this.chart.yAxisMaximumValue = metadata.yMax;
+      this.chart.yAxisMaximumValue = 500;
       this.chart.yAxisMinimumValue = metadata.yMin;
       this.updateTravelCostDistributionData(chartData.data);
     }

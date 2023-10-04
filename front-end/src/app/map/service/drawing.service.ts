@@ -146,15 +146,12 @@ export class DrawingService {
       }, {highlight: true});
     });
 
-    console.log(this.regionSelection);
     const spatialQuery = <Array<number[]>>polygon.geometry['coordinates'][0];
     this.regionSelection = {
       ...this.regionSelection,
       wkt: this.mapUtils.createWktFromPolygon(spatialQuery),
       selectedRegions: trulyIntersectingFeatures.length
     };
-
-    console.log(this.regionSelection);
 
     this.store.dispatch(
       mapActions.regionsSelected(

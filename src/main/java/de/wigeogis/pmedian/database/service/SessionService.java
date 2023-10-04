@@ -6,6 +6,7 @@ import de.wigeogis.pmedian.database.entity.SessionStatus;
 import de.wigeogis.pmedian.database.repository.SessionRepository;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -42,5 +43,13 @@ public class SessionService {
 
   public List<Session> getAll() {
     return repository.findAll();
+  }
+
+  public List<Session> getAllById(List<String> sessionKeys) {
+    return repository.findAllById(
+        sessionKeys.stream()
+            .map(s -> s.replaceAll("appState_", ""))
+            .map(UUID::fromString)
+            .collect(Collectors.toList()));
   }
 }

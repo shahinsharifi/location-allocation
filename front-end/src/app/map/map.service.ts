@@ -65,56 +65,62 @@ export class MapService {
   public async loadResultLayer(sessionId?: string): Promise<void> {
     if (!this.map || !sessionId) return;
 
-    const loadImageAndAdd = (): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        if (this.map.hasImage('facility')) {
-          resolve();
-          return;
-        }
-        this.map.loadImage('/assets/icons/facility.png', (error, image) => {
-          if (error) {
-            reject(error);
+    if(this.map.getLayer('location') && this.map.getLayer('allocation')) {
+      this.map.redraw();
+    }else {
+      const loadImageAndAdd = (): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          if (this.map.hasImage('facility')) {
+            resolve();
             return;
           }
-          this.map.addImage('facility', image);
-          resolve();
+          this.map.loadImage('/assets/icons/facility.png', (error, image) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            if (!this.map.hasImage('facility')) {
+              this.map.addImage('facility', image);
+            }
+            resolve();
+          });
         });
-      });
-    };
+      };
 
-    try {
-      await loadImageAndAdd();
-      this.commandService.execute(
-        `tiles/allocation/${sessionId}`, 'GET', null
-      ).subscribe((layer: VectorTileLayer) => {
+      try {
+        await loadImageAndAdd();
+        this.commandService.execute(
+          `tiles/allocation/${sessionId}`, 'GET', null
+        ).subscribe((layer: VectorTileLayer) => {
 
-        this.removeLayers(['region', 'allocation', 'location']);
-        if (layer instanceof Array) {
-          const locationLayer: VectorTileLayer = layer[0] as VectorTileLayer;
-          locationLayer.metadata = {
-            'bounds': layer[0].bounds
-          };
-          this.map!.addLayer(locationLayer);
+          this.removeLayers(['region', 'allocation', 'location']);
+          if (layer instanceof Array) {
+            const locationLayer: VectorTileLayer = layer[0] as VectorTileLayer;
+            locationLayer.metadata = {
+              'bounds': layer[0].bounds
+            };
+            this.map!.addLayer(locationLayer);
 
-          const allocationLayer: VectorTileLayer = layer[1] as VectorTileLayer;
-          locationLayer.metadata = {
-            'bounds': layer[0].bounds
-          };
-          this.map!.addLayer(allocationLayer);
+            const allocationLayer: VectorTileLayer = layer[1] as VectorTileLayer;
+            locationLayer.metadata = {
+              'bounds': layer[0].bounds
+            };
+            this.map!.addLayer(allocationLayer);
 
-          this.map.fitBounds(locationLayer.bounds as LngLatBoundsLike, {padding: 20});
-        } else {
-          const locationLayer: VectorTileLayer = layer[0] as VectorTileLayer;
-          locationLayer.metadata = {
-            'bounds': layer[0].bounds
-          };
-          this.map!.addLayer(locationLayer);
-          this.map.fitBounds(locationLayer.bounds as LngLatBoundsLike, {padding: 20});
-        }
-        this.enablePopupOnClick();
-      });
-    } catch (error) {
-      console.error('Error while loading or adding image:', error);
+            this.map.fitBounds(locationLayer.bounds as LngLatBoundsLike, {padding: 20});
+          } else {
+            const locationLayer: VectorTileLayer = layer[0] as VectorTileLayer;
+            locationLayer.metadata = {
+              'bounds': layer[0].bounds
+            };
+            this.map!.addLayer(locationLayer);
+            this.map.fitBounds(locationLayer.bounds as LngLatBoundsLike, {padding: 20});
+          }
+          this.enablePopupOnClick();
+        });
+      } catch (error) {
+        console.error('Error while loading or adding image:', error);
+      }
     }
   }
 

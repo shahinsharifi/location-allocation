@@ -1,18 +1,28 @@
 <mat-nav-list>
   <ng-container *ngFor="let session of sessionListState$ | async">
-    <mat-card class="session-card" (click)="loadSessionState(session)">
+    <a (click)="activateSession(session.id)">
+    <mat-card class="example-card" (click)="activateSession(session.id)">
       <mat-card-header>
-        <mat-card-title>Session: {{ session.id }}</mat-card-title>
-        <mat-card-subtitle>{{ formatDate(session.createdAt) | date }}</mat-card-subtitle>
+        <div class="header-content">
+          <mat-card-title-group class="title-group">
+            <mat-card-title class="text"><strong class="wrap-text">{{ session.id }}</strong></mat-card-title>
+            <mat-card-subtitle class="text">{{ formatDate(session.createdAt) | date }}</mat-card-subtitle>
+          </mat-card-title-group>
+        </div>
       </mat-card-header>
       <mat-card-content>
-        <p>Status: <span class="status-badge" [ngClass]="session.status">{{ session.status }}</span></p>
-        <p *ngIf="session.numberOfFacilities">Facilities: {{ session.numberOfFacilities }}</p>
-        <p *ngIf="session.maxTravelTimeInMinutes">Max Travel Time: {{ session.maxTravelTimeInMinutes }} mins</p>
-        <p *ngIf="session.maxRunningTimeInMinutes">Max Running Time: {{ session.maxRunningTimeInMinutes }} mins</p>
-        <!-- ... and so on for other properties -->
+        <div fxLayout="row" fxFill fxLayoutGap="20px">
+          <div fxFlex="60">
+          <p class="text" *ngIf="session.numberOfFacilities">Facilities: <strong>{{ session.numberOfFacilities }}</strong></p>
+          <p class="text" *ngIf="session.maxTravelTimeInMinutes">Max Travel: <strong>{{ session.maxTravelTimeInMinutes }} mins</strong></p>
+          <p class="text" *ngIf="session.maxRunningTimeInMinutes">Max Run: <strong>{{ session.maxRunningTimeInMinutes }} mins</strong></p>
+          </div>
+          <div fxFlex="40">
+            <span class="status-badge text" [ngClass]="session.status">{{ session.status }}</span>
+          </div>
+        </div>
       </mat-card-content>
     </mat-card>
-    <mat-divider></mat-divider>
+    </a>
   </ng-container>
 </mat-nav-list>

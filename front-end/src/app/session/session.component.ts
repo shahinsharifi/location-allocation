@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
@@ -12,11 +12,12 @@ import {Session, SessionStatus} from "./session";
 import {MatListModule} from "@angular/material/list";
 import {MatCardModule} from "@angular/material/card";
 import {SessionService} from "./session.service";
+import {FlexModule} from "@angular/flex-layout";
 
 @Component({
-  selector: 'app-panel',
+  selector: 'app-session-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatListModule, MatCardModule],
+  imports: [CommonModule, FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatListModule, MatCardModule, FlexModule],
   templateUrl: './session.component.html',
   styleUrls: ['./session.component.scss']
 })
@@ -26,18 +27,23 @@ export class SessionComponent implements OnInit, OnDestroy {
   launcherState$: Observable<Session>;
   sessionListState$: Observable<Session[]>;
 
+  @Output() sessionSelected = new EventEmitter<string>();
+
   constructor(private store: Store<AppState>, private sessionService: SessionService) {
     this.launcherState$ = this.store.pipe(select(state => state.launcher.activeSession));
     this.sessionListState$ = this.store.pipe(select(state => state.session.sessions));
   }
 
   ngOnInit(): void {
+
+    this.loadSessionsFromLocalStorage();
+
     this.launcherState$
     .pipe(takeUntil(this.destroy$))
     .subscribe(session => {
       if (session == null) return;
       if (session.status === SessionStatus.START) {
-        const input: Session ={
+        const input: Session = {
           wkt: session.wkt,
           numberOfFacilities: session.numberOfFacilities,
           maxTravelTimeInMinutes: session.maxTravelTimeInMinutes,
@@ -50,22 +56,39 @@ export class SessionComponent implements OnInit, OnDestroy {
           status: session.status
         };
         this.sessionService.stopSession(input);
-      }else if (session.status === SessionStatus.RESET) {
+      } else if (session.status === SessionStatus.RESET) {
         this.store.dispatch(sessionActions.resetActiveSession());
       }
     });
   }
 
-  loadSessionState(session: Session): void {
-    // Check and load the entire app state related to this session
-    const storedState: AppState = JSON.parse(localStorage.getItem(`appState_${session.id}`));
-    if (storedState) {
-      this.store.dispatch(sessionActions.activateSession({id: session.id}));
-    }
+  loadSessionsFromLocalStorage(): void {
+    const keys = Object.keys(localStorage);
+    const sessionKeys = keys.filter(key => key.startsWith('appState_'));
+    this.sessionService.loadSessions(sessionKeys).subscribe(sessions => {
+      sessionKeys.map(key => {
+        const appState: AppState = JSON.parse(localStorage.getItem(key));
+        // Check if the session exists in sessions
+        const session = sessions.find((session: {
+          id: string;
+        }) => session.id === appState.session.activeSession.id);
+        // If not found, delete it
+        if (!session) {
+          localStorage.removeItem(key);
+        }
+      });
+      this.store.dispatch(sessionActions.loadStoredSessions({sessions}));
+    });
   }
 
-  loadRelatedComponentStates(sessionId: string): void {
-    console.log('loadRelatedComponentStates', sessionId);
+
+  activateSession(sessionId: string): void {
+    // Check and load the entire app state related to this session
+    const storedState: AppState = JSON.parse(localStorage.getItem(`appState_${sessionId}`));
+    if (storedState) {
+      this.store.dispatch(sessionActions.activateSession({id: sessionId}));
+      this.sessionSelected.emit(sessionId);
+    }
   }
 
   formatDate(date: string) {

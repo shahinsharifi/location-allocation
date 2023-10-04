@@ -29,4 +29,10 @@ export class SessionService {
     });
   }
 
+  loadSessions(sessionIds: string[]){
+    return this.commandService.execute(
+      `get_sessions`, 'POST', sessionIds
+    );
+  }
+
 }

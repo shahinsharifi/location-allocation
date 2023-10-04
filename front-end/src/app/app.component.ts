@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
@@ -52,51 +52,29 @@ import {Store} from "@ngrx/store";
 })
 export class AppComponent implements OnInit, OnDestroy {
 
-  searchTerm: string;
   sidenavIsOpen = false;
-
-  @ViewChildren('exampleLink', {read: ElementRef})
-  exampleLinks: QueryList<ElementRef>;
 
   constructor(private store: Store<AppState>) {}
 
   ngOnInit(): void {
-   // this.loadSessionsFromLocalStorage();
+   this.loadSessionsFromLocalStorage();
   }
 
   loadSessionsFromLocalStorage(): void {
     const keys = Object.keys(localStorage);
     const sessionKeys = keys.filter(key => key.startsWith('appState_'));
-
     const sessions: Session[] = sessionKeys.map(key => {
       const appState: AppState = JSON.parse(localStorage.getItem(key));
-      return appState.session.activeSession; // Assuming activeSession has enough session info
+      return appState.session.activeSession;
     });
-
     this.store.dispatch(sessionActions.loadStoredSessions({ sessions }));
-  }
-
-
-
-  ngAfterViewInit() {
-    this.scrollInToActiveExampleLink();
-  }
-
-  toggleSidenav() {
-    this.sidenavIsOpen = !this.sidenavIsOpen;
   }
 
   onSidenavChange() {
     console.log('sidenav changed ...');
   }
 
-
-
-  scrollInToActiveExampleLink() {
-
-  }
-
   ngOnDestroy(): void {
-    throw new Error('Method not implemented.');
+
   }
 }

@@ -11,7 +11,7 @@
             <div fxLayout="row" fxFill fxLayoutAlign="start center" class="button-group">
               <mat-slide-toggle formControlName="activeDrawing" color="primary"
                                 matTooltip="Select regions by drawing a polygon"
-                                [disabled]="(sessionState$ | async)?.status === 'RUNNING'"
+                                [disabled]="['RUNNING', 'ABORTED', 'COMPLETED'].includes((sessionState$ | async)?.status)"
                                 (change)="toggleSelection($event.checked)">
                 <mat-label><strong style="font-size: 14px;">Enable Drawing</strong></mat-label>
               </mat-slide-toggle>

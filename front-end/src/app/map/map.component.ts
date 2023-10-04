@@ -5,7 +5,7 @@ import {NgxMapLibreGLModule} from '@maplibre/ngx-maplibre-gl';
 import {MatDialogModule} from '@angular/material/dialog';
 import style from '../../assets/style-de-at.json';
 import {MapService} from "./map.service";
-import {Session, SessionStatus} from "../session/session";
+import {Session} from "../session/session";
 import {select, Store} from "@ngrx/store";
 import {AppState} from "../core/state/app.state";
 import {MatCardModule} from "@angular/material/card";
@@ -67,23 +67,12 @@ export class MapComponent implements OnInit, OnDestroy {
       else if (session.id && session.status) {
         if (['RUNNING', 'ABORTED', 'COMPLETED'].includes(session.status)) {
           this.mapService.loadResultLayer(session.id).then(() => console.log('Loading allocation layer'));
-          this.mapService.updateLayerVisibility({
-            region: false,
-            location: true,
-            allocation: true
-          });
         }
       }
     });
   }
 
   initializeMap(map: Map): void {
-    console.log(SessionStatus.COMPLETED);
-    // const session: Session = {
-    //   id: 'fb73fe0b-26fc-4ecf-91a0-2dc4bda2a83c',
-    //   status: SessionStatus.COMPLETED
-    // };
-    // this.mapService.initializeMap(map, session);
     this.mapService.initializeMap(map);
   }
 
