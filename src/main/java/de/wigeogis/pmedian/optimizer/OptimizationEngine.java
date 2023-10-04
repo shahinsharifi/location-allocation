@@ -116,7 +116,7 @@ public class OptimizationEngine {
             7,
             abortSignal,
             new TargetFitness(0, false),
-            new Stagnation(2000, false),
+            new Stagnation(1000, false),
             elapsedTime);
 
     long end = System.currentTimeMillis();
