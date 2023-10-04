@@ -55,12 +55,12 @@
                 <b>Max. Travel Time:</b> {{slider.value}} minutes
               </mat-label>
               <mat-slider
-                  class="travel-time-slider"
-                  [max]="60"
-                  [min]="10"
-                  [step]="5"
-                  [discrete]="true"
-                  [showTickMarks]="true">
+                class="travel-time-slider"
+                [max]="60"
+                [min]="10"
+                [step]="5"
+                [discrete]="true"
+                [showTickMarks]="true">
                 <input #slider matSliderThumb formControlName="maxTravelTimeInMinutes">
               </mat-slider>
             </div>
@@ -84,12 +84,17 @@
         <form [formGroup]="runningTimeFormGroup" fxLayout="column" class="launcher-input-form">
           <ng-template matStepLabel>Run</ng-template>
           <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
-            <mat-form-field class="location-number-field" style="max-width: 100px;" fxFlex="50">
+            <mat-form-field class="location-number-field" style="max-width: 100px;" fxFlex="60">
               <mat-label>Execution Time-out</mat-label>
-              <input matInput formControlName="maxRunningTimeInMinutes" type="number" max="30"
-                     min="5"
-                     placeholder="Add a number between 5 and 30">
+              <input matInput formControlName="maxRunningTimeInMinutes"
+                     type="number" placeholder="Add maximum running time">
+              <mat-error
+                *ngIf="runningTimeFormGroup.get('maxRunningTimeInMinutes').hasError('min') ||
+                      runningTimeFormGroup.get('maxRunningTimeInMinutes').hasError('max')">
+                The value should be between 5 and 30 minutes.
+              </mat-error>
             </mat-form-field>
+
           </div>
           <div fxLayout="row" fxLayoutAlign="space-between center" class="button-group">
             <button mat-stroked-button matStepperPrevious matTooltip="Go Back"
@@ -119,7 +124,7 @@
         Stop
       </button>
       <button mat-stroked-button color="primary" (click)="start()" matTooltip="Start Calculation"
-              [disabled]="regionSelectionFormGroup.invalid || parametersFormGroup.invalid || (sessionState$ | async)?.status === 'RUNNING'">
+              [disabled]="regionSelectionFormGroup.invalid || parametersFormGroup.invalid || runningTimeFormGroup.invalid || (sessionState$ | async)?.status === 'RUNNING'">
         <mat-icon>play_circle_outline</mat-icon>
         Start
       </button>

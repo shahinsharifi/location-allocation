@@ -36,7 +36,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    this.loadSessionsFromLocalStorage();
+  //  this.loadSessionsFromLocalStorage();
 
     this.launcherState$
     .pipe(takeUntil(this.destroy$))
@@ -73,11 +73,16 @@ export class SessionComponent implements OnInit, OnDestroy {
           id: string;
         }) => session.id === appState.session.activeSession.id);
         // If not found, delete it
-        if (!session) {
+        if (session) {
+          appState.session.activeSession = session;
+          localStorage.setItem(key, JSON.stringify(appState));
+        } else {
           localStorage.removeItem(key);
         }
       });
+      this.store.dispatch(sessionActions.loadStoredSessions(null));
       this.store.dispatch(sessionActions.loadStoredSessions({sessions}));
+      console.log(sessions);
     });
   }
 

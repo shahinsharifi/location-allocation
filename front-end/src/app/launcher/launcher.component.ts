@@ -76,7 +76,7 @@ export class LauncherComponent implements OnInit, OnDestroy {
 
   initSession(session: Session) {
     this.activeSession = session;
-    this.stepper.selectedIndex = 0;
+   // this.stepper.selectedIndex = 0;
   }
 
   initForms(): void {
@@ -90,13 +90,17 @@ export class LauncherComponent implements OnInit, OnDestroy {
       maxTravelTimeInMinutes: [null, Validators.required]
     });
     this.runningTimeFormGroup = this.formBuilder.group({
-      maxRunningTimeInMinutes: [null, Validators.required]
+      maxRunningTimeInMinutes: [null, [
+        Validators.required,
+        Validators.min(5),
+        Validators.max(30)
+      ]]
     });
   }
 
 
   start() {
-    if (!this.regionSelectionFormGroup.invalid && !this.parametersFormGroup.invalid) {
+    if (!this.regionSelectionFormGroup.invalid && !this.parametersFormGroup.invalid && !this.runningTimeFormGroup.invalid) {
       const session: Session = {
         wkt: this.regionSelectionFormGroup.value.wkt,
         numberOfFacilities: this.parametersFormGroup.value.numberOfFacilities,

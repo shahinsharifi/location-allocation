@@ -29,6 +29,6 @@ export const sessionReducer = createReducer<SessionState>(
       return {...state, activeSession: null};
     }),
     on(sessionActions.loadStoredSessions, (state, {sessions}) => {
-      return {...state, sessions};
+      return {...state, sessions: sessions};
     })
 );

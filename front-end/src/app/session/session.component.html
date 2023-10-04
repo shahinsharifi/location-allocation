@@ -1,12 +1,12 @@
 <mat-nav-list>
   <ng-container *ngFor="let session of sessionListState$ | async">
     <a (click)="activateSession(session.id)">
-    <mat-card class="example-card" (click)="activateSession(session.id)">
+    <mat-card class="example-card" (click)="activateSession(session?.id)">
       <mat-card-header>
         <div class="header-content">
           <mat-card-title-group class="title-group">
-            <mat-card-title class="text"><strong class="wrap-text">{{ session.id }}</strong></mat-card-title>
-            <mat-card-subtitle class="text">{{ formatDate(session.createdAt) | date }}</mat-card-subtitle>
+            <mat-card-title class="text"><strong class="wrap-text">{{ session?.id }}</strong></mat-card-title>
+            <mat-card-subtitle class="text">{{ formatDate(session?.createdAt) | date }}</mat-card-subtitle>
           </mat-card-title-group>
         </div>
       </mat-card-header>
