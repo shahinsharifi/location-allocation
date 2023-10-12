@@ -34,13 +34,14 @@ class TravelCostTest {
     List<String> facilities = Arrays.asList("F1", "F2");
 
     ImmutableTable.Builder<String, String, Double> builder = new ImmutableTable.Builder<>();
-    builder.put("R1", "F1", 5.0);
-    builder.put("R1", "F2", 8.0);
+    builder.put("R1", "F1", 9.0);
+    builder.put("R1", "F2", 6.0);
     builder.put("R2", "F1", 3.0);
     ImmutableTable<String, String, Double> costSparseMatrix = builder.build();
 
     CostEvaluatorGpuUtils evaluator = new CostEvaluatorGpuUtils(regions, costSparseMatrix, 10.0);
     assertEquals(1, evaluator.calculateUncoveredAndAboveLimitRegions(facilities));
+    assertEquals(9.0, evaluator.calculateTotalCost(facilities));
   }
 
   @Test
