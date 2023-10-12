@@ -1,20 +1,14 @@
 package de.wigeogis.pmedian.optimizer.logger;
 
-import com.google.common.collect.ImmutableTable;
-import de.wigeogis.pmedian.database.dto.AllocationDto;
-import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.util.CostEvaluatorUtils;
-import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import de.wigeogis.pmedian.websocket.MessageSubject;
 import de.wigeogis.pmedian.websocket.NotificationService;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -23,7 +17,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.uncommons.watchmaker.framework.EvolutionObserver;
 import org.uncommons.watchmaker.framework.PopulationData;
-import org.uncommons.watchmaker.framework.islands.IslandEvolutionObserver;
 
 @Log4j2
 public class EvolutionLogger implements EvolutionObserver<List<BasicGenome>> {

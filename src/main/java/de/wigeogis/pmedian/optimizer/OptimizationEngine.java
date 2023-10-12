@@ -13,7 +13,6 @@ import de.wigeogis.pmedian.optimizer.factory.LocationPopulationFactory;
 import de.wigeogis.pmedian.optimizer.logger.EvolutionLogger;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.util.CostEvaluatorUtils;
-import de.wigeogis.pmedian.optimizer.util.FacilityCandidateUtil;
 import de.wigeogis.pmedian.websocket.NotificationService;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,27 +83,28 @@ public class OptimizationEngine {
     int uncoveredRegions =
         costEvaluatorUtils.calculateUncoveredAndAboveLimitRegions(
             initialSeed.stream().map(RegionDto::getId).toList());
-    //    int uncoveredRegions =
-    //        FacilityCandidateUtil.calculateUncoveredDemands(regions, initialSeed, distanceMatrix);
+
     log.info("Uncovered regions: " + uncoveredRegions);
 
     List<BasicGenome> locationResult = null;
 
     CandidateFactory<List<BasicGenome>> locationCandidateFactory =
-        new LocationPopulationFactory<>(
-            regions, distanceMatrix, numberOfFacilities, session.getMaxTravelTimeInMinutes());
+        new LocationPopulationFactory<>(numberOfFacilities, costEvaluatorUtils);
 
     EvolutionaryOperator<List<BasicGenome>> locationPipeline =
         new LocationOperationFactory(session.getId())
-            .createEvolutionPipeline(regions, distanceMatrix, costEvaluatorUtils);
-    CoverageEvaluator coverageEvaluator =
-        new CoverageEvaluator(regions, distanceMatrix, session.getMaxTravelTimeInMinutes());
+            .createEvolutionPipeline(regions, costEvaluatorUtils);
+
+    CoverageEvaluator coverageEvaluator = new CoverageEvaluator(costEvaluatorUtils);
+
     GenerationalEvolutionEngine<List<BasicGenome>> locationEngine =
         new GenerationalEvolutionEngine<>(
             locationCandidateFactory, locationPipeline, coverageEvaluator, selection, rng);
+
     locationEngine.addEvolutionObserver(
         new EvolutionLogger(
             session.getId(), costEvaluatorUtils, eventPublisher, notificationService, progress));
+
     locationEngine.setSingleThreaded(true);
 
     log.info("Running location engine...");
@@ -133,15 +133,18 @@ public class OptimizationEngine {
 
     EvolutionaryOperator<List<BasicGenome>> allocationPipeline =
         new AllocationOperationFactory(session.getId())
-            .createEvolutionPipeline(regions, distanceMatrix, costEvaluatorUtils);
-    TravelCostEvaluator travelCostEvaluator =
-        new TravelCostEvaluator(regions, distanceMatrix, session.getMaxTravelTimeInMinutes());
+            .createEvolutionPipeline(regions, costEvaluatorUtils);
+
+    TravelCostEvaluator travelCostEvaluator = new TravelCostEvaluator(costEvaluatorUtils);
+
     GenerationalEvolutionEngine<List<BasicGenome>> allocationEngine =
         new GenerationalEvolutionEngine<>(
             allocationCandidateFactory, allocationPipeline, travelCostEvaluator, selection, rng);
+
     allocationEngine.addEvolutionObserver(
         new EvolutionLogger(
             session.getId(), costEvaluatorUtils, eventPublisher, notificationService, progress));
+
     allocationEngine.setSingleThreaded(true);
 
     // Running allocation engine
@@ -149,14 +152,13 @@ public class OptimizationEngine {
 
     List<BasicGenome> resultAllocation =
         allocationEngine.evolve(12, 7, abortSignal, new Stagnation(2000, false), elapsedTime);
+
     end = System.currentTimeMillis();
 
-    List<RegionDto> facilitiesCodes =
-        resultAllocation.stream().map(BasicGenome::getRegionDto).toList();
+    List<String> facilitiesCodes = resultAllocation.stream().map(BasicGenome::getRegionId).toList();
 
     List<AllocationDto> optimizedAllocations =
-        FacilityCandidateUtil.findNearestFacilitiesForDemands(
-            allocationDTOs, facilitiesCodes, distanceMatrix);
+        costEvaluatorUtils.findNearestFacilitiesForDemands(facilitiesCodes, allocationDTOs);
 
     log.info("Allocated demands are saved into the database ...");
 

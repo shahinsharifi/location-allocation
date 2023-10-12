@@ -4,7 +4,6 @@ import de.wigeogis.pmedian.database.dto.SessionDto;
 import de.wigeogis.pmedian.database.service.SessionService;
 import de.wigeogis.pmedian.job.JobManager;
 import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;

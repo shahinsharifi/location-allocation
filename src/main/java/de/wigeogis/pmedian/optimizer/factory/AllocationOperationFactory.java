@@ -1,6 +1,5 @@
 package de.wigeogis.pmedian.optimizer.factory;
 
-import com.google.common.collect.ImmutableTable;
 import de.wigeogis.pmedian.database.dto.RegionDto;
 import de.wigeogis.pmedian.optimizer.model.BasicGenome;
 import de.wigeogis.pmedian.optimizer.operation.allocation.AllocationCrossOver;
@@ -25,7 +24,7 @@ public class AllocationOperationFactory {
   private final UUID sessionId;
 
   public EvolutionaryOperator<List<BasicGenome>> createEvolutionPipeline(
-      List<RegionDto> demands, ImmutableTable<String, String, Double> dMatrix, CostEvaluatorUtils costEvaluatorUtils) {
+      List<RegionDto> demands, CostEvaluatorUtils costEvaluatorUtils) {
 
     List<EvolutionaryOperator<List<BasicGenome>>> operators = new LinkedList<>();
 
@@ -35,7 +34,8 @@ public class AllocationOperationFactory {
             new ConstantGenerator<>(1), new AdjustableNumberGenerator<>(new Probability(0.9))));
 
     // Installing mutation operator
-    operators.add(new ListOperator<>(new AllocationMutation(sessionId, demands, dMatrix, costEvaluatorUtils)));
+    operators.add(
+        new ListOperator<>(new AllocationMutation(sessionId, demands, costEvaluatorUtils)));
 
     return new EvolutionPipeline<>(operators);
   }

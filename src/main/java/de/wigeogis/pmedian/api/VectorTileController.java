@@ -5,7 +5,6 @@ import de.wigeogis.pmedian.database.dto.AllocationDto;
 import de.wigeogis.pmedian.database.dto.VectorTileLayerDto;
 import de.wigeogis.pmedian.database.dto.VectorTileLayerDto.BoundingBoxDto;
 import de.wigeogis.pmedian.database.service.AllocationService;
-import de.wigeogis.pmedian.database.service.LocationService;
 import de.wigeogis.pmedian.database.service.RegionService;
 import de.wigeogis.pmedian.utils.VectorTileUtils;
 import java.util.ArrayList;
