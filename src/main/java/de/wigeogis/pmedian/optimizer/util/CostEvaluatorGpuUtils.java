@@ -23,6 +23,8 @@ import lombok.Getter;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.api.ops.impl.reduce.longer.CountNonZero;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.BooleanIndexing;
+import org.nd4j.linalg.indexing.conditions.Conditions;
 
 public class CostEvaluatorGpuUtils {
 
@@ -124,11 +126,16 @@ public class CostEvaluatorGpuUtils {
   private Optional<SimpleEntry<String, Double>> findNearestFacilityForRegion(
       List<String> facilities, int regionIndex) {
     INDArray facilityCosts = sparseMatrix.getRow(regionIndex);
+
     INDArray minItem = facilityCosts.min();
     Double minValue = minItem.getDouble(0);
-    // add this line to get the index of the minimum element in the `facilityCosts`
-    int minIndex = Nd4j.argMin(facilityCosts).getInt(0);
-    String nearestFacility = facilities.get(minIndex);
+
+    // Here, we are getting the index of the minimum element in the `facilityCosts`
+    // Replace NaNs with Double.MAX_VALUE before using argMin
+    BooleanIndexing.replaceWhere(facilityCosts, Double.MAX_VALUE, Conditions.isNan());
+    int minIdx = Nd4j.argMin(facilityCosts, 0).getInt(0);
+    String nearestFacility = facilities.get(minIdx);
+
     return (minValue.isNaN() || minValue.isInfinite())
         ? Optional.empty()
         : Optional.of(new SimpleEntry<>(nearestFacility, minValue));
@@ -189,7 +196,6 @@ public class CostEvaluatorGpuUtils {
         .map(regions::get)
         .collect(Collectors.toSet());
   }
-
 
   private INDArray convertToSparseMatrix(ImmutableTable<String, String, Double> travelCostMatrix) {
 

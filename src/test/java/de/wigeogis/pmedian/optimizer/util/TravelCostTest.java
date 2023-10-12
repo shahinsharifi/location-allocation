@@ -57,6 +57,7 @@ class TravelCostTest {
 
     CostEvaluatorGpuUtils evaluator = new CostEvaluatorGpuUtils(regions, costSparseMatrix, 10.0);
     assertEquals(2, evaluator.calculateUncoveredAndAboveLimitRegions(facilities));
+    assertEquals(3.0, evaluator.calculateCostMap(facilities).get(1));
   }
 
   @Test
